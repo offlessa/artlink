@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  nome        String   @db.VarChar(100)
+  email       String   @unique @db.VarChar(100)
+  senha       String   @db.VarChar(255)
+  bio         String?  @db.Text
+  cidade      String?  @db.VarChar(100)
+  contato     String?  @db.VarChar(100)
+  fotoPerfil  String?  @map("foto_perfil") @db.VarChar(255)
+  criadoEm    DateTime @default(now()) @map("criado_em")
+
+  posts                  Post[]
+  postsColaboracoes      PostColaboracao[]
+  catalogos              Catalogo[]
+  catalogosColaboracoes  CatalogoColaboracao[]
+  curtidas               Curtida[]
+  comentarios            Comentario[]
+  mensagensEnviadas      Mensagem[] @relation("Remetente")
+  mensagensRecebidas     Mensagem[] @relation("Destinatario")
+
+  @@map("usuarios")
+}
+
+model Post {
+  id           Int      @id @default(autoincrement())
+  usuarioId    Int      @map("usuario_id")
+  titulo       String   @db.VarChar(150)
+  descricao    String?  @db.Text
+  imagem       String?  @db.VarChar(255)
+  dataPostagem DateTime @default(now()) @map("data_postagem")
+
+  autor         Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  colaboracoes  PostColaboracao[]
+  catalogos     CatalogoPost[]
+  curtidas      Curtida[]
+  comentarios   Comentario[]
+
+  @@map("posts")
+}
+
+model PostColaboracao {
+  postId    Int @map("post_id")
+  usuarioId Int @map("usuario_id")
+
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@id([postId, usuarioId])
+  @@map("posts_colaboracoes")
+}
+
+model Catalogo {
+  id          Int      @id @default(autoincrement())
+  usuarioId   Int      @map("usuario_id")
+  nome        String   @db.VarChar(150)
+  descricao   String?  @db.Text
+  dataCriacao DateTime @default(now()) @map("data_criacao")
+
+  dono          Usuario               @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  colaboracoes  CatalogoColaboracao[]
+  posts         CatalogoPost[]
+
+  @@map("catalogos")
+}
+
+model CatalogoColaboracao {
+  catalogoId Int @map("catalog_id")
+  usuarioId  Int @map("usuario_id")
+
+  catalogo Catalogo @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@id([catalogoId, usuarioId])
+  @@map("catalogos_colaboracoes")
+}
+
+model CatalogoPost {
+  catalogoId Int @map("catalog_id")
+  postId     Int @map("post_id")
+
+  catalogo Catalogo @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([catalogoId, postId])
+  @@map("catalogos_posts")
+}
+
+model Curtida {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int      @map("usuario_id")
+  postId    Int      @map("post_id")
+  data      DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, postId])
+  @@map("curtidas")
+}
+
+model Comentario {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int      @map("usuario_id")
+  postId    Int      @map("post_id")
+  conteudo  String   @db.Text
+  data      DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("comentarios")
+}
+
+enum StatusMensagem {
+  nao_lido
+  lido
+}
+
+model Mensagem {
+  id             Int            @id @default(autoincrement())
+  remetenteId    Int            @map("remetente_id")
+  destinatarioId Int            @map("destinatario_id")
+  conteudo       String         @db.Text
+  dataEnvio      DateTime       @default(now()) @map("data_envio")
+  status         StatusMensagem @default(nao_lido)
+
+  remetente    Usuario @relation("Remetente", fields: [remetenteId], references: [id], onDelete: Cascade)
+  destinatario Usuario @relation("Destinatario", fields: [destinatarioId], references: [id], onDelete: Cascade)
+
+  @@map("mensagens")
+}
