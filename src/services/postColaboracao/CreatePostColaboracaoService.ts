@@ -14,14 +14,14 @@ export class CreatePostColaboracaoService {
   }: PostColaboracaoRequest): Promise<ServiceResponse> {
     if (!postId) {
       return createError(
-        "Parâmetro postId é obrigatório.",
+        "Parâmetro post é obrigatório.",
         HttpStatusCode.BAD_REQUEST
       );
     }
 
     if (!usuarioId) {
       return createError(
-        "Parâmetro usuarioId é obrigatório.",
+        "Parâmetro autor é obrigatório.",
         HttpStatusCode.BAD_REQUEST
       );
     }
