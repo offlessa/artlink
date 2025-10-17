@@ -1,12 +1,24 @@
-import React from 'react'
-import FormUsuario from '../components/FormUsuario'
+// src/pages/Home.tsx
+import React, { useEffect, useState } from "react";
 
 export default function Home() {
+  const [posts, setPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/post")
+      .then((res) => res.json())
+      .then((data) => setPosts(data.data || []))
+      .catch((err) => console.error(err));
+  }, []);
+
   return (
-    <div className="container">
-      <h1>Bem-vindo ao Artlink</h1>
-      <p>Cadastro rápido de usuário:</p>
-      <FormUsuario />
+    <div className="p-4">
+      {posts.map((post) => (
+        <div key={post.id} className="border p-4 mb-4 rounded shadow">
+          <h2 className="font-bold">{post.titulo}</h2>
+          <p>{post.descricao}</p>
+        </div>
+      ))}
     </div>
-  )
+  );
 }
