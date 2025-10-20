@@ -1,0 +1,39 @@
+.busca-container {
+  padding: 2rem;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+
+  .search-bar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+
+    input {
+      width: 100%;
+      max-width: 500px;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s;
+
+      &:focus {
+        border-color: #0077ff;
+      }
+    }
+  }
+
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #777;
+      font-size: 1.1rem;
+    }
+  }
+}

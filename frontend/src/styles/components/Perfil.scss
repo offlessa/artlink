@@ -1,0 +1,91 @@
+.perfil-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fafafa;
+  min-height: 100vh;
+
+  .perfil-header {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .perfil-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ddd;
+    }
+
+    .perfil-info {
+      h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+      }
+
+      .perfil-stats {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 1rem;
+
+        span {
+          strong {
+            font-weight: bold;
+          }
+        }
+      }
+    }
+  }
+
+  .perfil-posts,
+  .perfil-catalogos {
+    margin-top: 2rem;
+
+    h3 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .posts-grid,
+    .catalogos-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+
+      .post-card,
+      .catalogo-card {
+        position: relative;
+        cursor: pointer;
+
+        img {
+          width: 100%;
+          height: 150px;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+
+        .post-overlay {
+          position: absolute;
+          bottom: 5px;
+          left: 5px;
+          display: flex;
+          gap: 0.5rem;
+          background: rgba(0, 0, 0, 0.5);
+          color: #fff;
+          padding: 0.2rem 0.5rem;
+          border-radius: 5px;
+          font-size: 0.9rem;
+        }
+
+        span {
+          display: block;
+          text-align: center;
+          margin-top: 0.3rem;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+}

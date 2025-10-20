@@ -1,23 +1,29 @@
-// src/pages/Home.tsx
 import React, { useEffect, useState } from "react";
+import PostCard from "../components/PostCard";
+import "../styles/components/Home.scss";
+
+interface Post {
+  id: number;
+  titulo: string;
+  imagem: string;
+  curtidas: number;
+  comentarios: number;
+}
 
 export default function Home() {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:3000/post")
       .then((res) => res.json())
-      .then((data) => setPosts(data.data || []))
+      .then((data) => setPosts(data))
       .catch((err) => console.error(err));
   }, []);
 
   return (
-    <div className="p-4">
+    <div className="home-container">
       {posts.map((post) => (
-        <div key={post.id} className="border p-4 mb-4 rounded shadow">
-          <h2 className="font-bold">{post.titulo}</h2>
-          <p>{post.descricao}</p>
-        </div>
+        <PostCard key={post.id} {...post} />
       ))}
     </div>
   );
