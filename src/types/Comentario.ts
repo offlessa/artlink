@@ -11,3 +11,8 @@ export interface ComentarioRequest {
   postId: number;
   conteudo: string;
 }
+
+export interface UpdateComentarioRequest {
+  id: number;
+  conteudo: string;
+}

@@ -1,9 +1,10 @@
-export interface CatalogoColaboracao {
+export type CatalogoColaboracaoRequest = {
   catalogoId: number;
   usuarioId: number;
-}
+};
 
-export interface CatalogoColaboracaoRequest {
+export type UpdateCatalogoColaboracaoRequest = {
   catalogoId: number;
   usuarioId: number;
-}
+  novoUsuarioId?: number; // se for atualizar usuário
+};
