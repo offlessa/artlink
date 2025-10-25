@@ -1,3 +1,4 @@
+// src/services/post/GetPostService.ts
 import prismaClient from "../../prisma";
 
 export class GetPostService {
@@ -21,7 +22,6 @@ export class GetPostService {
           dataPostagem: "desc",
         },
       });
-
       return posts;
     } catch (error) {
       console.error("Erro ao buscar posts:", error);
@@ -58,11 +58,39 @@ export class GetPostService {
           curtidas: true,
         },
       });
-
       return post;
     } catch (error) {
       console.error("Erro ao buscar post:", error);
       throw new Error("Erro ao buscar post");
+    }
+  }
+
+  // ✅ Novo método: Busca posts de um usuário específico
+  async getByUsuario(usuarioId: number) {
+    try {
+      const posts = await prismaClient.post.findMany({
+        where: { usuarioId },
+        include: {
+          autor: {
+            select: {
+              id: true,
+              nome: true,
+              username: true,
+              fotoPerfil: true,
+            },
+          },
+          comentarios: true,
+          curtidas: true,
+        },
+        orderBy: {
+          dataPostagem: "desc",
+        },
+      });
+
+      return posts;
+    } catch (error) {
+      console.error("Erro ao buscar posts do usuário:", error);
+      throw new Error("Erro ao buscar posts do usuário");
     }
   }
 }
