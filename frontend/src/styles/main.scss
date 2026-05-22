@@ -1,15 +1,63 @@
-/* src/styles/main.scss */
-@import "variables";
+@use 'variables' as *;
 
-/* Reset básico */
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: $bg-page;
-  color: $font-color;
+  font-family: $font-sans;
+  background-color: $creme;
+  color: $texto;
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: $font-sans;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+input, textarea {
+  font-family: $font-sans;
+}
+
+// Scrollbar elegante
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: $borda-suave;
+}
+::-webkit-scrollbar-thumb {
+  background: $brand-mid;
+  border-radius: 99px;
+}
+
+// Seleção de texto com a cor da marca
+::selection {
+  background: rgba(92, 122, 58, 0.25);
+  color: $texto;
+}
+
+main {
+  min-height: calc(100vh - 68px);
 }

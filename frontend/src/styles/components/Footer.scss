@@ -1,0 +1,107 @@
+.footer {
+  background: #1A2A10;
+  color: rgba(250,248,243,0.7);
+  margin-top: auto;
+
+  &__main {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 3rem;
+    padding: 3rem 4rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      padding: 2rem;
+      gap: 2rem;
+    }
+  }
+
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #FAF8F3;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  &__deco {
+    width: 36px;
+    height: 2px;
+    background: linear-gradient(90deg, #9A8050, transparent);
+  }
+
+  &__tagline {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: rgba(250,248,243,0.45);
+    font-style: italic;
+    max-width: 240px;
+  }
+
+  &__col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__col-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #FAF8F3;
+    margin-bottom: 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  &__link {
+    font-size: 0.85rem;
+    color: rgba(250,248,243,0.55);
+    text-decoration: none;
+    transition: color 0.18s;
+    display: block;
+
+    &:hover { color: #FAF8F3; }
+  }
+
+  &__text {
+    font-size: 0.85rem;
+    color: rgba(250,248,243,0.55);
+    line-height: 1.7;
+  }
+
+  &__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 4rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 6px;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+  }
+
+  &__copy {
+    font-size: 0.78rem;
+    color: rgba(250,248,243,0.3);
+    letter-spacing: 0.3px;
+  }
+
+  &__mark {
+    font-size: 0.78rem;
+    color: rgba(250,248,243,0.2);
+    font-style: italic;
+  }
+}

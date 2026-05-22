@@ -1,0 +1,441 @@
+@use '../variables' as *;
+
+// ── Animação de entrada ───────────────────────────────────────────────────────
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Painel esquerdo ──────────────────────────────────────────────────────────
+.auth-panel {
+  background: linear-gradient(160deg, #1E2E10 0%, #141F0B 60%, #0C1507 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+
+  @media (max-width: 768px) { display: none; }
+
+  // grain de papel — dá textura artesanal ao painel
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    pointer-events: none;
+    opacity: 0.055;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    mix-blend-mode: screen;
+  }
+
+  &__reveal {
+    position: absolute;
+    inset: 0;
+    background: url('/12d65a66-950a-4912-885c-381d3b8aad1e.png') center / cover no-repeat;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  &__veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #1E2E10 0%, #141F0B 60%, #0C1507 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  // luz quente âmbar — aparece sobre o buraco do véu
+  &__warmth {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  // ── Texto (logo + tagline) ─────────────────────────────────────────────────
+  &__texto {
+    position: relative;
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  // camada escura — visível só dentro do círculo de luz
+  &__texto-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    .auth-panel__logo {
+      display: block;
+      font-family: $font-serif;
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: #1C2616;
+      letter-spacing: 10px;
+      text-transform: uppercase;
+      line-height: 1;
+      text-decoration: none;
+      animation: none;
+      text-shadow: 0 0 1px #1C2616, 0 0 2px #1C2616;
+    }
+
+    .auth-panel__deco {
+      width: 44px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(28,38,22,0.7), transparent);
+      margin: 0.9rem auto 1.1rem;
+    }
+
+    .auth-panel__tagline {
+      font-size: 0.92rem;
+      color: rgba(28, 38, 22, 0.85);
+      line-height: 1.8;
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 0.2px;
+      animation: none;
+      text-shadow: 0 0 1px rgba(28, 38, 22, 0.6);
+    }
+  }
+
+  &__logo {
+    display: block;
+    font-family: $font-serif;
+    font-size: 3.2rem;
+    font-weight: 700;
+    color: $creme;
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    line-height: 1;
+    text-decoration: none;
+    animation: fadeSlideIn 0.7s ease both;
+
+    &:hover { opacity: 0.85; }
+  }
+
+  // linha decorativa dourada
+  &__deco {
+    width: 44px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #9A8050, transparent);
+    margin: 0.9rem auto 1.1rem;
+    animation: fadeSlideIn 0.7s 0.15s ease both;
+  }
+
+  &__tagline {
+    font-size: 0.92rem;
+    color: rgba(250, 248, 243, 0.65);
+    line-height: 1.8;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.2px;
+    animation: fadeSlideIn 0.7s 0.25s ease both;
+  }
+
+  // ── Cards empilhados ───────────────────────────────────────────────────────
+  &__fotos {
+    position: relative;
+    width: 220px;
+    height: 300px;
+    cursor: pointer;
+    animation: fadeSlideIn 0.7s 0.45s ease both;
+
+    &:hover {
+      .auth-panel__foto {
+        filter: brightness(1) !important;
+        box-shadow:
+          0 28px 65px rgba(0,0,0,0.5),
+          0 6px 20px rgba(0,0,0,0.3),
+          0 0 28px rgba(154, 128, 80, 0.35) !important;
+      }
+      .auth-panel__foto--0 { transform: rotate(-24deg) translate(-38px, 14px); }
+      .auth-panel__foto--1 { transform: rotate(0deg)   translate(0px, -14px); }
+      .auth-panel__foto--2 { transform: rotate(24deg)  translate(38px, 14px); }
+    }
+  }
+
+  &__foto {
+    position: absolute;
+    width: 190px;
+    height: 260px;
+    border-radius: 18px;
+    overflow: hidden;
+    transform-origin: bottom center;
+    transition:
+      transform  0.45s cubic-bezier(0.34, 1.4, 0.64, 1),
+      filter     0.35s ease,
+      box-shadow 0.35s ease;
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.6),
+      0 4px 16px rgba(0,0,0,0.4);
+
+    img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    &--0 { top: 20px; left: 15px; transform: rotate(-7deg); z-index: 1; filter: brightness(0.75); }
+    &--1 { top: 20px; left: 15px; transform: rotate(0deg);  z-index: 3; filter: brightness(0.88); }
+    &--2 { top: 20px; left: 15px; transform: rotate(7deg);  z-index: 2; }
+  }
+}
+
+// ── Painel direito ───────────────────────────────────────────────────────────
+.auth-form-side {
+  background: $creme;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 380px;
+  animation: fadeSlideIn 0.65s 0.1s ease both;
+
+  &__header { margin-bottom: 2rem; }
+
+  &__logo-mobile {
+    display: none;
+    font-family: $font-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: $brand;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    @media (max-width: 768px) { display: block; }
+  }
+
+  &__title {
+    font-family: $font-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1C2616;
+    margin-bottom: 0.4rem;
+    line-height: 1.2;
+  }
+
+  &__subtitle {
+    font-size: 0.9rem;
+    color: #8A9E7A;
+    font-weight: 400;
+  }
+
+  &__error {
+    background: #FDF0EE;
+    border: 1px solid #E8C4BC;
+    color: #8B2020;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+  }
+
+  &__success {
+    background: #EEF5E8;
+    border: 1px solid #B8D4A0;
+    color: #2A5A1C;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+
+  // ── Campo com label flutuante ──────────────────────────────────────────────
+  &__field--float {
+    position: relative;
+
+    .auth-form__label {
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      font-size: 0.93rem;
+      font-weight: 400;
+      color: #B8C4AE;
+      pointer-events: none;
+      transition: top 0.18s ease, font-size 0.18s ease, color 0.18s ease, font-weight 0.18s ease, background 0.18s ease;
+      text-transform: none;
+      letter-spacing: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    .auth-form__input:focus ~ .auth-form__label,
+    .auth-form__input:not(:placeholder-shown) ~ .auth-form__label {
+      top: -9px;
+      left: 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: $brand-mid;
+      background: #fff;
+      padding: 0 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+  }
+
+  &__input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid #E0D9CC;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: $font-sans;
+    background: #fff;
+    color: #1C2616;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: $brand-mid;
+      box-shadow: 0 0 0 3px rgba(92,122,58,0.10);
+    }
+  }
+
+  // ── Linha lembrar-me + esqueceu a senha ──────────────────────────────────
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: -0.4rem;
+  }
+
+  &__lembrar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    user-select: none;
+
+    input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #C8D4B8;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.18s, background 0.18s;
+      flex-shrink: 0;
+
+      &:checked {
+        background: $brand;
+        border-color: $brand;
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 4px;
+          top: 1px;
+          width: 5px;
+          height: 9px;
+          border: 2px solid #fff;
+          border-top: none;
+          border-left: none;
+          transform: rotate(45deg);
+        }
+      }
+    }
+
+    span {
+      font-size: 0.82rem;
+      color: $texto-suave;
+    }
+  }
+
+  &__forgot-link {
+    font-size: 0.82rem;
+    color: $texto-suave;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover { color: $brand; }
+  }
+
+  // ── Campo código numérico ─────────────────────────────────────────────────
+  &__input--code {
+    letter-spacing: 8px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  // ── Botões ─────────────────────────────────────────────────────────────────
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.2rem;
+  }
+
+  &__btn {
+    width: 100%;
+    padding: 13px;
+    background: $brand;
+    color: $creme;
+    border: none;
+    border-radius: 8px;
+    font-family: $font-sans;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+
+    &:hover   { background: $brand-hover; }
+    &:active  { transform: scale(0.99); }
+    &:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  }
+
+  &__btn-outline {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: $brand;
+    border: 1.5px solid $brand;
+    border-radius: 8px;
+    font-family: $font-sans;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.1s;
+
+    &:hover  { background: $brand; color: $creme; }
+    &:active { transform: scale(0.99); }
+  }
+}

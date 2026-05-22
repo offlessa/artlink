@@ -1,5 +1,11 @@
 // src/routes.ts
 import { Router } from "express";
+import { authMiddleware } from "./middleware/authMiddleware";
+
+// ====== AUTH ======
+import { LoginController } from "./controllers/auth/LoginController";
+import { EsqueciSenhaController } from "./controllers/auth/EsqueciSenhaController";
+import { RedefinirSenhaController } from "./controllers/auth/RedefinirSenhaController";
 
 // ====== IMPORTS DE CONTROLLERS ======
 
@@ -59,6 +65,13 @@ import { DeleteMensagemController } from "./controllers/mensagem/DeleteMensagemC
 const router = Router();
 
 // ===================================================
+// ======================= AUTH ======================
+// ===================================================
+router.post("/auth/login", new LoginController().handle);
+router.post("/auth/esqueci-senha", new EsqueciSenhaController().handle);
+router.post("/auth/redefinir-senha", new RedefinirSenhaController().handle);
+
+// ===================================================
 // ===================== USUÁRIO =====================
 // ===================================================
 router.post("/usuario", new CreateUsuarioController().handle);
@@ -68,116 +81,125 @@ router.get(
   "/usuario/username/:username",
   new GetUsuarioController().getByUsername
 );
-router.put("/usuario/:id", new UpdateUsuarioController().handle);
-router.delete("/usuario/:id", new DeleteUsuarioController().handle);
+router.put("/usuario/:id", authMiddleware, new UpdateUsuarioController().handle);
+router.delete("/usuario/:id", authMiddleware, new DeleteUsuarioController().handle);
 
 // ===================================================
 // ======================= POST ======================
 // ===================================================
-router.post("/post", new CreatePostController().handle);
+router.post("/post", authMiddleware, new CreatePostController().handle);
 router.get("/post", new GetPostController().getAll);
 router.get("/post/:id", new GetPostController().getById);
 router.get("/post/usuario/:usuarioId", new GetPostController().getByUsuario);
-router.put("/post/:id", new UpdatePostController().handle);
-router.delete("/post/:id", new DeletePostController().handle);
+router.put("/post/:id", authMiddleware, new UpdatePostController().handle);
+router.delete("/post/:id", authMiddleware, new DeletePostController().handle);
 
 // ===================================================
 // ================ POST COLABORAÇÃO =================
 // ===================================================
-router.post("/post/colaboracao", new CreatePostColaboracaoController().handle);
+router.post("/post/colaboracao", authMiddleware, new CreatePostColaboracaoController().handle);
 router.get(
   "/post/colaboracao/:postId",
   new GetPostColaboracaoController().getByPost
 );
 router.put(
   "/post/colaboracao/:postId/:usuarioId",
+  authMiddleware,
   new UpdatePostColaboracaoController().handle
 );
 router.delete(
   "/post/colaboracao/:postId/:usuarioId",
+  authMiddleware,
   new DeletePostColaboracaoController().handle
 );
 
 // ===================================================
 // ===================== CATÁLOGO ====================
 // ===================================================
-router.post("/catalogo", new CreateCatalogoController().handle);
+router.post("/catalogo", authMiddleware, new CreateCatalogoController().handle);
 router.get("/catalogo", new GetCatalogoController().getAll);
 router.get("/catalogo/:id", new GetCatalogoController().getById);
 router.get(
   "/catalogo/usuario/:usuarioId",
   new GetCatalogoController().getByUsuario
 );
-router.put("/catalogo/:id", new UpdateCatalogoController().handle);
-router.delete("/catalogo/:id", new DeleteCatalogoController().handle);
+router.put("/catalogo/:id", authMiddleware, new UpdateCatalogoController().handle);
+router.delete("/catalogo/:id", authMiddleware, new DeleteCatalogoController().handle);
 
 // ===================================================
 // ============ CATÁLOGO COLABORAÇÃO =================
 // ===================================================
 router.post(
   "/catalogo/colaboracao",
+  authMiddleware,
   new CreateCatalogoColaboracaoController().handle
 );
 router.put(
   "/catalogo/colaboracao/:catalogoId/:usuarioId",
+  authMiddleware,
   new UpdateCatalogoColaboracaoController().handle
 );
 router.delete(
   "/catalogo/colaboracao/:catalogoId/:usuarioId",
+  authMiddleware,
   new DeleteCatalogoColaboracaoController().handle
 );
 
 // ===================================================
 // ================== CATÁLOGO POST ==================
 // ===================================================
-router.post("/catalogo/post", new CreateCatalogoPostController().handle);
+router.post("/catalogo/post", authMiddleware, new CreateCatalogoPostController().handle);
 router.get(
   "/catalogo/post/:catalogoId",
   new GetCatalogoPostController().getByCatalogo
 );
 router.put(
   "/catalogo/post/:catalogoId",
+  authMiddleware,
   new UpdateCatalogoPostController().handle
 );
 router.delete(
   "/catalogo/post/:catalogoId/:postId",
+  authMiddleware,
   new DeleteCatalogoPostController().handle
 );
 
 // ===================================================
 // ==================== COMENTÁRIOS ==================
 // ===================================================
-router.post("/comentario", new CreateComentarioController().handle);
+router.post("/comentario", authMiddleware, new CreateComentarioController().handle);
 router.get("/comentario/:postId", new GetComentarioController().getByPost);
-router.put("/comentario/:id", new UpdateComentarioController().handle);
-router.delete("/comentario/:id", new DeleteComentarioController().handle);
+router.put("/comentario/:id", authMiddleware, new UpdateComentarioController().handle);
+router.delete("/comentario/:id", authMiddleware, new DeleteComentarioController().handle);
 
 // ===================================================
 // ===================== CURTIDAS ====================
 // ===================================================
-router.post("/curtida", new CreateCurtidaController().handle);
+router.post("/curtida", authMiddleware, new CreateCurtidaController().handle);
 router.get("/curtida/:postId", new GetCurtidaController().getByPost);
-router.put("/curtida/:id", new UpdateCurtidaController().handle);
-router.delete("/curtida/:id", new DeleteCurtidaController().handle);
+router.put("/curtida/:id", authMiddleware, new UpdateCurtidaController().handle);
+router.delete("/curtida/:id", authMiddleware, new DeleteCurtidaController().handle);
 
 // ===================================================
 // ==================== MENSAGENS ====================
 // ===================================================
-router.post("/mensagem", new CreateMensagemController().handle);
+router.post("/mensagem", authMiddleware, new CreateMensagemController().handle);
 const getMensagemController = new GetMensagemController();
 
 // Mensagens recebidas
 router.get(
   "/mensagem/destinatario/:destinatarioId",
+  authMiddleware,
   getMensagemController.getByDestinatario.bind(getMensagemController)
 );
 
 // Mensagens enviadas
 router.get(
   "/mensagem/remetente/:remetenteId",
+  authMiddleware,
   getMensagemController.getByRemetente.bind(getMensagemController)
 );
-router.put("/mensagem/:id", new UpdateMensagemController().handle);
-router.delete("/mensagem/:id", new DeleteMensagemController().handle);
+router.put("/mensagem/:id", authMiddleware, new UpdateMensagemController().handle);
+router.delete("/mensagem/:id", authMiddleware, new DeleteMensagemController().handle);
 
 export { router };

@@ -9,7 +9,7 @@ export class GetPostController {
   };
 
   getById = async (req: Request, res: Response) => {
-    const { postId } = req.params;
+    const { id: postId } = req.params;
     const service = new GetPostService();
     const post = await service.getById(Number(postId));
     if (!post) return res.status(404).json({ message: "Post não encontrado" });

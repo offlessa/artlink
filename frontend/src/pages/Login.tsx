@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/components/Login.scss";
 
@@ -11,15 +11,13 @@ const FOTOS = [
 
 const RAIO = 200;
 
-export default function Cadastro() {
+export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [nome, setNome] = useState("");
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [mensagem, setMensagem] = useState("");
-  const [erro, setErro] = useState(false);
+  const [lembrar, setLembrar] = useState(false);
+  const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
 
   const [pos, setPos] = useState({ x: -999, y: -999 });
@@ -43,26 +41,13 @@ export default function Cadastro() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setMensagem("");
-    setErro(false);
+    setErro("");
     setCarregando(true);
     try {
-      const res = await fetch("http://localhost:3000/usuario", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, username, email, senha }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        await login(email, senha, true);
-        navigate("/");
-      } else {
-        setErro(true);
-        setMensagem(data.message || "Erro ao criar conta.");
-      }
-    } catch {
-      setErro(true);
-      setMensagem("Erro na conexão com o servidor.");
+      await login(email, senha, lembrar);
+      navigate("/");
+    } catch (err: any) {
+      setErro(err?.response?.data?.message || "E-mail ou senha inválidos.");
     } finally {
       setCarregando(false);
     }
@@ -70,6 +55,8 @@ export default function Cadastro() {
 
   const veilMask = `radial-gradient(circle ${RAIO}px at ${pos.x}px ${pos.y}px, transparent 0%, transparent 25%, rgba(0,0,0,0.4) 55%, black 80%)`;
   const warmthBg = `radial-gradient(circle ${RAIO * 0.85}px at ${pos.x}px ${pos.y}px, rgba(190,145,55,0.18) 0%, transparent 70%)`;
+
+  // spotlight relativo ao elemento de texto para a camada escura
   const tx = pos.x - textoOffset.left;
   const ty = pos.y - textoOffset.top;
   const spotlightMask = `radial-gradient(circle ${RAIO}px at ${tx}px ${ty}px, black 0%, black 45%, transparent 65%)`;
@@ -90,8 +77,9 @@ export default function Cadastro() {
             <Link to="/" className="auth-panel__logo">Artlink</Link>
             <div className="auth-panel__deco" />
             <p className="auth-panel__tagline">
-              Mostre seu trabalho para o mundo.<br />Conecte-se com quem ama criar.
+              Descubra a alma do artesanato.<br />Compartilhe o que suas mãos criam.
             </p>
+            {/* camada escura — visível apenas dentro do círculo de luz */}
             <div
               className="auth-panel__texto-overlay"
               style={{ WebkitMaskImage: spotlightMask, maskImage: spotlightMask }}
@@ -100,7 +88,7 @@ export default function Cadastro() {
               <span className="auth-panel__logo">Artlink</span>
               <div className="auth-panel__deco" />
               <p className="auth-panel__tagline">
-                Mostre seu trabalho para o mundo.<br />Conecte-se com quem ama criar.
+                Descubra a alma do artesanato.<br />Compartilhe o que suas mãos criam.
               </p>
             </div>
           </div>
@@ -119,41 +107,13 @@ export default function Cadastro() {
         <div className="auth-box">
           <div className="auth-box__header">
             <Link to="/" className="auth-box__logo-mobile">Artlink</Link>
-            <h1 className="auth-box__title">Criar conta</h1>
-            <p className="auth-box__subtitle">Junte-se à comunidade de artesãos</p>
+            <h1 className="auth-box__title">Bem-vindo</h1>
+            <p className="auth-box__subtitle">Entre na sua conta para continuar</p>
           </div>
 
-          {mensagem && (
-            <div className={erro ? "auth-box__error" : "auth-box__success"}>
-              {mensagem}
-            </div>
-          )}
+          {erro && <div className="auth-box__error">{erro}</div>}
 
           <form className="auth-form" onSubmit={handleSubmit}>
-            <div className="auth-form__field auth-form__field--float">
-              <input
-                className="auth-form__input"
-                type="text"
-                placeholder=" "
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                required
-                autoComplete="name"
-              />
-              <label className="auth-form__label">Nome completo</label>
-            </div>
-            <div className="auth-form__field auth-form__field--float">
-              <input
-                className="auth-form__input"
-                type="text"
-                placeholder=" "
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoComplete="username"
-              />
-              <label className="auth-form__label">Username</label>
-            </div>
             <div className="auth-form__field auth-form__field--float">
               <input
                 className="auth-form__input"
@@ -166,6 +126,7 @@ export default function Cadastro() {
               />
               <label className="auth-form__label">E-mail</label>
             </div>
+
             <div className="auth-form__field auth-form__field--float">
               <input
                 className="auth-form__input"
@@ -174,17 +135,31 @@ export default function Cadastro() {
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
-                autoComplete="new-password"
+                autoComplete="current-password"
               />
               <label className="auth-form__label">Senha</label>
             </div>
 
+            <div className="auth-form__row">
+              <label className="auth-form__lembrar">
+                <input
+                  type="checkbox"
+                  checked={lembrar}
+                  onChange={(e) => setLembrar(e.target.checked)}
+                />
+                <span>Lembrar-me</span>
+              </label>
+              <Link to="/esqueci-senha" className="auth-form__forgot-link">
+                Esqueceu a senha?
+              </Link>
+            </div>
+
             <div className="auth-form__actions">
               <button className="auth-form__btn" type="submit" disabled={carregando}>
-                {carregando ? "Criando conta..." : "Criar conta"}
+                {carregando ? "Entrando..." : "Entrar"}
               </button>
-              <Link to="/login" className="auth-form__btn-outline">
-                Já tenho conta
+              <Link to="/cadastro" className="auth-form__btn-outline">
+                Criar conta
               </Link>
             </div>
           </form>
