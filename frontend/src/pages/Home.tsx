@@ -79,6 +79,7 @@ export default function Home() {
                 key={post.id}
                 id={post.id}
                 titulo={post.titulo}
+                descricao={post.descricao}
                 imagem={post.imagem}
                 curtidas={post.curtidas}
                 autor={post.autor}

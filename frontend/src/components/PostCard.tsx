@@ -7,13 +7,14 @@ import "../styles/components/PostCard.scss";
 interface PostCardProps {
   id: number;
   titulo: string;
+  descricao?: string;
   imagem?: string;
   curtidas: { id: number; usuarioId: number }[];
   autor?: { id: number; nome: string; username: string; fotoPerfil?: string };
   onCurtidaChange?: () => void;
 }
 
-export default function PostCard({ id, titulo, imagem, curtidas, autor, onCurtidaChange }: PostCardProps) {
+export default function PostCard({ id, titulo, descricao, imagem, curtidas, autor, onCurtidaChange }: PostCardProps) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
@@ -31,46 +32,52 @@ export default function PostCard({ id, titulo, imagem, curtidas, autor, onCurtid
         await api.post("/curtida", { usuarioId: usuario.id, postId: id });
       }
       onCurtidaChange?.();
-    } catch (err) {
-      console.error("Erro ao curtir:", err);
-    }
+    } catch {}
   }
 
   const inicialAutor = autor?.nome?.charAt(0).toUpperCase() ?? "?";
 
   return (
     <article className="post-card" onClick={() => navigate(`/post/${id}`)}>
+      <div className="post-card__top">
+        <h2 className="post-card__titulo">{titulo}</h2>
+        {autor && (
+          <p className="post-card__subtitulo">
+            {descricao ? descricao : `por ${autor.nome}`}
+          </p>
+        )}
+      </div>
+
       <div className="post-card__image-wrapper">
         {imagem
           ? <img src={imagem} alt={titulo} loading="lazy" />
-          : <div className="post-card__no-image"><ImageOffIcon size={32} /></div>
+          : <div className="post-card__no-image"><ImageOffIcon size={36} /></div>
         }
+      </div>
+
+      <div className="post-card__bottom">
         <button
           className={`post-card__like ${jaCurtiu ? "post-card__like--ativo" : ""}`}
           onClick={toggleCurtida}
           title={jaCurtiu ? "Descurtir" : "Curtir"}
         >
-          <HeartIcon size={14} filled={jaCurtiu} />
-        </button>
-      </div>
-
-      <div className="post-card__info">
-        <p className="post-card__titulo">{titulo}</p>
-        {autor && (
-          <div className="post-card__autor">
-            <div className="post-card__avatar">
-              {autor.fotoPerfil
-                ? <img src={autor.fotoPerfil} alt={autor.nome} />
-                : <span>{inicialAutor}</span>
-              }
-            </div>
-            <span className="post-card__autor-nome">{autor.nome}</span>
-          </div>
-        )}
-        <div className="post-card__curtidas">
-          <HeartIcon size={12} filled={jaCurtiu} />
+          <HeartIcon size={13} filled={jaCurtiu} />
           <span>{totalCurtidas}</span>
+        </button>
+
+        <div className="post-card__autor">
+          <div className="post-card__avatar">
+            {autor?.fotoPerfil
+              ? <img src={autor.fotoPerfil} alt={autor.nome} />
+              : <span>{inicialAutor}</span>
+            }
+          </div>
+          <span>{autor?.username}</span>
         </div>
+
+        <button className="post-card__cta" onClick={(e) => { e.stopPropagation(); navigate(`/post/${id}`); }}>
+          Ver post
+        </button>
       </div>
     </article>
   );

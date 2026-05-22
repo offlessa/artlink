@@ -1,24 +1,48 @@
+@use '../variables' as *;
+
 .post-card {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
   cursor: pointer;
-  border: 1px solid #E0D9CC;
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
   display: flex;
   flex-direction: column;
+  background: #F5F3EF;
 
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(42, 59, 28, 0.16);
+  &__top {
+    padding: 2.8rem 2rem 1.8rem;
+    text-align: center;
+  }
+
+  &__titulo {
+    font-family: $font-serif;
+    font-size: 1.45rem;
+    font-weight: 400;
+    color: #1C2616;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.55rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__subtitulo {
+    font-size: 0.75rem;
+    color: #8A9E7A;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   &__image-wrapper {
     position: relative;
     width: 100%;
-    padding-bottom: 118%;
-    background: #EBF0E4;
+    padding-bottom: 105%;
     overflow: hidden;
+    background: #E5E1D8;
 
     img {
       position: absolute;
@@ -26,10 +50,12 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease;
+      transition: transform 0.55s ease;
     }
+  }
 
-    &:hover img { transform: scale(1.04); }
+  &:hover &__image-wrapper img {
+    transform: scale(1.04);
   }
 
   &__no-image {
@@ -39,58 +65,24 @@
     align-items: center;
     justify-content: center;
     color: #8A9E7A;
-    font-size: 2.5rem;
-    opacity: 0.4;
+    opacity: 0.35;
   }
 
-  &__like {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(4px);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    cursor: pointer;
-    color: #8A9E7A;
-    transition: background 0.15s, color 0.15s, transform 0.15s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-
-    &:hover {
-      background: #fff;
-      transform: scale(1.12);
-    }
-
-    &--ativo { color: #C0392B; }
-  }
-
-  &__info {
-    padding: 12px 14px 14px;
+  &__bottom {
+    padding: 1.6rem 2rem 2.8rem;
     display: flex;
     flex-direction: column;
-    gap: 7px;
-  }
-
-  &__titulo {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: #1C2616;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    align-items: center;
+    gap: 1.1rem;
   }
 
   &__autor {
     display: flex;
     align-items: center;
     gap: 7px;
+    font-size: 0.75rem;
+    color: #8A9E7A;
+    letter-spacing: 0.3px;
   }
 
   &__avatar {
@@ -108,17 +100,35 @@
     span { color: #fff; font-size: 0.62rem; font-weight: 700; }
   }
 
-  &__autor-nome {
+  &__like {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #A89E8E;
+    font-family: $font-sans;
     font-size: 0.78rem;
-    color: #8A9E7A;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    transition: color 0.15s;
+
+    &:hover { color: #C0392B; }
+    &--ativo { color: #C0392B; }
   }
 
-  &__curtidas {
-    font-size: 0.78rem;
-    color: #8A9E7A;
-    font-weight: 500;
+  &__cta {
+    padding: 11px 38px;
+    background: #2A3B1C;
+    color: #FAF8F3;
+    border: none;
+    font-family: $font-sans;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover { background: #3A5128; }
   }
 }
