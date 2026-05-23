@@ -137,6 +137,27 @@
     white-space: nowrap;
   }
 
+  &__criar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba(255, 255, 255, 0.28);
+    color: #FAF8F3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.55);
+      transform: rotate(90deg);
+    }
+  }
+
   &__entrar {
     flex-shrink: 0;
     padding: 7px 18px;

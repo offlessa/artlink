@@ -56,6 +56,13 @@ export class GetPostService {
             },
           },
           curtidas: true,
+          colaboracoes: {
+            include: {
+              usuario: {
+                select: { id: true, nome: true, username: true, fotoPerfil: true },
+              },
+            },
+          },
         },
       });
       return post;

@@ -1,209 +1,405 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
-import { HeartIcon, CommentIcon, FolderIcon } from "../components/Icons";
+import CreatePostModal from "../components/CreatePostModal";
+import CatalogoModal from "../components/CatalogoModal";
+import {
+  HeartIcon, CommentIcon, FolderIcon, ImageOffIcon,
+  PlusIcon, PaletteIcon, CameraIcon, TrashIcon,
+  GridIcon, ListIcon,
+} from "../components/Icons";
 import "../styles/components/Perfil.scss";
 
-interface Post {
-  id: number;
-  titulo: string;
-  imagem?: string;
-  curtidas: { id: number }[];
-  comentarios: { id: number }[];
+interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[] }
+interface Catalogo { id: number; nome: string; posts: { postId: number }[] }
+
+interface ProfileConfig {
+  bgType: "solid" | "gradient" | "texture";
+  bgValue: string;
+  cardStyle: "rounded" | "sharp" | "glass" | "polaroid" | "minimal";
+  layout: "grid" | "compact" | "list";
 }
 
-interface Catalogo {
-  id: number;
-  nome: string;
-  posts: { postId: number }[];
+const DEFAULT_CONFIG: ProfileConfig = {
+  bgType: "solid", bgValue: "#FAF8F3", cardStyle: "rounded", layout: "grid",
+};
+
+function parseConfig(raw?: string): ProfileConfig {
+  if (!raw) return DEFAULT_CONFIG;
+  try { return { ...DEFAULT_CONFIG, ...JSON.parse(raw) }; } catch { return DEFAULT_CONFIG; }
 }
+
+const BG_SOLIDS = ["#FAF8F3", "#E8F0E4", "#F5EFE6", "#F5E8E8", "#F0ECF5", "#E8EEF5", "#2C2C2C", "#1C2616"];
+const BG_GRADIENTS = [
+  "linear-gradient(135deg,#EBF0E4,#5C7A3A)",
+  "linear-gradient(135deg,#FAF0E4,#F5C58A,#E8947A)",
+  "linear-gradient(135deg,#E0F2F1,#80CBC4)",
+  "linear-gradient(135deg,#EDE8F5,#B39DDB)",
+  "linear-gradient(135deg,#FDF8E8,#C4A96A)",
+  "linear-gradient(135deg,#F5F5F5,#9E9E9E)",
+];
+const CARD_STYLES: { key: ProfileConfig["cardStyle"]; label: string }[] = [
+  { key: "rounded", label: "Arredondado" },
+  { key: "sharp", label: "Reto" },
+  { key: "glass", label: "Vidro" },
+  { key: "polaroid", label: "Polaroid" },
+  { key: "minimal", label: "Minimal" },
+];
 
 export default function Perfil() {
-  const { usuario } = useAuth();
+  const { usuario, updateUsuario } = useAuth();
   const navigate = useNavigate();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [catalogos, setCatalogos] = useState<Catalogo[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [tab, setTab] = useState<"posts" | "catalogos">("posts");
 
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [imagemUrl, setImagemUrl] = useState("");
-  const [criando, setCriando] = useState(false);
-  const [msgPost, setMsgPost] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [showCatalogoModal, setShowCatalogoModal] = useState(false);
+  const [showCustomize, setShowCustomize] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+
+  const [config, setConfig] = useState<ProfileConfig>(DEFAULT_CONFIG);
+  const [editData, setEditData] = useState({ nome: "", bio: "", cidade: "", contato: "" });
+  const [excluindo, setExcluindo] = useState<number | null>(null);
+  const [salvandoConfig, setSalvandoConfig] = useState(false);
+  const [salvandoPerfil, setSalvandoPerfil] = useState(false);
+
+  const bannerRef = useRef<HTMLInputElement>(null);
+  const avatarRef = useRef<HTMLInputElement>(null);
 
   async function carregarDados() {
     if (!usuario) return;
     try {
-      const [resPosts, resCatalogos] = await Promise.all([
+      const [rp, rc] = await Promise.all([
         api.get(`/post/usuario/${usuario.id}`),
         api.get(`/catalogo/usuario/${usuario.id}`),
       ]);
-      setPosts(Array.isArray(resPosts.data) ? resPosts.data : []);
-      setCatalogos(Array.isArray(resCatalogos.data) ? resCatalogos.data : []);
-    } catch (err) {
-      console.error("Erro ao carregar perfil:", err);
+      setPosts(Array.isArray(rp.data) ? rp.data : []);
+      setCatalogos(Array.isArray(rc.data) ? rc.data : []);
     } finally {
       setCarregando(false);
     }
   }
 
-  useEffect(() => { carregarDados(); }, [usuario?.id]);
+  useEffect(() => {
+    carregarDados();
+    setConfig(parseConfig(usuario?.perfilConfig));
+    setEditData({
+      nome: usuario?.nome ?? "",
+      bio: usuario?.bio ?? "",
+      cidade: usuario?.cidade ?? "",
+      contato: usuario?.contato ?? "",
+    });
+  }, [usuario?.id]);
 
-  async function criarPost(e: React.FormEvent) {
-    e.preventDefault();
-    if (!titulo.trim() || !usuario) return;
-    setCriando(true);
-    setMsgPost("");
+  const bgStyle = useMemo(() => {
+    if (config.bgType === "gradient") return { background: config.bgValue };
+    if (config.bgType === "texture") return { backgroundColor: config.bgValue };
+    return { backgroundColor: config.bgValue || "#FAF8F3" };
+  }, [config]);
+
+  function lerImagem(file: File, cb: (data: string) => void) {
+    const reader = new FileReader();
+    reader.onload = () => cb(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadBanner(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !usuario) return;
+    lerImagem(file, async (data) => {
+      await api.put(`/usuario/${usuario.id}`, { fotoCapa: data });
+      updateUsuario({ fotoCapa: data });
+    });
+  }
+
+  async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !usuario) return;
+    lerImagem(file, async (data) => {
+      await api.put(`/usuario/${usuario.id}`, { fotoPerfil: data });
+      updateUsuario({ fotoPerfil: data });
+    });
+  }
+
+  async function salvarPerfil() {
+    if (!usuario) return;
+    setSalvandoPerfil(true);
     try {
-      await api.post("/post", {
-        usuarioId: usuario.id,
-        titulo: titulo.trim(),
-        descricao: descricao.trim() || null,
-        imagem: imagemUrl.trim() || null,
-      });
-      setTitulo("");
-      setDescricao("");
-      setImagemUrl("");
-      setMsgPost("Publicação criada!");
-      carregarDados();
-    } catch {
-      setMsgPost("Erro ao criar publicação.");
+      await api.put(`/usuario/${usuario.id}`, editData);
+      updateUsuario(editData);
+      setEditMode(false);
     } finally {
-      setCriando(false);
+      setSalvandoPerfil(false);
     }
+  }
+
+  async function salvarConfig(newCfg: ProfileConfig) {
+    if (!usuario) return;
+    setSalvandoConfig(true);
+    const json = JSON.stringify(newCfg);
+    try {
+      await api.put(`/usuario/${usuario.id}`, { perfilConfig: json });
+      updateUsuario({ perfilConfig: json });
+      setConfig(newCfg);
+    } finally {
+      setSalvandoConfig(false);
+    }
+  }
+
+  async function excluirPost(e: React.MouseEvent, id: number) {
+    e.stopPropagation();
+    if (!confirm("Excluir esta publicação?")) return;
+    setExcluindo(id);
+    try { await api.delete(`/post/${id}`); carregarDados(); }
+    catch { alert("Erro ao excluir."); }
+    finally { setExcluindo(null); }
   }
 
   const inicial = usuario?.nome?.charAt(0).toUpperCase() ?? "?";
 
   return (
-    <div className="perfil">
-      {/* Hero */}
-      <div className="perfil__hero">
-        <div className="perfil__avatar">
-          {usuario?.fotoPerfil
-            ? <img src={usuario.fotoPerfil} alt={usuario.nome} />
-            : <span>{inicial}</span>
-          }
-        </div>
-        <div className="perfil__hero-info">
-          <h1 className="perfil__nome">{usuario?.nome}</h1>
-          <span className="perfil__username">@{usuario?.username}</span>
-          <div className="perfil__stats">
-            <div className="perfil__stat">
-              <strong>{posts.length}</strong>
-              <span>Posts</span>
-            </div>
-            <div className="perfil__stat">
-              <strong>{catalogos.length}</strong>
-              <span>Catálogos</span>
-            </div>
-          </div>
-        </div>
+    <div
+      className={`perfil ${config.bgType === "texture" ? `perfil--texture-${config.bgValue}` : ""}`}
+      style={bgStyle}
+    >
+      {/* ── BANNER ── */}
+      <div className="perfil__banner">
+        {usuario?.fotoCapa
+          ? <img src={usuario.fotoCapa} alt="capa" />
+          : <div className="perfil__banner-placeholder" />}
+        <button className="perfil__banner-btn" onClick={() => bannerRef.current?.click()}>
+          <CameraIcon size={15} /> Mudar capa
+        </button>
+        <input ref={bannerRef} type="file" accept="image/*" hidden onChange={uploadBanner} />
       </div>
 
-      <div className="perfil__body">
-        {/* Sidebar: criar post */}
-        <aside className="perfil__sidebar">
-          <button className="perfil__btn-artistas">Adicionar Artistas</button>
-
-          <div className="perfil__criar-card">
-            <p className="perfil__criar-titulo">Compartilhe sua arte</p>
-            <form onSubmit={criarPost}>
-              <div className="perfil__upload-area">
-                {imagemUrl
-                  ? <img src={imagemUrl} alt="preview" />
-                  : <span className="perfil__upload-plus">+</span>
-                }
-              </div>
-              <input
-                className="perfil__input"
-                type="text"
-                placeholder="URL da imagem (opcional)"
-                value={imagemUrl}
-                onChange={(e) => setImagemUrl(e.target.value)}
-              />
-              <input
-                className="perfil__input"
-                type="text"
-                placeholder="Título *"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                required
-              />
-              <input
-                className="perfil__input"
-                type="text"
-                placeholder="Descrição (opcional)"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-              />
-              {msgPost && (
-                <p className={`perfil__msg ${msgPost.includes("Erro") ? "perfil__msg--erro" : "perfil__msg--ok"}`}>
-                  {msgPost}
-                </p>
-              )}
-              <button className="perfil__btn-criar" type="submit" disabled={criando || !titulo.trim()}>
-                {criando ? "Publicando..." : "Criar publicação"}
-              </button>
-            </form>
+      {/* ── PROFILE CARD ── */}
+      <div className="perfil__card">
+        <div className="perfil__avatar-wrap">
+          <div className="perfil__avatar">
+            {usuario?.fotoPerfil
+              ? <img src={usuario.fotoPerfil} alt={usuario.nome} />
+              : <span>{inicial}</span>}
           </div>
-        </aside>
+          <button className="perfil__avatar-btn" onClick={() => avatarRef.current?.click()}>
+            <CameraIcon size={12} />
+          </button>
+          <input ref={avatarRef} type="file" accept="image/*" hidden onChange={uploadAvatar} />
+        </div>
 
-        {/* Galeria */}
-        <main className="perfil__galeria">
-          {catalogos.length > 0 && (
+        {editMode ? (
+          <div className="perfil__edit-form">
+            <input className="perfil__edit-input" placeholder="Nome" value={editData.nome} onChange={e => setEditData(p => ({ ...p, nome: e.target.value }))} />
+            <textarea className="perfil__edit-textarea" placeholder="Bio" value={editData.bio} onChange={e => setEditData(p => ({ ...p, bio: e.target.value }))} maxLength={160} />
+            <input className="perfil__edit-input" placeholder="Cidade" value={editData.cidade} onChange={e => setEditData(p => ({ ...p, cidade: e.target.value }))} />
+            <input className="perfil__edit-input" placeholder="Contato / site" value={editData.contato} onChange={e => setEditData(p => ({ ...p, contato: e.target.value }))} />
+            <div className="perfil__edit-actions">
+              <button className="perfil__btn-salvar" onClick={salvarPerfil} disabled={salvandoPerfil}>{salvandoPerfil ? "Salvando..." : "Salvar"}</button>
+              <button className="perfil__btn-cancelar" onClick={() => setEditMode(false)}>Cancelar</button>
+            </div>
+          </div>
+        ) : (
+          <div className="perfil__meta">
+            <h1 className="perfil__nome">{usuario?.nome}</h1>
+            <span className="perfil__username">@{usuario?.username}</span>
+            {usuario?.bio && <p className="perfil__bio">{usuario.bio}</p>}
+            {usuario?.cidade && <p className="perfil__cidade">📍 {usuario.cidade}</p>}
+            <div className="perfil__stats">
+              <span><strong>{posts.length}</strong> posts</span>
+              <span><strong>{catalogos.length}</strong> catálogos</span>
+            </div>
+          </div>
+        )}
+
+        <div className="perfil__actions">
+          {!editMode && (
             <>
-              <div className="perfil__galeria-header">
-                <h2 className="perfil__galeria-titulo">Catálogos</h2>
-                <span className="perfil__galeria-count">{catalogos.length}</span>
-              </div>
-              <div className="perfil__grid">
-                {catalogos.map((cat) => (
-                  <div key={cat.id} className="perfil__catalogo-card">
-                    <div className="perfil__catalogo-label">{cat.nome}</div>
-                    <div className="perfil__catalogo-capa">
-                      <FolderIcon size={28} />
-                      <span>{cat.posts.length} item{cat.posts.length !== 1 ? "s" : ""}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <button className="perfil__btn-editar" onClick={() => setEditMode(true)}>Editar perfil</button>
+              <button className="perfil__btn-custom" onClick={() => setShowCustomize(true)}>
+                <PaletteIcon size={15} />
+              </button>
             </>
           )}
+        </div>
+      </div>
 
-          <div className="perfil__galeria-header">
-            <h2 className="perfil__galeria-titulo">Sua Galeria</h2>
-            <span className="perfil__galeria-count">{posts.length} publicações</span>
+      {/* ── TABS + NOVO POST ── */}
+      <div className="perfil__tabbar">
+        <div className="perfil__tabs">
+          <button className={tab === "posts" ? "active" : ""} onClick={() => setTab("posts")}>
+            Posts <span className="perfil__tab-count">{posts.length}</span>
+          </button>
+          <button className={tab === "catalogos" ? "active" : ""} onClick={() => setTab("catalogos")}>
+            Catálogos <span className="perfil__tab-count">{catalogos.length}</span>
+          </button>
+        </div>
+        <button
+          className="perfil__novo-btn"
+          onClick={() => tab === "catalogos" ? setShowCatalogoModal(true) : setShowModal(true)}
+        >
+          <PlusIcon size={14} /> {tab === "catalogos" ? "Novo catálogo" : "Nova publicação"}
+        </button>
+      </div>
+
+      {/* ── GALLERY ── */}
+      {tab === "posts" && (
+        carregando ? (
+          <div className="perfil__skeleton-grid">
+            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="perfil__skeleton" />)}
           </div>
-
-          {carregando ? (
-            <p className="perfil__status">Carregando...</p>
-          ) : posts.length === 0 ? (
-            <div className="perfil__empty">
-              <p>Você ainda não publicou nada. Compartilhe sua arte!</p>
-            </div>
-          ) : (
-            <div className="perfil__grid">
-              {posts.map((post) => (
-                <div key={post.id} className="perfil__post-card" onClick={() => navigate(`/post/${post.id}`)}>
-                  <div className="perfil__post-label">{post.titulo}</div>
+        ) : posts.length === 0 ? (
+          <div className="perfil__empty">
+            <p>Nenhuma publicação ainda.</p>
+            <button className="perfil__empty-btn" onClick={() => setShowModal(true)}>
+              <PlusIcon size={14} /> Criar primeira publicação
+            </button>
+          </div>
+        ) : (
+          <div className={`perfil__galeria perfil__galeria--${config.layout} perfil__galeria--${config.cardStyle}`}>
+            {posts.map(post => (
+              <div key={post.id} className="perfil__post-card" onClick={() => navigate(`/post/${post.id}`)}>
+                <div className="perfil__post-img">
                   {post.imagem
-                    ? <img className="perfil__post-imagem" src={post.imagem} alt={post.titulo} />
-                    : <div className="perfil__post-sem-img">Sem imagem</div>
-                  }
-                  <div className="perfil__post-stats">
-                    <span><HeartIcon size={12} filled /> {post.curtidas.length}</span>
-                    <span><CommentIcon size={12} /> {post.comentarios.length}</span>
+                    ? <img src={post.imagem} alt={post.titulo} />
+                    : <div className="perfil__post-no-img"><ImageOffIcon size={26} /></div>}
+                </div>
+                <div className="perfil__post-info">
+                  <span className="perfil__post-titulo">{post.titulo}</span>
+                  <div className="perfil__post-row">
+                    <span className="perfil__post-stats">
+                      <HeartIcon size={11} filled /> {post.curtidas.length}
+                      &nbsp;&nbsp;<CommentIcon size={11} /> {post.comentarios.length}
+                    </span>
+                    <button
+                      className="perfil__post-del"
+                      onClick={e => excluirPost(e, post.id)}
+                      disabled={excluindo === post.id}
+                      title="Excluir"
+                    >
+                      <TrashIcon size={13} />
+                    </button>
                   </div>
                 </div>
-              ))}
+              </div>
+            ))}
+          </div>
+        )
+      )}
+
+      {tab === "catalogos" && (
+        <div className="perfil__cat-grid">
+          {catalogos.length === 0 ? (
+            <p className="perfil__empty-txt">Nenhum catálogo ainda.</p>
+          ) : catalogos.map(cat => (
+            <div key={cat.id} className="perfil__cat-card" onClick={() => navigate(`/catalogo/${cat.id}`)}>
+              <div className="perfil__cat-icon"><FolderIcon size={28} /></div>
+              <p className="perfil__cat-nome">{cat.nome}</p>
+              <span className="perfil__cat-count">{cat.posts.length} item{cat.posts.length !== 1 ? "s" : ""}</span>
             </div>
-          )}
-        </main>
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── CUSTOMIZATION PANEL ── */}
+      {showCustomize && (
+        <div className="perfil__custom-overlay" onClick={() => setShowCustomize(false)}>
+          <div className="perfil__custom-panel" onClick={e => e.stopPropagation()}>
+            <div className="perfil__custom-header">
+              <span>Personalizar perfil</span>
+              <button onClick={() => setShowCustomize(false)}>✕</button>
+            </div>
+
+            <div className="perfil__custom-body">
+              <section className="perfil__custom-section">
+                <p className="perfil__custom-label">Fundo sólido</p>
+                <div className="perfil__color-swatches">
+                  {BG_SOLIDS.map(c => (
+                    <button
+                      key={c}
+                      className={`perfil__swatch ${config.bgType === "solid" && config.bgValue === c ? "active" : ""}`}
+                      style={{ background: c, border: c === "#FAF8F3" ? "1px solid #E0D9CC" : "none" }}
+                      onClick={() => setConfig(p => ({ ...p, bgType: "solid", bgValue: c }))}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              <section className="perfil__custom-section">
+                <p className="perfil__custom-label">Gradiente</p>
+                <div className="perfil__color-swatches">
+                  {BG_GRADIENTS.map(g => (
+                    <button
+                      key={g}
+                      className={`perfil__swatch ${config.bgType === "gradient" && config.bgValue === g ? "active" : ""}`}
+                      style={{ background: g }}
+                      onClick={() => setConfig(p => ({ ...p, bgType: "gradient", bgValue: g }))}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              <section className="perfil__custom-section">
+                <p className="perfil__custom-label">Textura</p>
+                <div className="perfil__texture-opts">
+                  {[["dots", "Pontos"], ["grid", "Grade"], ["diagonal", "Diagonal"]].map(([key, label]) => (
+                    <button
+                      key={key}
+                      className={`perfil__texture-btn ${config.bgType === "texture" && config.bgValue === key ? "active" : ""}`}
+                      onClick={() => setConfig(p => ({ ...p, bgType: "texture", bgValue: key }))}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="perfil__custom-section">
+                <p className="perfil__custom-label">Estilo dos cards</p>
+                <div className="perfil__style-opts">
+                  {CARD_STYLES.map(s => (
+                    <button
+                      key={s.key}
+                      className={`perfil__style-btn ${config.cardStyle === s.key ? "active" : ""}`}
+                      onClick={() => setConfig(p => ({ ...p, cardStyle: s.key }))}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="perfil__custom-section">
+                <p className="perfil__custom-label">Layout da galeria</p>
+                <div className="perfil__layout-opts">
+                  <button className={`perfil__layout-btn ${config.layout === "grid" ? "active" : ""}`} onClick={() => setConfig(p => ({ ...p, layout: "grid" }))}>
+                    <GridIcon size={18} /> Grade 3
+                  </button>
+                  <button className={`perfil__layout-btn ${config.layout === "compact" ? "active" : ""}`} onClick={() => setConfig(p => ({ ...p, layout: "compact" }))}>
+                    <GridIcon size={18} /> Grade 2
+                  </button>
+                  <button className={`perfil__layout-btn ${config.layout === "list" ? "active" : ""}`} onClick={() => setConfig(p => ({ ...p, layout: "list" }))}>
+                    <ListIcon size={18} /> Lista
+                  </button>
+                </div>
+              </section>
+            </div>
+
+            <div className="perfil__custom-footer">
+              <button className="perfil__custom-save" onClick={() => salvarConfig(config)} disabled={salvandoConfig}>
+                {salvandoConfig ? "Salvando..." : "Salvar personalização"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showModal && <CreatePostModal onClose={() => setShowModal(false)} onSuccess={carregarDados} />}
+      {showCatalogoModal && <CatalogoModal onClose={() => setShowCatalogoModal(false)} />}
 
       <Footer />
     </div>

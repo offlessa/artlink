@@ -5,20 +5,18 @@ export class UpdateComentarioController {
   async handle(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { conteudo } = req.body;
+      const { conteudo, oculto } = req.body;
 
       if (!id) {
-        return res
-          .status(400)
-          .json({ message: "ID do comentário não fornecido" });
+        return res.status(400).json({ message: "ID do comentário não fornecido" });
       }
 
-      if (!conteudo || typeof conteudo !== "string") {
-        return res.status(400).json({ message: "Conteúdo inválido" });
+      if (conteudo === undefined && oculto === undefined) {
+        return res.status(400).json({ message: "Nenhum campo para atualizar" });
       }
 
       const service = new UpdateComentarioService();
-      const resultado = await service.execute({ id: Number(id), conteudo });
+      const resultado = await service.execute({ id: Number(id), conteudo, oculto });
 
       return res.json(resultado);
     } catch (error: any) {

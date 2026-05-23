@@ -10,44 +10,29 @@ export interface UpdateUsuarioRequest {
   cidade?: string;
   contato?: string;
   fotoPerfil?: string;
+  fotoCapa?: string;
+  perfilConfig?: string;
 }
 
 export class UpdateUsuarioService {
-  async execute({
-    id,
-    nome,
-    username,
-    email,
-    senha,
-    bio,
-    cidade,
-    contato,
-    fotoPerfil,
-  }: UpdateUsuarioRequest) {
-    // Verifica se o usuário existe
-    const usuarioExistente = await prismaClient.usuario.findUnique({
-      where: { id },
-    });
+  async execute({ id, nome, username, email, senha, bio, cidade, contato, fotoPerfil, fotoCapa, perfilConfig }: UpdateUsuarioRequest) {
+    const usuarioExistente = await prismaClient.usuario.findUnique({ where: { id } });
+    if (!usuarioExistente) throw new Error("Usuário não encontrado");
 
-    if (!usuarioExistente) {
-      throw new Error("Usuário não encontrado");
-    }
-
-    // Atualiza os campos fornecidos
-    const usuarioAtualizado = await prismaClient.usuario.update({
+    return prismaClient.usuario.update({
       where: { id },
       data: {
-        ...(nome && { nome }),
-        ...(username && { username }),
-        ...(email && { email }),
-        ...(senha && { senha }),
-        ...(bio && { bio }),
-        ...(cidade && { cidade }),
-        ...(contato && { contato }),
-        ...(fotoPerfil && { fotoPerfil }),
+        ...(nome !== undefined && { nome }),
+        ...(username !== undefined && { username }),
+        ...(email !== undefined && { email }),
+        ...(senha !== undefined && { senha }),
+        ...(bio !== undefined && { bio: bio || null }),
+        ...(cidade !== undefined && { cidade: cidade || null }),
+        ...(contato !== undefined && { contato: contato || null }),
+        ...(fotoPerfil !== undefined && { fotoPerfil: fotoPerfil || null }),
+        ...(fotoCapa !== undefined && { fotoCapa: fotoCapa || null }),
+        ...(perfilConfig !== undefined && { perfilConfig: perfilConfig || null }),
       },
     });
-
-    return usuarioAtualizado;
   }
 }

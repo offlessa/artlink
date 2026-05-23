@@ -5,7 +5,7 @@ export class UpdateCatalogoController {
   async handle(req: Request, res: Response) {
     try {
       const { id } = req.params; // vem da URL
-      const { nome, descricao } = req.body;
+      const { nome, descricao, capa } = req.body;
 
       if (!id) {
         return res
@@ -18,6 +18,7 @@ export class UpdateCatalogoController {
         id: Number(id),
         nome,
         descricao,
+        capa,
       });
 
       return res.json(catalogoAtualizado);

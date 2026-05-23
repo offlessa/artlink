@@ -2,7 +2,7 @@ import prismaClient from "../../prisma";
 import { UpdateCatalogoRequest } from "../../types/Catalogo";
 
 export class UpdateCatalogoService {
-  async execute({ id, nome, descricao }: UpdateCatalogoRequest) {
+  async execute({ id, nome, descricao, capa }: UpdateCatalogoRequest) {
     // Confirma que o catálogo existe
     const catalogoExistente = await prismaClient.catalogo.findUnique({
       where: { id },
@@ -18,6 +18,7 @@ export class UpdateCatalogoService {
       data: {
         ...(nome !== undefined ? { nome } : {}),
         ...(descricao !== undefined ? { descricao } : {}),
+        ...(capa !== undefined ? { capa } : {}),
       },
     });
 

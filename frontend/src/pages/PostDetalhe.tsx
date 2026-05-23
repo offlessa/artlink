@@ -3,13 +3,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
-import { HeartIcon, ImageOffIcon } from "../components/Icons";
+import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon } from "../components/Icons";
 import "../styles/components/PostDetalhe.scss";
 
 interface Comentario {
   id: number;
   conteudo: string;
   data: string;
+  oculto: boolean;
+  usuario: { id: number; nome: string; username: string; fotoPerfil?: string };
+}
+
+interface Colaboracao {
+  usuarioId: number;
   usuario: { id: number; nome: string; username: string; fotoPerfil?: string };
 }
 
@@ -21,6 +27,7 @@ interface Post {
   curtidas: { id: number; usuarioId: number }[];
   comentarios: Comentario[];
   autor: { id: number; nome: string; username: string; fotoPerfil?: string };
+  colaboracoes: Colaboracao[];
 }
 
 export default function PostDetalhe() {
@@ -33,6 +40,8 @@ export default function PostDetalhe() {
   const [novoComentario, setNovoComentario] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
+  const [acaoComentario, setAcaoComentario] = useState<number | null>(null);
+  const [verOcultos, setVerOcultos] = useState(false);
 
   async function carregarPost() {
     try {
@@ -51,8 +60,20 @@ export default function PostDetalhe() {
 
   useEffect(() => { carregarPost(); }, [id]);
 
-  const jaCurtiu = post?.curtidas.some((c) => c.usuarioId === usuario?.id) ?? false;
-  const totalCurtidas = post?.curtidas.length ?? 0;
+  if (carregando) return <div className="post-detalhe__loading">Carregando...</div>;
+  if (!post) return null;
+
+  const jaCurtiu = post.curtidas.some((c) => c.usuarioId === usuario?.id);
+  const totalCurtidas = post.curtidas.length;
+
+  // Gestor = dono do post OU colaborador
+  const isGestor = !!usuario && (
+    usuario.id === post.autor.id ||
+    post.colaboracoes.some(c => c.usuarioId === usuario.id)
+  );
+
+  const visiveis = comentarios.filter(c => !c.oculto);
+  const ocultos  = comentarios.filter(c => c.oculto);
 
   async function toggleCurtida() {
     if (!post || !usuario) return;
@@ -64,9 +85,7 @@ export default function PostDetalhe() {
         await api.post("/curtida", { usuarioId: usuario.id, postId: post.id });
       }
       carregarPost();
-    } catch (err) {
-      console.error("Erro ao curtir:", err);
-    }
+    } catch {}
   }
 
   async function enviarComentario(e: React.FormEvent) {
@@ -81,17 +100,85 @@ export default function PostDetalhe() {
       });
       setNovoComentario("");
       carregarPost();
-    } catch (err) {
-      console.error("Erro ao comentar:", err);
     } finally {
       setEnviando(false);
     }
   }
 
-  if (carregando) return <div className="post-detalhe__loading">Carregando...</div>;
-  if (!post) return null;
+  async function excluirComentario(comentarioId: number) {
+    setAcaoComentario(comentarioId);
+    try {
+      await api.delete(`/comentario/${comentarioId}`);
+      carregarPost();
+    } finally {
+      setAcaoComentario(null);
+    }
+  }
+
+  async function toggleOculto(c: Comentario) {
+    setAcaoComentario(c.id);
+    try {
+      await api.put(`/comentario/${c.id}`, { oculto: !c.oculto });
+      carregarPost();
+    } finally {
+      setAcaoComentario(null);
+    }
+  }
 
   const inicialAutor = post.autor.nome.charAt(0).toUpperCase();
+
+  function ComentarioItem({ c, ocultoView = false }: { c: Comentario; ocultoView?: boolean }) {
+    const isMeu = usuario?.id === c.usuario.id;
+    const emAcao = acaoComentario === c.id;
+
+    return (
+      <div className={`post-detalhe__comentario ${ocultoView ? "post-detalhe__comentario--oculto-view" : ""}`}>
+        <div className="post-detalhe__avatar-sm">
+          {c.usuario.fotoPerfil
+            ? <img src={c.usuario.fotoPerfil} alt={c.usuario.nome} />
+            : <span>{c.usuario.nome.charAt(0).toUpperCase()}</span>}
+        </div>
+        <div className="post-detalhe__comentario-body">
+          <div className="post-detalhe__comentario-header">
+            <span className="post-detalhe__comentario-autor">{c.usuario.nome}</span>
+            <div className="post-detalhe__comentario-acoes">
+              {isGestor && !ocultoView && (
+                <button
+                  className="post-detalhe__acao-btn"
+                  onClick={() => toggleOculto(c)}
+                  disabled={emAcao}
+                  title="Ocultar comentário"
+                >
+                  <EyeOffIcon size={13} />
+                </button>
+              )}
+              {isGestor && ocultoView && (
+                <button
+                  className="post-detalhe__acao-btn post-detalhe__acao-btn--mostrar"
+                  onClick={() => toggleOculto(c)}
+                  disabled={emAcao}
+                  title="Mostrar comentário"
+                >
+                  <EyeIcon size={13} /> <span>Mostrar</span>
+                </button>
+              )}
+              {isMeu && (
+                <button
+                  className="post-detalhe__acao-btn post-detalhe__acao-btn--del"
+                  onClick={() => excluirComentario(c.id)}
+                  disabled={emAcao}
+                  title="Excluir comentário"
+                >
+                  <TrashIcon size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+          <p className="post-detalhe__comentario-texto">{c.conteudo}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="post-detalhe">
@@ -115,8 +202,7 @@ export default function PostDetalhe() {
               <div className="post-detalhe__avatar">
                 {post.autor.fotoPerfil
                   ? <img src={post.autor.fotoPerfil} alt={post.autor.nome} />
-                  : <span>{inicialAutor}</span>
-                }
+                  : <span>{inicialAutor}</span>}
               </div>
               <div className="post-detalhe__autor-info">
                 <span className="post-detalhe__autor-nome">{post.autor.nome}</span>
@@ -131,50 +217,77 @@ export default function PostDetalhe() {
               {totalCurtidas}
             </button>
           </div>
-          {post.descricao && (
-            <p className="post-detalhe__descricao">{post.descricao}</p>
+          {post.descricao && <p className="post-detalhe__descricao">{post.descricao}</p>}
+
+          {post.colaboracoes.length > 0 && (
+            <div className="post-detalhe__collabs">
+              <span className="post-detalhe__collabs-label">Com colaboração de</span>
+              <div className="post-detalhe__collabs-list">
+                {post.colaboracoes.map(col => (
+                  <div key={col.usuarioId} className="post-detalhe__collab-chip">
+                    <div className="post-detalhe__collab-av">
+                      {col.usuario.fotoPerfil
+                        ? <img src={col.usuario.fotoPerfil} alt={col.usuario.nome} />
+                        : <span>{col.usuario.nome.charAt(0)}</span>}
+                    </div>
+                    <span>@{col.usuario.username}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
         <div className="post-detalhe__comentarios-col">
           <h1 className="post-detalhe__titulo">{post.titulo}</h1>
           <p className="post-detalhe__secao-titulo">
-            {comentarios.length} Comentário{comentarios.length !== 1 ? "s" : ""}
+            {visiveis.length} Comentário{visiveis.length !== 1 ? "s" : ""}
           </p>
 
           <div className="post-detalhe__lista">
-            {comentarios.length === 0
-              ? <p className="post-detalhe__sem-comentarios">
-                  Seja o primeiro a comentar.
-                </p>
-              : comentarios.map((c) => (
-                  <div key={c.id} className="post-detalhe__comentario">
-                    <div className="post-detalhe__avatar-sm">
-                      {c.usuario.fotoPerfil
-                        ? <img src={c.usuario.fotoPerfil} alt={c.usuario.nome} />
-                        : <span>{c.usuario.nome.charAt(0).toUpperCase()}</span>
-                      }
-                    </div>
-                    <div className="post-detalhe__comentario-body">
-                      <span className="post-detalhe__comentario-autor">{c.usuario.nome}</span>
-                      <p className="post-detalhe__comentario-texto">{c.conteudo}</p>
-                    </div>
-                  </div>
-                ))
+            {visiveis.length === 0
+              ? <p className="post-detalhe__sem-comentarios">Seja o primeiro a comentar.</p>
+              : visiveis.map(c => <ComentarioItem key={c.id} c={c} />)
             }
           </div>
 
-          <form className="post-detalhe__form" onSubmit={enviarComentario}>
-            <input
-              type="text"
-              placeholder="Escreva um comentário..."
-              value={novoComentario}
-              onChange={(e) => setNovoComentario(e.target.value)}
-            />
-            <button type="submit" disabled={enviando || !novoComentario.trim()}>
-              {enviando ? "..." : "Enviar"}
-            </button>
-          </form>
+          {/* Comentários ocultos — só gestores veem */}
+          {isGestor && ocultos.length > 0 && (
+            <div className="post-detalhe__ocultos">
+              <button
+                className="post-detalhe__ocultos-toggle"
+                onClick={() => setVerOcultos(v => !v)}
+              >
+                <EyeOffIcon size={14} />
+                {verOcultos ? "Ocultar" : `Ver comentários ocultos (${ocultos.length})`}
+                <span className={`post-detalhe__ocultos-chevron ${verOcultos ? "open" : ""}`}>▾</span>
+              </button>
+
+              {verOcultos && (
+                <div className="post-detalhe__ocultos-lista">
+                  {ocultos.map(c => <ComentarioItem key={c.id} c={c} ocultoView />)}
+                </div>
+              )}
+            </div>
+          )}
+
+          {usuario ? (
+            <form className="post-detalhe__form" onSubmit={enviarComentario}>
+              <input
+                type="text"
+                placeholder="Escreva um comentário..."
+                value={novoComentario}
+                onChange={(e) => setNovoComentario(e.target.value)}
+              />
+              <button type="submit" disabled={enviando || !novoComentario.trim()}>
+                {enviando ? "..." : "Enviar"}
+              </button>
+            </form>
+          ) : (
+            <p className="post-detalhe__sem-comentarios" style={{ marginTop: 8 }}>
+              <a href="/login" style={{ color: "#2A3B1C", fontWeight: 600 }}>Entre</a> para comentar.
+            </p>
+          )}
         </div>
 
       </div>

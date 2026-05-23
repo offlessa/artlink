@@ -44,6 +44,11 @@ import { GetCatalogoPostController } from "./controllers/catalogoPost/GetCatalog
 import { UpdateCatalogoPostController } from "./controllers/catalogoPost/UpdateCatalogoPostController";
 import { DeleteCatalogoPostController } from "./controllers/catalogoPost/DeleteCatalogoPostController";
 
+// === CATÁLOGO IMAGEM ===
+import { CreateCatalogoImagemController } from "./controllers/catalogoImagem/CreateCatalogoImagemController";
+import { GetCatalogoImagemController } from "./controllers/catalogoImagem/GetCatalogoImagemController";
+import { DeleteCatalogoImagemController } from "./controllers/catalogoImagem/DeleteCatalogoImagemController";
+
 // === COMENTÁRIO ===
 import { CreateComentarioController } from "./controllers/comentario/CreateComentarioController";
 import { GetComentarioController } from "./controllers/comentario/GetComentarioController";
@@ -118,11 +123,11 @@ router.delete(
 // ===================================================
 router.post("/catalogo", authMiddleware, new CreateCatalogoController().handle);
 router.get("/catalogo", new GetCatalogoController().getAll);
-router.get("/catalogo/:id", new GetCatalogoController().getById);
 router.get(
   "/catalogo/usuario/:usuarioId",
   new GetCatalogoController().getByUsuario
 );
+router.get("/catalogo/:id", new GetCatalogoController().getById);
 router.put("/catalogo/:id", authMiddleware, new UpdateCatalogoController().handle);
 router.delete("/catalogo/:id", authMiddleware, new DeleteCatalogoController().handle);
 
@@ -163,6 +168,13 @@ router.delete(
   authMiddleware,
   new DeleteCatalogoPostController().handle
 );
+
+// ===================================================
+// ================== CATÁLOGO IMAGEM ================
+// ===================================================
+router.post("/catalogo/imagem", authMiddleware, new CreateCatalogoImagemController().handle);
+router.get("/catalogo/imagem/:catalogoId", new GetCatalogoImagemController().handle);
+router.delete("/catalogo/imagem/:id", authMiddleware, new DeleteCatalogoImagemController().handle);
 
 // ===================================================
 // ==================== COMENTÁRIOS ==================

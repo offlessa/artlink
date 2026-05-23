@@ -17,7 +17,9 @@ model Usuario {
   bio         String?  @db.Text
   cidade      String?  @db.VarChar(100)
   contato     String?  @db.VarChar(100)
-  fotoPerfil       String?   @map("foto_perfil") @db.VarChar(255)
+  fotoPerfil       String?   @map("foto_perfil") @db.Text
+  fotoCapa         String?   @map("foto_capa") @db.Text
+  perfilConfig     String?   @map("perfil_config") @db.Text
   criadoEm         DateTime  @default(now()) @map("criado_em")
   resetToken       String?   @map("reset_token") @db.VarChar(255)
   resetTokenExpiry DateTime? @map("reset_token_expiry")
@@ -39,7 +41,7 @@ model Post {
   usuarioId    Int      @map("usuario_id")
   titulo       String   @db.VarChar(150)
   descricao    String?  @db.Text
-  imagem       String?  @db.VarChar(255)
+  imagem       String?  @db.Text
   dataPostagem DateTime @default(now()) @map("data_postagem")
 
   autor         Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
@@ -67,13 +69,26 @@ model Catalogo {
   usuarioId   Int      @map("usuario_id")
   nome        String   @db.VarChar(150)
   descricao   String?  @db.Text
+  capa        String?  @db.Text
   dataCriacao DateTime @default(now()) @map("data_criacao")
 
   dono          Usuario               @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   colaboracoes  CatalogoColaboracao[]
   posts         CatalogoPost[]
+  imagens       CatalogoImagem[]
 
   @@map("catalogos")
+}
+
+model CatalogoImagem {
+  id          Int      @id @default(autoincrement())
+  catalogoId  Int      @map("catalogo_id")
+  imagem      String   @db.Text
+  dataCriacao DateTime @default(now()) @map("data_criacao")
+
+  catalogo Catalogo @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+
+  @@map("catalogo_imagens")
 }
 
 model CatalogoColaboracao {
@@ -117,6 +132,7 @@ model Comentario {
   postId    Int      @map("post_id")
   conteudo  String   @db.Text
   data      DateTime @default(now())
+  oculto    Boolean  @default(false)
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)

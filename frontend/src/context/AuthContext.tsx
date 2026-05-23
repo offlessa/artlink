@@ -10,6 +10,8 @@ export interface Usuario {
   cidade?: string;
   contato?: string;
   fotoPerfil?: string;
+  fotoCapa?: string;
+  perfilConfig?: string;
   criadoEm: string;
 }
 
@@ -18,6 +20,7 @@ interface AuthContextData {
   token: string | null;
   login: (email: string, senha: string, lembrar?: boolean) => Promise<void>;
   logout: () => void;
+  updateUsuario: (data: Partial<Usuario>) => void;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -59,6 +62,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     storage.setItem("@artlink:usuario", JSON.stringify(newUsuario));
   }
 
+  function updateUsuario(data: Partial<Usuario>) {
+    setUsuario((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...data };
+      const storage = localStorage.getItem("@artlink:token") ? localStorage : sessionStorage;
+      storage.setItem("@artlink:usuario", JSON.stringify(updated));
+      return updated;
+    });
+  }
+
   function logout() {
     setToken(null);
     setUsuario(null);
@@ -76,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         login,
         logout,
+        updateUsuario,
         isAuthenticated: !!token,
         loading,
       }}

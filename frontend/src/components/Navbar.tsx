@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { SearchIcon, UserIcon, LogOutIcon } from "./Icons";
+import { SearchIcon, UserIcon, LogOutIcon, PlusIcon } from "./Icons";
+import CreatePostModal from "./CreatePostModal";
 import "../styles/components/Navbar.scss";
 
 export default function Navbar() {
@@ -9,6 +10,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   function handleBusca(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +51,19 @@ export default function Navbar() {
         <Link to="/artistas">Artistas</Link>
         <Link to="/sobre">Sobre nós</Link>
       </div>
+
+      {usuario && (
+        <button className="navbar__criar" onClick={() => setShowModal(true)} title="Nova publicação">
+          <PlusIcon size={16} />
+        </button>
+      )}
+
+      {showModal && (
+        <CreatePostModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => { setShowModal(false); navigate("/perfil"); }}
+        />
+      )}
 
       {usuario ? (
         <div className="navbar__user" onClick={() => setMenuAberto(!menuAberto)}>

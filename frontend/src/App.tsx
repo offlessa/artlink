@@ -10,6 +10,8 @@ import Cadastro from "./pages/Cadastro";
 import Login from "./pages/Login";
 import PostDetalhe from "./pages/PostDetalhe";
 import EsqueciSenha from "./pages/EsqueciSenha";
+import PerfilPublico from "./pages/PerfilPublico";
+import CatalogoDetalhe from "./pages/CatalogoDetalhe";
 
 function PublicLayout({ children }: { children: ReactNode }) {
   return (
@@ -20,12 +22,10 @@ function PublicLayout({ children }: { children: ReactNode }) {
   );
 }
 
-// "/" → landing page se não logado, feed se logado
 function RootPage() {
-  const { isAuthenticated, loading } = useAuth();
+  const { loading } = useAuth();
   if (loading) return null;
-  if (isAuthenticated) return <PublicLayout><Home /></PublicLayout>;
-  return <Login />;
+  return <PublicLayout><Home /></PublicLayout>;
 }
 
 export default function App() {
@@ -39,6 +39,8 @@ export default function App() {
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/busca" element={<PublicLayout><Busca /></PublicLayout>} />
           <Route path="/post/:id" element={<PublicLayout><PostDetalhe /></PublicLayout>} />
+          <Route path="/u/:username" element={<PublicLayout><PerfilPublico /></PublicLayout>} />
+          <Route path="/catalogo/:id" element={<PublicLayout><CatalogoDetalhe /></PublicLayout>} />
           <Route
             path="/perfil"
             element={

@@ -1,0 +1,110 @@
+.catm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.catm {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  animation: catm-in 0.2s ease;
+
+  @keyframes catm-in {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #E0D9CC;
+    font-weight: 600;
+    color: #1C2616;
+    font-size: 0.95rem;
+    font-family: 'DM Sans', sans-serif;
+
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #8A9E7A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 50%;
+      transition: color 0.15s;
+      &:hover { color: #1C2616; }
+    }
+  }
+
+  &__body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #E0D9CC;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: #1C2616;
+    outline: none;
+    transition: border-color 0.18s;
+    box-sizing: border-box;
+
+    &::placeholder { color: #B8C4AE; }
+    &:focus { border-color: #5C7A3A; }
+  }
+
+  &__textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #E0D9CC;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #1C2616;
+    outline: none;
+    resize: vertical;
+    min-height: 90px;
+    transition: border-color 0.18s;
+    box-sizing: border-box;
+
+    &::placeholder { color: #B8C4AE; }
+    &:focus { border-color: #5C7A3A; }
+  }
+
+  &__btn {
+    align-self: flex-end;
+    background: #2A3B1C;
+    color: #FAF8F3;
+    border: none;
+    border-radius: 99px;
+    padding: 10px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+
+    &:hover { background: #364D24; }
+    &:disabled { opacity: 0.45; cursor: not-allowed; }
+  }
+}
