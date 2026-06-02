@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "npx prisma generate && tsc -p tsconfig.build.json",
+    "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "prisma": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
@@ -22,7 +22,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@prisma/client": "^6.15.0",
+    "@prisma/client": "6.15.0",
     "@types/nodemailer": "^8.0.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
@@ -32,7 +32,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
-    "prisma": "^6.15.0",
+    "prisma": "6.15.0",
     "resend": "^6.12.3"
   }
 }
