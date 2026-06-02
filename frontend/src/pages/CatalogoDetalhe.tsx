@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
+import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 import CreatePostModal from "../components/CreatePostModal";
@@ -118,26 +119,17 @@ export default function CatalogoDetalhe() {
     } finally { setAdicionando(null); }
   }
 
-  function lerArquivo(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("Falha ao ler arquivo"));
-      reader.readAsDataURL(file);
-    });
-  }
-
   async function uploadCapa(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !catalogo) return;
     e.target.value = "";
     setSalvandoCapa(true);
     try {
-      const data = await lerArquivo(file);
-      await api.put(`/catalogo/${catalogo.id}`, { capa: data });
-      setCatalogo(c => c ? { ...c, capa: data } : c);
+      const url = await uploadImagem(file);
+      await api.put(`/catalogo/${catalogo.id}`, { capa: url });
+      setCatalogo(c => c ? { ...c, capa: url } : c);
     } catch {
-      alert("Erro ao salvar a capa. Tente com uma imagem menor.");
+      alert("Erro ao salvar a capa.");
     } finally {
       setSalvandoCapa(false);
     }
@@ -152,10 +144,10 @@ export default function CatalogoDetalhe() {
       const novas: Imagem[] = [];
       for (const file of files) {
         try {
-          const data = await lerArquivo(file);
+          const url = await uploadImagem(file);
           const res = await api.post("/catalogo/imagem", {
             catalogoId: catalogo.id,
-            imagem: data,
+            imagem: url,
           });
           novas.push(res.data);
         } catch {

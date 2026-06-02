@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
+import { uploadImagem } from "../api/upload";
 import { XIcon, ImageIcon, ChevronRightIcon, PlusIcon } from "./Icons";
 import "../styles/components/CreatePostModal.scss";
 
@@ -12,6 +13,7 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   const { usuario } = useAuth();
   const [step, setStep] = useState<"upload" | "form">("upload");
   const [preview, setPreview] = useState<string | null>(null);
+  const [arquivo, setArquivo] = useState<File | null>(null);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
@@ -24,9 +26,9 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
 
   function lerArquivo(file: File) {
     if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => { setPreview(reader.result as string); setStep("form"); };
-    reader.readAsDataURL(file);
+    setArquivo(file);
+    setPreview(URL.createObjectURL(file));
+    setStep("form");
   }
 
   function handleDrop(e: React.DragEvent) {
@@ -60,11 +62,14 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
     if (!titulo.trim() || !usuario) return;
     setCriando(true);
     try {
+      let imagemUrl: string | null = null;
+      if (arquivo) imagemUrl = await uploadImagem(arquivo);
+
       const res = await api.post("/post", {
         usuarioId: usuario.id,
         titulo: titulo.trim(),
         descricao: descricao.trim() || null,
-        imagem: preview || null,
+        imagem: imagemUrl,
       });
       const postId = res.data?.data?.id ?? res.data?.id;
       for (const c of colaboradores) {

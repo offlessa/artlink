@@ -1,6 +1,10 @@
 // src/routes.ts
 import { Router } from "express";
+import multer from "multer";
 import { authMiddleware } from "./middleware/authMiddleware";
+import { UploadController } from "./controllers/upload/UploadController";
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // ====== AUTH ======
 import { LoginController } from "./controllers/auth/LoginController";
@@ -68,6 +72,11 @@ import { UpdateMensagemController } from "./controllers/mensagem/UpdateMensagemC
 import { DeleteMensagemController } from "./controllers/mensagem/DeleteMensagemController";
 
 const router = Router();
+
+// ===================================================
+// ====================== UPLOAD =====================
+// ===================================================
+router.post("/upload", authMiddleware, upload.single("file"), new UploadController().handle);
 
 // ===================================================
 // ======================= AUTH ======================

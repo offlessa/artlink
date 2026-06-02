@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
+import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 import CreatePostModal from "../components/CreatePostModal";
@@ -102,28 +103,20 @@ export default function Perfil() {
     return { backgroundColor: config.bgValue || "#FAF8F3" };
   }, [config]);
 
-  function lerImagem(file: File, cb: (data: string) => void) {
-    const reader = new FileReader();
-    reader.onload = () => cb(reader.result as string);
-    reader.readAsDataURL(file);
-  }
-
   async function uploadBanner(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !usuario) return;
-    lerImagem(file, async (data) => {
-      await api.put(`/usuario/${usuario.id}`, { fotoCapa: data });
-      updateUsuario({ fotoCapa: data });
-    });
+    const url = await uploadImagem(file);
+    await api.put(`/usuario/${usuario.id}`, { fotoCapa: url });
+    updateUsuario({ fotoCapa: url });
   }
 
   async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !usuario) return;
-    lerImagem(file, async (data) => {
-      await api.put(`/usuario/${usuario.id}`, { fotoPerfil: data });
-      updateUsuario({ fotoPerfil: data });
-    });
+    const url = await uploadImagem(file);
+    await api.put(`/usuario/${usuario.id}`, { fotoPerfil: url });
+    updateUsuario({ fotoPerfil: url });
   }
 
   async function salvarPerfil() {
