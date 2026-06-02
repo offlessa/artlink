@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "prisma generate && tsc -p tsconfig.build.json",
+    "build": "npm install && ./node_modules/.bin/prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "prisma": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
