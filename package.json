@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "npm install --legacy-peer-deps && ./node_modules/.bin/prisma generate && tsc -p tsconfig.build.json",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "prisma": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
     "prisma:migrate": "npx prisma migrate dev"

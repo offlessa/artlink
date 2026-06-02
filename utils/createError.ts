@@ -52,14 +52,16 @@ export const createSuccess = (
 
 export const sendResponse = (res: Response, result: ServiceResponse) => {
   if (!result.success) {
-    return res.status(result.error.statusCode).json({
+    const err = result as ErrorResponse;
+    return res.status(err.error.statusCode).json({
       success: false,
-      message: result.error.message,
+      message: err.error.message,
     });
   }
 
-  return res.status(result.statusCode).json({
+  const ok = result as SuccessResponse;
+  return res.status(ok.statusCode).json({
     success: true,
-    data: result.data,
+    data: ok.data,
   });
 };
