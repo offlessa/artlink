@@ -3,12 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
-import { HeartIcon, CommentIcon, FolderIcon, ImageOffIcon } from "../components/Icons";
+import { HeartIcon, CommentIcon, FolderIcon, ImageOffIcon, UsersIcon, MessageIcon } from "../components/Icons";
 import "../styles/components/PerfilPublico.scss";
 
-interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number; usuarioId: number }[]; comentarios: { id: number }[] }
+interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number; usuarioId: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
 interface Catalogo { id: number; nome: string; posts: { postId: number }[] }
 interface PerfilData { id: number; nome: string; username: string; bio?: string; cidade?: string; fotoPerfil?: string; fotoCapa?: string; perfilConfig?: string }
+interface Contadores { seguidores: number; seguindo: number }
 
 interface ProfileConfig {
   bgType: string; bgValue: string; cardStyle: string; layout: string;
@@ -31,25 +32,69 @@ export default function PerfilPublico() {
   const [tab, setTab] = useState<"posts" | "catalogos">("posts");
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [seguindo, setSeguindo] = useState(false);
+  const [contadores, setContadores] = useState<Contadores>({ seguidores: 0, seguindo: 0 });
+  const [loadingFollow, setLoadingFollow] = useState(false);
 
   useEffect(() => {
     if (!username) return;
     setLoading(true);
     api.get(`/usuario/username/${username}`)
-      .then(async res => {
-        const u: PerfilData = res.data;
-        setPerfil(u);
+      .then(async u => {
+        const dados: PerfilData = u.data;
+        setPerfil(dados);
         if (eu && eu.username === username) { navigate("/perfil", { replace: true }); return; }
-        const [rp, rc] = await Promise.all([
-          api.get(`/post/usuario/${u.id}`).catch(() => ({ data: [] })),
-          api.get(`/catalogo/usuario/${u.id}`).catch(() => ({ data: [] })),
+
+        const [rp, rcolab, rc, cont] = await Promise.all([
+          api.get(`/post/usuario/${dados.id}`).catch(() => ({ data: [] })),
+          api.get(`/post/colaboracao/usuario/${dados.id}`).catch(() => ({ data: [] })),
+          api.get(`/catalogo/usuario/${dados.id}`).catch(() => ({ data: [] })),
+          api.get(`/seguidor/contadores/${dados.id}`).catch(() => ({ data: { data: { seguidores: 0, seguindo: 0 } } })),
         ]);
-        setPosts(Array.isArray(rp.data) ? rp.data : []);
+
+        const proprios: Post[] = Array.isArray(rp.data) ? rp.data : [];
+        const colab: Post[] = Array.isArray(rcolab.data) ? rcolab.data : [];
+
+        // Mescla sem duplicatas, ordena por id desc (mais recente primeiro)
+        const idsVistos = new Set(proprios.map(p => p.id));
+        const todosPosts = [
+          ...proprios,
+          ...colab.filter(p => !idsVistos.has(p.id)),
+        ].sort((a, b) => b.id - a.id);
+
+        setPosts(todosPosts);
         setCatalogos(Array.isArray(rc.data) ? rc.data : []);
+        const c = cont.data?.data ?? cont.data;
+        setContadores({ seguidores: c?.seguidores ?? 0, seguindo: c?.seguindo ?? 0 });
+
+        if (eu) {
+          const checar = await api.get(`/seguidor/checar/${eu.id}/${dados.id}`).catch(() => ({ data: { data: { seguindo: false } } }));
+          const seg = checar.data?.data ?? checar.data;
+          setSeguindo(seg?.seguindo ?? false);
+        }
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [username, eu?.username]);
+  }, [username, eu?.id]);
+
+  async function toggleSeguir() {
+    if (!eu || !perfil || loadingFollow) return;
+    if (!eu.id) { navigate("/login"); return; }
+    setLoadingFollow(true);
+    try {
+      if (seguindo) {
+        await api.delete(`/seguidor/${eu.id}/${perfil.id}`);
+        setSeguindo(false);
+        setContadores(p => ({ ...p, seguidores: Math.max(0, p.seguidores - 1) }));
+      } else {
+        await api.post("/seguidor", { seguidorId: eu.id, seguidoId: perfil.id });
+        setSeguindo(true);
+        setContadores(p => ({ ...p, seguidores: p.seguidores + 1 }));
+      }
+    } catch { /* silencioso */ } finally {
+      setLoadingFollow(false);
+    }
+  }
 
   const config = useMemo(() => parseConfig(perfil?.perfilConfig), [perfil?.perfilConfig]);
 
@@ -84,8 +129,31 @@ export default function PerfilPublico() {
           {perfil.cidade && <p className="pp__cidade">📍 {perfil.cidade}</p>}
           <div className="pp__stats">
             <span><strong>{posts.length}</strong> posts</span>
+            <span><strong>{contadores.seguidores}</strong> seguidores</span>
+            <span><strong>{contadores.seguindo}</strong> seguindo</span>
             <span><strong>{catalogos.length}</strong> catálogos</span>
           </div>
+
+          {eu && eu.id !== perfil.id && (
+            <div className="pp__acoes">
+              <button
+                className={`pp__btn-seguir ${seguindo ? "pp__btn-seguir--ativo" : ""}`}
+                onClick={toggleSeguir}
+                disabled={loadingFollow}
+              >
+                <UsersIcon size={14} />
+                {loadingFollow ? "..." : seguindo ? "Seguindo" : "Seguir"}
+              </button>
+              <button
+                className="pp__btn-msg"
+                onClick={() => navigate("/mensagens")}
+                title="Enviar mensagem"
+              >
+                <MessageIcon size={14} />
+                Mensagem
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -111,6 +179,9 @@ export default function PerfilPublico() {
                 </div>
                 <div className="pp__post-info">
                   <span className="pp__post-titulo">{post.titulo}</span>
+                  {post.autor && post.autor.id !== perfil.id && (
+                    <span className="pp__post-colab-badge">com @{post.autor.username}</span>
+                  )}
                   <div className="pp__post-stats">
                     <span><HeartIcon size={11} /> {post.curtidas.length}</span>
                     <span><CommentIcon size={11} /> {post.comentarios.length}</span>

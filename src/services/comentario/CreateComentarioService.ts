@@ -67,6 +67,13 @@ export class CreateComentarioService {
         },
       });
 
+      // notificar autor do post (se não for o mesmo usuário)
+      if (postExiste.usuarioId !== usuarioId) {
+        await prismaClient.notificacao.create({
+          data: { usuarioId: postExiste.usuarioId, remetenteId: usuarioId, tipo: "comentario", postId },
+        });
+      }
+
       return createSuccess(comentario);
     } catch (error) {
       console.error("Erro ao criar comentário:", error);

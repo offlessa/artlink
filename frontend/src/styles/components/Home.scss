@@ -5,6 +5,46 @@
   flex-direction: column;
   min-height: calc(100vh - 68px);
 
+  &__feed-tabs {
+    display: flex;
+    border-bottom: 2px solid $borda-suave;
+    background: $surface;
+
+    button {
+      flex: 1;
+      max-width: 180px;
+      padding: 14px 20px;
+      border: none;
+      background: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: $texto-suave;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s, border-color 0.2s;
+      &.active {
+        color: $brand;
+        border-bottom-color: $brand;
+      }
+      &:hover:not(.active) { color: $texto-medio; }
+    }
+  }
+
+  &__explorar-btn {
+    margin-top: 12px;
+    padding: 9px 22px;
+    background: $brand;
+    color: #fff;
+    border: none;
+    border-radius: $radius;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    &:hover { background: $brand-hover; }
+  }
+
   &__filters {
     display: flex;
     align-items: center;

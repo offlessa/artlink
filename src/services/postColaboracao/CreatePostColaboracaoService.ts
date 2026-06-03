@@ -27,11 +27,11 @@ export class CreatePostColaboracaoService {
     }
 
     try {
-      const postExists = await prismaClient.post.findUnique({
+      const post = await prismaClient.post.findUnique({
         where: { id: postId },
       });
 
-      if (!postExists) {
+      if (!post) {
         return createError("Post não encontrado.", HttpStatusCode.NOT_FOUND);
       }
 
@@ -44,12 +44,7 @@ export class CreatePostColaboracaoService {
       }
 
       const colaboracaoExists = await prismaClient.postColaboracao.findUnique({
-        where: {
-          postId_usuarioId: {
-            postId,
-            usuarioId,
-          },
-        },
+        where: { postId_usuarioId: { postId, usuarioId } },
       });
 
       if (colaboracaoExists) {
@@ -60,19 +55,23 @@ export class CreatePostColaboracaoService {
       }
 
       const colaboracao = await prismaClient.postColaboracao.create({
-        data: {
-          postId,
-          usuarioId,
-        },
+        data: { postId, usuarioId, status: "pendente" },
         select: {
           postId: true,
           usuarioId: true,
-          post: {
-            select: { id: true, titulo: true },
-          },
-          usuario: {
-            select: { id: true, nome: true, username: true },
-          },
+          status: true,
+          post: { select: { id: true, titulo: true } },
+          usuario: { select: { id: true, nome: true, username: true } },
+        },
+      });
+
+      // Notifica o colaborador convidado
+      await prismaClient.notificacao.create({
+        data: {
+          usuarioId,
+          remetenteId: post.usuarioId,
+          tipo: "colaboracao",
+          postId,
         },
       });
 

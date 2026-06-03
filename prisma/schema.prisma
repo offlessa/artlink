@@ -33,6 +33,10 @@ model Usuario {
   comentarios            Comentario[]
   mensagensEnviadas      Mensagem[] @relation("Remetente")
   mensagensRecebidas     Mensagem[] @relation("Destinatario")
+  seguidores             Seguidor[] @relation("Seguido")
+  seguindo               Seguidor[] @relation("Seguidor")
+  notificacoesRecebidas  Notificacao[] @relation("NotifDestinatario")
+  notificacoesEnviadas   Notificacao[] @relation("NotifRemetente")
 
   @@map("usuarios")
 }
@@ -50,13 +54,21 @@ model Post {
   catalogos     CatalogoPost[]
   curtidas      Curtida[]
   comentarios   Comentario[]
+  notificacoes  Notificacao[]
 
   @@map("posts")
 }
 
+enum StatusColaboracao {
+  pendente
+  aceito
+  recusado
+}
+
 model PostColaboracao {
-  postId    Int @map("post_id")
-  usuarioId Int @map("usuario_id")
+  postId    Int                @map("post_id")
+  usuarioId Int                @map("usuario_id")
+  status    StatusColaboracao  @default(pendente)
 
   post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
@@ -158,4 +170,39 @@ model Mensagem {
   destinatario Usuario @relation("Destinatario", fields: [destinatarioId], references: [id], onDelete: Cascade)
 
   @@map("mensagens")
+}
+
+model Seguidor {
+  seguidorId Int      @map("seguidor_id")
+  seguidoId  Int      @map("seguido_id")
+  data       DateTime @default(now())
+
+  seguidor Usuario @relation("Seguidor", fields: [seguidorId], references: [id], onDelete: Cascade)
+  seguido  Usuario @relation("Seguido", fields: [seguidoId], references: [id], onDelete: Cascade)
+
+  @@id([seguidorId, seguidoId])
+  @@map("seguidores")
+}
+
+enum TipoNotificacao {
+  curtida
+  comentario
+  seguindo
+  colaboracao
+}
+
+model Notificacao {
+  id          Int             @id @default(autoincrement())
+  usuarioId   Int             @map("usuario_id")
+  remetenteId Int             @map("remetente_id")
+  tipo        TipoNotificacao
+  postId      Int?            @map("post_id")
+  lida        Boolean         @default(false)
+  data        DateTime        @default(now())
+
+  usuario   Usuario  @relation("NotifDestinatario", fields: [usuarioId], references: [id], onDelete: Cascade)
+  remetente Usuario  @relation("NotifRemetente", fields: [remetenteId], references: [id], onDelete: Cascade)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@map("notificacoes")
 }

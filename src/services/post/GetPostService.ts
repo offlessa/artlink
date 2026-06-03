@@ -1,26 +1,28 @@
 // src/services/post/GetPostService.ts
 import prismaClient from "../../prisma";
 
+const colaboracaoAceita = { status: "aceito" as const };
+
+const incluirAutor = {
+  select: { id: true, nome: true, username: true, fotoPerfil: true },
+};
+
 export class GetPostService {
-  // Busca todos os posts
   async getAll() {
     try {
       const posts = await prismaClient.post.findMany({
         include: {
-          autor: {
-            select: {
-              id: true,
-              nome: true,
-              username: true,
-              fotoPerfil: true,
-            },
-          },
+          autor: incluirAutor,
           comentarios: true,
           curtidas: true,
+          colaboracoes: {
+            where: colaboracaoAceita,
+            include: {
+              usuario: incluirAutor,
+            },
+          },
         },
-        orderBy: {
-          dataPostagem: "desc",
-        },
+        orderBy: { dataPostagem: "desc" },
       });
       return posts;
     } catch (error) {
@@ -29,38 +31,22 @@ export class GetPostService {
     }
   }
 
-  // Busca um post específico pelo ID
   async getById(postId: number) {
     try {
       const post = await prismaClient.post.findUnique({
         where: { id: postId },
         include: {
-          autor: {
-            select: {
-              id: true,
-              nome: true,
-              username: true,
-              fotoPerfil: true,
-            },
-          },
+          autor: incluirAutor,
           comentarios: {
             include: {
-              usuario: {
-                select: {
-                  id: true,
-                  nome: true,
-                  username: true,
-                  fotoPerfil: true,
-                },
-              },
+              usuario: incluirAutor,
             },
           },
           curtidas: true,
           colaboracoes: {
+            where: colaboracaoAceita,
             include: {
-              usuario: {
-                select: { id: true, nome: true, username: true, fotoPerfil: true },
-              },
+              usuario: incluirAutor,
             },
           },
         },
@@ -72,28 +58,49 @@ export class GetPostService {
     }
   }
 
-  // ✅ Novo método: Busca posts de um usuário específico
+  async getFeed(usuarioId: number) {
+    try {
+      const seguindo = await prismaClient.seguidor.findMany({
+        where: { seguidorId: usuarioId },
+        select: { seguidoId: true },
+      });
+      const idsQueSeguem = seguindo.map(s => s.seguidoId);
+
+      const posts = await prismaClient.post.findMany({
+        where: { usuarioId: { in: idsQueSeguem } },
+        include: {
+          autor: incluirAutor,
+          comentarios: true,
+          curtidas: true,
+          colaboracoes: {
+            where: colaboracaoAceita,
+            include: { usuario: incluirAutor },
+          },
+        },
+        orderBy: { dataPostagem: "desc" },
+      });
+      return posts;
+    } catch (error) {
+      console.error("Erro ao buscar feed:", error);
+      throw new Error("Erro ao buscar feed");
+    }
+  }
+
   async getByUsuario(usuarioId: number) {
     try {
       const posts = await prismaClient.post.findMany({
         where: { usuarioId },
         include: {
-          autor: {
-            select: {
-              id: true,
-              nome: true,
-              username: true,
-              fotoPerfil: true,
-            },
-          },
+          autor: incluirAutor,
           comentarios: true,
           curtidas: true,
+          colaboracoes: {
+            where: colaboracaoAceita,
+            include: { usuario: incluirAutor },
+          },
         },
-        orderBy: {
-          dataPostagem: "desc",
-        },
+        orderBy: { dataPostagem: "desc" },
       });
-
       return posts;
     } catch (error) {
       console.error("Erro ao buscar posts do usuário:", error);

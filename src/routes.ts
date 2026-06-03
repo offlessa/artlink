@@ -30,6 +30,7 @@ import { CreatePostColaboracaoController } from "./controllers/postColaboracao/C
 import { GetPostColaboracaoController } from "./controllers/postColaboracao/GetPostColaboracaoController";
 import { UpdatePostColaboracaoController } from "./controllers/postColaboracao/UpdatePostColaboracaoController";
 import { DeletePostColaboracaoController } from "./controllers/postColaboracao/DeletePostColaboracaoController";
+import { RespostaColaboracaoController } from "./controllers/postColaboracao/RespostaColaboracaoController";
 
 // === CATÁLOGO ===
 import { CreateCatalogoController } from "./controllers/catalogo/CreateCatalogoController";
@@ -71,6 +72,15 @@ import { GetMensagemController } from "./controllers/mensagem/GetMensagemControl
 import { UpdateMensagemController } from "./controllers/mensagem/UpdateMensagemController";
 import { DeleteMensagemController } from "./controllers/mensagem/DeleteMensagemController";
 
+// === SEGUIDOR ===
+import { CreateSeguidorController } from "./controllers/seguidor/CreateSeguidorController";
+import { DeleteSeguidorController } from "./controllers/seguidor/DeleteSeguidorController";
+import { GetSeguidorController } from "./controllers/seguidor/GetSeguidorController";
+
+// === NOTIFICAÇÃO ===
+import { GetNotificacaoController } from "./controllers/notificacao/GetNotificacaoController";
+import { UpdateNotificacaoController } from "./controllers/notificacao/UpdateNotificacaoController";
+
 const router = Router();
 
 // ===================================================
@@ -104,6 +114,7 @@ router.delete("/usuario/:id", authMiddleware, new DeleteUsuarioController().hand
 router.post("/post", authMiddleware, new CreatePostController().handle);
 router.get("/post", new GetPostController().getAll);
 router.get("/post/:id", new GetPostController().getById);
+router.get("/post/feed/:usuarioId", new GetPostController().getFeed);
 router.get("/post/usuario/:usuarioId", new GetPostController().getByUsuario);
 router.put("/post/:id", authMiddleware, new UpdatePostController().handle);
 router.delete("/post/:id", authMiddleware, new DeletePostController().handle);
@@ -111,11 +122,13 @@ router.delete("/post/:id", authMiddleware, new DeletePostController().handle);
 // ===================================================
 // ================ POST COLABORAÇÃO =================
 // ===================================================
+const respostaColaboracaoController = new RespostaColaboracaoController();
 router.post("/post/colaboracao", authMiddleware, new CreatePostColaboracaoController().handle);
-router.get(
-  "/post/colaboracao/:postId",
-  new GetPostColaboracaoController().getByPost
-);
+// Rotas específicas antes das parametrizadas para evitar conflito
+router.get("/post/colaboracao/usuario/:usuarioId", new GetPostColaboracaoController().getByUsuario);
+router.patch("/post/colaboracao/:postId/aceitar", authMiddleware, respostaColaboracaoController.aceitar.bind(respostaColaboracaoController));
+router.patch("/post/colaboracao/:postId/recusar", authMiddleware, respostaColaboracaoController.recusar.bind(respostaColaboracaoController));
+router.get("/post/colaboracao/:postId", new GetPostColaboracaoController().getByPost);
 router.put(
   "/post/colaboracao/:postId/:usuarioId",
   authMiddleware,
@@ -207,6 +220,13 @@ router.delete("/curtida/:id", authMiddleware, new DeleteCurtidaController().hand
 router.post("/mensagem", authMiddleware, new CreateMensagemController().handle);
 const getMensagemController = new GetMensagemController();
 
+// Contagem de não lidas (antes da rota genérica para não conflitar)
+router.get(
+  "/mensagem/nao-lidas/:destinatarioId",
+  authMiddleware,
+  getMensagemController.contarNaoLidas.bind(getMensagemController)
+);
+
 // Mensagens recebidas
 router.get(
   "/mensagem/destinatario/:destinatarioId",
@@ -222,5 +242,24 @@ router.get(
 );
 router.put("/mensagem/:id", authMiddleware, new UpdateMensagemController().handle);
 router.delete("/mensagem/:id", authMiddleware, new DeleteMensagemController().handle);
+
+// ===================================================
+// ==================== SEGUIDORES ===================
+// ===================================================
+const getSeguidorController = new GetSeguidorController();
+router.post("/seguidor", authMiddleware, new CreateSeguidorController().handle);
+router.delete("/seguidor/:seguidorId/:seguidoId", authMiddleware, new DeleteSeguidorController().handle);
+router.get("/seguidor/seguidores/:usuarioId", getSeguidorController.getSeguidores.bind(getSeguidorController));
+router.get("/seguidor/seguindo/:usuarioId", getSeguidorController.getSeguindo.bind(getSeguidorController));
+router.get("/seguidor/contadores/:usuarioId", getSeguidorController.getContadores.bind(getSeguidorController));
+router.get("/seguidor/checar/:seguidorId/:seguidoId", getSeguidorController.checarSeguindo.bind(getSeguidorController));
+
+// ===================================================
+// =================== NOTIFICAÇÕES ==================
+// ===================================================
+const getNotificacaoController = new GetNotificacaoController();
+router.get("/notificacao/:usuarioId", authMiddleware, getNotificacaoController.getByUsuario.bind(getNotificacaoController));
+router.get("/notificacao/nao-lidas/:usuarioId", authMiddleware, getNotificacaoController.contarNaoLidas.bind(getNotificacaoController));
+router.put("/notificacao/marcar-lidas/:usuarioId", authMiddleware, new UpdateNotificacaoController().marcarTodasLidas);
 
 export { router };

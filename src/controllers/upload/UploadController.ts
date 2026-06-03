@@ -17,11 +17,15 @@ export class UploadController {
     const b64 = file.buffer.toString("base64");
     const dataUrl = `data:${file.mimetype};base64,${b64}`;
 
-    const result = await cloudinary.uploader.upload(dataUrl, {
-      folder: "artlink",
-      transformation: [{ quality: "auto", fetch_format: "auto" }],
-    });
-
-    return res.json({ url: result.secure_url });
+    try {
+      const result = await cloudinary.uploader.upload(dataUrl, {
+        folder: "artlink",
+        transformation: [{ quality: "auto", fetch_format: "auto" }],
+      });
+      return res.json({ url: result.secure_url });
+    } catch (err: any) {
+      console.error("Cloudinary error:", err);
+      return res.status(500).json({ message: err?.message ?? "Erro ao fazer upload para o Cloudinary." });
+    }
   }
 }

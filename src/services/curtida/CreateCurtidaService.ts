@@ -72,6 +72,13 @@ export class CreateCurtidaService {
         },
       });
 
+      // notificar autor do post (se não for o mesmo usuário)
+      if (postExiste.usuarioId !== usuarioId) {
+        await prismaClient.notificacao.create({
+          data: { usuarioId: postExiste.usuarioId, remetenteId: usuarioId, tipo: "curtida", postId },
+        });
+      }
+
       return createSuccess(curtida);
     } catch (error) {
       console.error("Erro ao criar curtida:", error);

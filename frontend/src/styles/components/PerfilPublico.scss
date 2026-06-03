@@ -97,9 +97,56 @@
     display: flex;
     gap: 2rem;
     margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
 
     span { font-size: 0.85rem; color: $texto-medio; }
     strong { color: $texto; font-weight: 700; }
+  }
+
+  &__acoes {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  &__btn-seguir {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    background: $brand;
+    color: #fff;
+    border: none;
+    border-radius: $radius;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    &:hover:not(:disabled) { background: $brand-hover; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+    &--ativo {
+      background: $surface;
+      color: $brand;
+      border: 1.5px solid $brand;
+      &:hover:not(:disabled) { background: $brand-subtle; }
+    }
+  }
+
+  &__btn-msg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: $surface;
+    color: $brand;
+    border: 1.5px solid $borda;
+    border-radius: $radius;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    &:hover { background: $brand-subtle; border-color: $brand; }
   }
 
   &__tabs {
@@ -207,9 +254,8 @@
   &__post-info {
     padding: 8px 10px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
+    flex-direction: column;
+    gap: 4px;
   }
 
   &__post-titulo {
@@ -219,7 +265,12 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 1;
+  }
+
+  &__post-colab-badge {
+    font-size: 0.72rem;
+    color: $texto-suave;
+    font-style: italic;
   }
 
   &__post-stats {

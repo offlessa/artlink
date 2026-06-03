@@ -1,29 +1,31 @@
 import prismaClient from "../../prisma";
 
+const incluirAutor = {
+  select: { id: true, nome: true, username: true, fotoPerfil: true },
+};
+
 export class GetPostColaboracaoService {
+  // Posts onde o usuário é colaborador aceito (para exibir no perfil)
   async getByUsuario(usuarioId: number) {
     try {
       const colaboracoes = await prismaClient.postColaboracao.findMany({
-        where: { usuarioId },
+        where: { usuarioId, status: "aceito" },
         include: {
           post: {
             include: {
-              autor: {
-                select: {
-                  id: true,
-                  nome: true,
-                  username: true,
-                  fotoPerfil: true,
-                },
+              autor: incluirAutor,
+              curtidas: true,
+              comentarios: true,
+              colaboracoes: {
+                where: { status: "aceito" },
+                include: { usuario: incluirAutor },
               },
             },
           },
         },
       });
 
-      const posts = colaboracoes.map((c) => c.post);
-
-      return posts;
+      return colaboracoes.map(c => c.post);
     } catch (error) {
       console.error("Erro ao buscar posts de colaboração:", error);
       throw new Error("Erro ao buscar posts de colaboração");
@@ -35,14 +37,7 @@ export class GetPostColaboracaoService {
       const colaboracoes = await prismaClient.postColaboracao.findMany({
         where: { postId },
         include: {
-          usuario: {
-            select: {
-              id: true,
-              nome: true,
-              username: true,
-              fotoPerfil: true,
-            },
-          },
+          usuario: incluirAutor,
         },
       });
 

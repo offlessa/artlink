@@ -380,6 +380,12 @@
     text-overflow: ellipsis;
   }
 
+  &__post-colab-badge {
+    font-size: 0.72rem;
+    color: $texto-suave;
+    font-style: italic;
+  }
+
   &__post-row {
     display: flex;
     align-items: center;

@@ -13,7 +13,7 @@ import {
 } from "../components/Icons";
 import "../styles/components/Perfil.scss";
 
-interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[] }
+interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
 interface Catalogo { id: number; nome: string; posts: { postId: number }[] }
 
 interface ProfileConfig {
@@ -75,11 +75,19 @@ export default function Perfil() {
   async function carregarDados() {
     if (!usuario) return;
     try {
-      const [rp, rc] = await Promise.all([
+      const [rp, rcolab, rc] = await Promise.all([
         api.get(`/post/usuario/${usuario.id}`),
+        api.get(`/post/colaboracao/usuario/${usuario.id}`).catch(() => ({ data: [] })),
         api.get(`/catalogo/usuario/${usuario.id}`),
       ]);
-      setPosts(Array.isArray(rp.data) ? rp.data : []);
+      const proprios: Post[] = Array.isArray(rp.data) ? rp.data : [];
+      const colab: Post[] = Array.isArray(rcolab.data) ? rcolab.data : [];
+      const idsVistos = new Set(proprios.map(p => p.id));
+      const todos = [
+        ...proprios,
+        ...colab.filter(p => !idsVistos.has(p.id)),
+      ].sort((a, b) => b.id - a.id);
+      setPosts(todos);
       setCatalogos(Array.isArray(rc.data) ? rc.data : []);
     } finally {
       setCarregando(false);
@@ -150,6 +158,15 @@ export default function Perfil() {
     setExcluindo(id);
     try { await api.delete(`/post/${id}`); carregarDados(); }
     catch { alert("Erro ao excluir."); }
+    finally { setExcluindo(null); }
+  }
+
+  async function sairColaboracao(e: React.MouseEvent, postId: number) {
+    e.stopPropagation();
+    if (!confirm("Remover esta publicação do seu perfil? O post continuará no perfil do autor.")) return;
+    setExcluindo(postId);
+    try { await api.delete(`/post/colaboracao/${postId}/${usuario?.id}`); carregarDados(); }
+    catch { alert("Erro ao sair da colaboração."); }
     finally { setExcluindo(null); }
   }
 
@@ -263,19 +280,33 @@ export default function Perfil() {
                 </div>
                 <div className="perfil__post-info">
                   <span className="perfil__post-titulo">{post.titulo}</span>
+                  {post.autor && post.autor.id !== usuario?.id && (
+                    <span className="perfil__post-colab-badge">com @{post.autor.username}</span>
+                  )}
                   <div className="perfil__post-row">
                     <span className="perfil__post-stats">
                       <HeartIcon size={11} filled /> {post.curtidas.length}
                       &nbsp;&nbsp;<CommentIcon size={11} /> {post.comentarios.length}
                     </span>
-                    <button
-                      className="perfil__post-del"
-                      onClick={e => excluirPost(e, post.id)}
-                      disabled={excluindo === post.id}
-                      title="Excluir"
-                    >
-                      <TrashIcon size={13} />
-                    </button>
+                    {post.autor && post.autor.id !== usuario?.id ? (
+                      <button
+                        className="perfil__post-del perfil__post-del--sair"
+                        onClick={e => sairColaboracao(e, post.id)}
+                        disabled={excluindo === post.id}
+                        title="Sair da colaboração"
+                      >
+                        <TrashIcon size={13} />
+                      </button>
+                    ) : (
+                      <button
+                        className="perfil__post-del"
+                        onClick={e => excluirPost(e, post.id)}
+                        disabled={excluindo === post.id}
+                        title="Excluir"
+                      >
+                        <TrashIcon size={13} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -33,6 +33,12 @@ export class GetMensagemService {
     });
   }
 
+  async contarNaoLidas(destinatarioId: number) {
+    return prismaClient.mensagem.count({
+      where: { destinatarioId, status: "nao_lido" },
+    });
+  }
+
   // Opcional: buscar todas mensagens
   async getAll() {
     return prismaClient.mensagem.findMany({

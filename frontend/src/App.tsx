@@ -12,6 +12,8 @@ import PostDetalhe from "./pages/PostDetalhe";
 import EsqueciSenha from "./pages/EsqueciSenha";
 import PerfilPublico from "./pages/PerfilPublico";
 import CatalogoDetalhe from "./pages/CatalogoDetalhe";
+import Mensagens from "./pages/Mensagens";
+import Sobre from "./pages/Sobre";
 
 function PublicLayout({ children }: { children: ReactNode }) {
   return (
@@ -38,6 +40,7 @@ export default function App() {
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/busca" element={<PublicLayout><Busca /></PublicLayout>} />
+          <Route path="/sobre" element={<PublicLayout><Sobre /></PublicLayout>} />
           <Route path="/post/:id" element={<PublicLayout><PostDetalhe /></PublicLayout>} />
           <Route path="/u/:username" element={<PublicLayout><PerfilPublico /></PublicLayout>} />
           <Route path="/catalogo/:id" element={<PublicLayout><CatalogoDetalhe /></PublicLayout>} />
@@ -47,6 +50,15 @@ export default function App() {
               <ProtectedRoute>
                 <Navbar />
                 <main><Perfil /></main>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mensagens"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <main><Mensagens /></main>
               </ProtectedRoute>
             }
           />

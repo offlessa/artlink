@@ -21,6 +21,7 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   const [resultadosColab, setResultadosColab] = useState<Colaborador[]>([]);
   const [mostrarColab, setMostrarColab] = useState(false);
   const [criando, setCriando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -61,9 +62,20 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   async function publicar() {
     if (!titulo.trim() || !usuario) return;
     setCriando(true);
+    setErro(null);
     try {
       let imagemUrl: string | null = null;
-      if (arquivo) imagemUrl = await uploadImagem(arquivo);
+      if (arquivo) {
+        try {
+          imagemUrl = await uploadImagem(arquivo);
+        } catch (uploadErr: any) {
+          const status = uploadErr?.response?.status;
+          const msg = uploadErr?.response?.data?.message ?? uploadErr?.response?.data?.error ?? uploadErr?.message;
+          setErro(`Erro no upload (${status ?? "sem conexão"}): ${msg ?? "verifique se o servidor está rodando."}`);
+          setCriando(false);
+          return;
+        }
+      }
 
       const res = await api.post("/post", {
         usuarioId: usuario.id,
@@ -80,7 +92,11 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
       }
       onSuccess();
       onClose();
-    } catch { setCriando(false); }
+    } catch (e: any) {
+      const msg = e?.response?.data?.message ?? e?.message ?? "Erro ao publicar. Tente novamente.";
+      setErro(msg);
+      setCriando(false);
+    }
   }
 
   const inicial = usuario?.nome?.charAt(0).toUpperCase() ?? "?";
@@ -175,6 +191,8 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
                   </div>
                 )}
               </div>
+
+              {erro && <p className="cpm__erro">{erro}</p>}
 
               <button className="cpm__publicar" onClick={publicar} disabled={!titulo.trim() || criando}>
                 {criando ? "Publicando..." : "Publicar"}

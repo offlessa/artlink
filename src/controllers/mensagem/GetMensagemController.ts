@@ -23,6 +23,16 @@ export class GetMensagemController {
     }
   }
 
+  async contarNaoLidas(req: Request, res: Response) {
+    try {
+      const { destinatarioId } = req.params;
+      const count = await this.service.contarNaoLidas(Number(destinatarioId));
+      return res.json({ count });
+    } catch (error: any) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
   // Mensagens enviadas
   async getByRemetente(req: Request, res: Response) {
     try {
