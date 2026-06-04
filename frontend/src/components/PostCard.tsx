@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
 import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon } from "./Icons";
 import Toast from "./Toast";
+import { copiarLink } from "../utils/compartilhar";
 import "../styles/components/PostCard.scss";
 
 interface PostCardProps {
@@ -65,8 +66,7 @@ export default function PostCard({ id, titulo, descricao, imagem, curtidas, auto
 
   function compartilhar(e: React.MouseEvent) {
     e.stopPropagation();
-    const url = `${window.location.origin}/post/${id}`;
-    navigator.clipboard.writeText(url).then(() => mostrarToast("Link copiado!")).catch(() => {});
+    copiarLink(`/post/${id}`, mostrarToast);
   }
 
   function mostrarToast(msg: string) {

@@ -11,6 +11,7 @@ import {
   BookmarkIcon, ShareIcon,
 } from "../components/Icons";
 import Toast from "../components/Toast";
+import { copiarLink } from "../utils/compartilhar";
 import "../styles/components/CatalogoDetalhe.scss";
 
 interface Post {
@@ -141,8 +142,7 @@ export default function CatalogoDetalhe() {
   }
 
   function compartilhar() {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => mostrarToast("Link copiado!")).catch(() => {});
+    copiarLink(`/catalogo/${id}`, mostrarToast);
   }
 
   // Busca colaboradores com debounce

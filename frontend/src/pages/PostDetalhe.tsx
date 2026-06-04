@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 import Toast from "../components/Toast";
 import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon, BookmarkIcon, ShareIcon } from "../components/Icons";
+import { copiarLink } from "../utils/compartilhar";
 import "../styles/components/PostDetalhe.scss";
 
 interface Comentario {
@@ -119,8 +120,7 @@ export default function PostDetalhe() {
   }
 
   function compartilhar() {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => mostrarToast("Link copiado!")).catch(() => {});
+    copiarLink(`/post/${id}`, mostrarToast);
   }
 
   async function enviarComentario(e: React.FormEvent) {

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon } from "../components/Icons";
 import Toast from "../components/Toast";
+import { copiarLink } from "../utils/compartilhar";
 import "../styles/components/PerfilPublico.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number; usuarioId: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
@@ -80,11 +81,10 @@ export default function PerfilPublico() {
   }, [username, eu?.id]);
 
   function compartilharPerfil() {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-      setToast("Link copiado!");
+    copiarLink(`/u/${perfil?.username}`, msg => {
+      setToast(msg);
       setTimeout(() => setToast(""), 2500);
-    }).catch(() => {});
+    });
   }
 
   async function toggleSeguir() {

@@ -12,6 +12,7 @@ import {
   GridIcon, ListIcon, ShareIcon,
 } from "../components/Icons";
 import Toast from "../components/Toast";
+import { copiarLink } from "../utils/compartilhar";
 import "../styles/components/Perfil.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
@@ -109,11 +110,10 @@ export default function Perfil() {
   }
 
   function compartilharPerfil() {
-    const url = `${window.location.origin}/u/${usuario?.username}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setToast("Link copiado!");
+    copiarLink(`/u/${usuario?.username}`, msg => {
+      setToast(msg);
       setTimeout(() => setToast(""), 2500);
-    }).catch(() => {});
+    });
   }
 
   useEffect(() => {
