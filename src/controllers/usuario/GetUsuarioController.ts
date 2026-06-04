@@ -2,6 +2,15 @@ import { Request, Response } from "express";
 import { GetUsuarioService } from "../../services/usuario/GetUsuarioService";
 
 export class GetUsuarioController {
+  async getArtistas(req: Request, res: Response) {
+    try {
+      const service = new GetUsuarioService();
+      return res.json(await service.getArtistas());
+    } catch (error) {
+      return res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  }
+
   // Todos os usuários
   async getAll(req: Request, res: Response) {
     try {

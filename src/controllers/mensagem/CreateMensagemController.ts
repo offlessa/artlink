@@ -4,14 +4,14 @@ import { sendResponse } from "../../../utils/createError";
 
 export class CreateMensagemController {
   async handle(req: Request, res: Response) {
-    const { remetenteId, destinatarioId, conteudo, status } = req.body;
+    const { remetenteId, destinatarioId, conteudo, imagem } = req.body;
 
     const service = new CreateMensagemService();
     const result = await service.execute({
       remetenteId,
       destinatarioId,
       conteudo,
-      status,
+      imagem,
     });
 
     return sendResponse(res, result);

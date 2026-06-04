@@ -1,0 +1,201 @@
+@use '../variables' as *;
+
+.notif-page {
+  min-height: calc(100vh - 68px);
+  background: $creme;
+  display: flex;
+  flex-direction: column;
+
+  &__container {
+    flex: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 2rem 1.5rem 3rem;
+  }
+
+  // ── CABEÇALHO ───────────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.6rem;
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: $texto;
+
+    h1 {
+      font-family: $font-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0;
+    }
+  }
+
+  &__badge-total {
+    font-size: 0.78rem;
+    font-weight: 700;
+    background: $brand;
+    color: #FAF8F3;
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+
+  // ── LISTA ────────────────────────────────────────────────────────────────────
+  &__lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: $surface;
+    border: 1px solid $borda-suave;
+    transition: background 0.15s;
+    position: relative;
+
+    &:hover:not(&--colab) { background: $brand-subtle; }
+
+    &--nova {
+      background: #F0F5EA;
+      border-color: #C8DCA8;
+    }
+
+    &--colab { cursor: default !important; }
+  }
+
+  // Ponto colorido de tipo (esquerda)
+  &__tipo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  // Avatar
+  &__avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: $brand-subtle;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: $brand;
+    font-size: 1rem;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  // Texto
+  &__texto {
+    flex: 1;
+    min-width: 0;
+
+    p {
+      font-size: 0.88rem;
+      color: $texto;
+      line-height: 1.5;
+      margin: 0 0 3px;
+    }
+  }
+
+  &__remetente {
+    font-weight: 700;
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
+  }
+
+  &__data {
+    font-size: 0.75rem;
+    color: $texto-suave;
+  }
+
+  // Botões aceitar/recusar
+  &__acoes {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  &__aceitar {
+    background: $brand;
+    color: #FAF8F3;
+    border: none;
+    border-radius: 99px;
+    padding: 7px 18px;
+    font-family: $font-sans;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    &:hover { background: $brand-hover; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__recusar {
+    background: none;
+    color: $texto-suave;
+    border: 1.5px solid $borda;
+    border-radius: 99px;
+    padding: 7px 18px;
+    font-family: $font-sans;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    &:hover { color: #c0392b; border-color: #c0392b; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  // Bolinha azul de "não lida" (direita)
+  &__nova-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: $brand-mid;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  // ── ESTADOS ──────────────────────────────────────────────────────────────────
+  &__vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 5rem 2rem;
+    color: $texto-suave;
+    text-align: center;
+
+    svg { opacity: 0.25; }
+    p  { font-size: 1rem; font-weight: 600; color: $texto-medio; margin: 0; }
+    span { font-size: 0.85rem; max-width: 280px; }
+  }
+
+  &__skeleton {
+    height: 72px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #EDE8DF 25%, #F6F2EA 50%, #EDE8DF 75%);
+    background-size: 200% 100%;
+    animation: shimmer-notif 1.4s infinite;
+  }
+}
+
+@keyframes shimmer-notif {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

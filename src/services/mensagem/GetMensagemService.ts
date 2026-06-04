@@ -1,56 +1,67 @@
 import prismaClient from "../../prisma";
 
+const incluirParticipantes = {
+  remetente:    { select: { id: true, nome: true, username: true, fotoPerfil: true } },
+  destinatario: { select: { id: true, nome: true, username: true, fotoPerfil: true } },
+  deletadasPorMim: { select: { usuarioId: true } },
+};
+
 export class GetMensagemService {
-  // Buscar mensagens recebidas por um usuário
   async getByDestinatario(destinatarioId: number) {
-    return prismaClient.mensagem.findMany({
+    const configs = await prismaClient.conversaConfig.findMany({ where: { usuarioId: destinatarioId } });
+    const deletadasConv = new Map(configs.map(c => [c.outroUsuarioId, c.deletadaEm]));
+
+    const mensagens = await prismaClient.mensagem.findMany({
       where: { destinatarioId },
-      include: {
-        remetente: {
-          select: { id: true, nome: true, username: true, fotoPerfil: true },
-        },
-        destinatario: {
-          select: { id: true, nome: true, username: true, fotoPerfil: true },
-        },
-      },
+      include: incluirParticipantes,
       orderBy: { dataEnvio: "desc" },
+    });
+
+    return mensagens.filter(m => {
+      if (m.deletadasPorMim.some(d => d.usuarioId === destinatarioId)) return false;
+      const deletadaEm = deletadasConv.get(m.remetenteId);
+      return !deletadaEm || new Date(m.dataEnvio) > deletadaEm;
     });
   }
 
-  // Buscar mensagens enviadas por um usuário
   async getByRemetente(remetenteId: number) {
-    return prismaClient.mensagem.findMany({
+    const configs = await prismaClient.conversaConfig.findMany({ where: { usuarioId: remetenteId } });
+    const deletadasConv = new Map(configs.map(c => [c.outroUsuarioId, c.deletadaEm]));
+
+    const mensagens = await prismaClient.mensagem.findMany({
       where: { remetenteId },
-      include: {
-        remetente: {
-          select: { id: true, nome: true, username: true, fotoPerfil: true },
-        },
-        destinatario: {
-          select: { id: true, nome: true, username: true, fotoPerfil: true },
-        },
-      },
+      include: incluirParticipantes,
       orderBy: { dataEnvio: "desc" },
+    });
+
+    return mensagens.filter(m => {
+      if (m.deletadasPorMim.some(d => d.usuarioId === remetenteId)) return false;
+      const deletadaEm = deletadasConv.get(m.destinatarioId);
+      return !deletadaEm || new Date(m.dataEnvio) > deletadaEm;
     });
   }
 
   async contarNaoLidas(destinatarioId: number) {
-    return prismaClient.mensagem.count({
-      where: { destinatarioId, status: "nao_lido" },
+    const configs = await prismaClient.conversaConfig.findMany({
+      where: { usuarioId: destinatarioId, solicitacao: { not: "recebida" } },
     });
+    const deletadasConv = new Map(configs.map(c => [c.outroUsuarioId, c.deletadaEm]));
+
+    const mensagens = await prismaClient.mensagem.findMany({
+      where: { destinatarioId, status: "nao_lido" },
+      include: { deletadasPorMim: { select: { usuarioId: true } } },
+    });
+
+    return mensagens.filter(m => {
+      if (m.deletadasPorMim.some(d => d.usuarioId === destinatarioId)) return false;
+      const deletadaEm = deletadasConv.get(m.remetenteId);
+      return !deletadaEm || new Date(m.dataEnvio) > deletadaEm;
+    }).length;
   }
 
-  // Opcional: buscar todas mensagens
-  async getAll() {
-    return prismaClient.mensagem.findMany({
-      include: {
-        remetente: {
-          select: { id: true, nome: true, username: true, fotoPerfil: true },
-        },
-        destinatario: {
-          select: { id: true, nome: true, username: true, fotoPerfil: true },
-        },
-      },
-      orderBy: { dataEnvio: "desc" },
+  async getConfigs(usuarioId: number) {
+    return prismaClient.conversaConfig.findMany({
+      where: { usuarioId },
     });
   }
 }

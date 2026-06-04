@@ -46,6 +46,20 @@ export class CreateCatalogoPostService {
         return createError("Post não encontrado.", HttpStatusCode.NOT_FOUND);
       }
 
+      // O post deve ser do dono do catálogo ou de um colaborador aceito
+      const autorDoPost = postExiste.usuarioId;
+      if (autorDoPost !== catalogoExiste.usuarioId) {
+        const colaboracaoAceita = await prismaClient.catalogoColaboracao.findFirst({
+          where: { catalogoId, usuarioId: autorDoPost, status: "aceito" },
+        });
+        if (!colaboracaoAceita) {
+          return createError(
+            "Só é possível adicionar posts do dono do catálogo ou de colaboradores aceitos.",
+            HttpStatusCode.FORBIDDEN
+          );
+        }
+      }
+
       const catalogoPostExiste = await prismaClient.catalogoPost.findUnique({
         where: {
           catalogoId_postId: {

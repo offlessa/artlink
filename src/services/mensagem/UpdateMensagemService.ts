@@ -14,7 +14,18 @@ export class UpdateMensagemService {
       throw new Error("Mensagem não encontrada");
     }
 
-    // Atualiza os campos fornecidos
+    // Se tentando marcar como lido, verificar se o remetente permite confirmação de leitura
+    if (novosDados.status === "lido") {
+      const remetenteRaw = (await prismaClient.usuario.findUnique({
+        where: { id: mensagemExistente.remetenteId }, select: { configuracoes: true },
+      }))?.configuracoes;
+      const cfgRem = remetenteRaw ? JSON.parse(remetenteRaw) : null;
+      if (cfgRem?.mensagens?.confirmarLeitura === false) {
+        // Remetente optou por não enviar confirmações — ainda atualiza internamente mas não é exibido
+        novosDados = { ...novosDados };
+      }
+    }
+
     const mensagemAtualizada = await prismaClient.mensagem.update({
       where: { id },
       data: novosDados,

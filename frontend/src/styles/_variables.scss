@@ -1,32 +1,53 @@
-// ── Paleta principal ─────────────────────────────────────────────────────────
-// Verde escuro elegante com toque terroso/amarronzado
-$brand:          #2A3B1C;   // Verde-floresta profundo (brand principal)
-$brand-hover:    #364D24;   // Hover suave
-$brand-mid:      #5C7A3A;   // Verde médio para acentos
-$brand-subtle:   #EBF0E4;   // Verde claríssimo para fundos hover
+// ── CSS Custom Properties (tema claro — padrão) ───────────────────────────────
+:root {
+  --c-bg:       #FAF8F3;
+  --c-surface:  #FFFFFF;
+  --c-borda:    #E0D9CC;
+  --c-borda-s:  #EDE8DF;
+  --c-texto:    #1C2616;
+  --c-medio:    #546248;
+  --c-suave:    #8A9E7A;
+  --font-scale: 1;
+}
 
-// Neutros quentes (levemente cremosos, nunca frio)
-$creme:          #FAF8F3;   // Fundo geral — off-white quente
-$surface:        #FFFFFF;   // Superfícies de card
-$borda:          #E0D9CC;   // Borda quente
-$borda-suave:    #EDE8DF;   // Borda mais discreta
+// ── Tema escuro ───────────────────────────────────────────────────────────────
+html[data-tema="escuro"] {
+  --c-bg:       #131A0D;
+  --c-surface:  #1B2414;
+  --c-borda:    #2C3C1E;
+  --c-borda-s:  #243018;
+  --c-texto:    #DCE8CA;
+  --c-medio:    #90B070;
+  --c-suave:    #537840;
+}
 
-// Textos
-$texto:          #1C2616;   // Quase preto com toque verde
-$texto-medio:    #546248;   // Cinza-verde para subtítulos
-$texto-suave:    #8A9E7A;   // Placeholder / metadados
+// ── Escala de fonte ───────────────────────────────────────────────────────────
+html[data-fonte="pequeno"] { --font-scale: 0.88; }
+html[data-fonte="medio"]   { --font-scale: 1; }
+html[data-fonte="grande"]  { --font-scale: 1.13; }
 
-// Dourado-terroso — para acentos especiais, avatar bg
+// ── SCSS bridge — variáveis que todos os componentes usam ─────────────────────
+$brand:        #2A3B1C;
+$brand-hover:  #364D24;
+$brand-mid:    #5C7A3A;
+$brand-subtle: #EBF0E4;
+
+$creme:        var(--c-bg);
+$surface:      var(--c-surface);
+$borda:        var(--c-borda);
+$borda-suave:  var(--c-borda-s);
+$texto:        var(--c-texto);
+$texto-medio:  var(--c-medio);
+$texto-suave:  var(--c-suave);
+
 $dourado:        #9A8050;
 $dourado-light:  #C4A96A;
 
-// Utilitários
-$sombra:         0 2px 12px rgba(42, 59, 28, 0.10);
-$sombra-hover:   0 8px 28px rgba(42, 59, 28, 0.18);
-$radius:         10px;
-$radius-sm:      6px;
-$radius-lg:      16px;
+$sombra:       0 2px 12px rgba(42, 59, 28, 0.10);
+$sombra-hover: 0 8px 28px rgba(42, 59, 28, 0.18);
+$radius:       10px;
+$radius-sm:    6px;
+$radius-lg:    16px;
 
-// Tipografia
 $font-sans:  'DM Sans', 'Segoe UI', system-ui, sans-serif;
 $font-serif: 'Playfair Display', Georgia, serif;

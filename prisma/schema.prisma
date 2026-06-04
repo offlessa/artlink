@@ -21,6 +21,7 @@ model Usuario {
   fotoPerfil       String?   @map("foto_perfil") @db.Text
   fotoCapa         String?   @map("foto_capa") @db.Text
   perfilConfig     String?   @map("perfil_config") @db.Text
+  configuracoes    String?   @map("configuracoes") @db.Text
   criadoEm         DateTime  @default(now()) @map("criado_em")
   resetToken       String?   @map("reset_token") @db.VarChar(255)
   resetTokenExpiry DateTime? @map("reset_token_expiry")
@@ -33,6 +34,8 @@ model Usuario {
   comentarios            Comentario[]
   mensagensEnviadas      Mensagem[] @relation("Remetente")
   mensagensRecebidas     Mensagem[] @relation("Destinatario")
+  conversaConfigs        ConversaConfig[]
+  mensagensDeletadas     MensagemDeletada[]
   seguidores             Seguidor[] @relation("Seguido")
   seguindo               Seguidor[] @relation("Seguidor")
   notificacoesRecebidas  Notificacao[] @relation("NotifDestinatario")
@@ -89,6 +92,7 @@ model Catalogo {
   colaboracoes  CatalogoColaboracao[]
   posts         CatalogoPost[]
   imagens       CatalogoImagem[]
+  notificacoes  Notificacao[]
 
   @@map("catalogos")
 }
@@ -105,8 +109,9 @@ model CatalogoImagem {
 }
 
 model CatalogoColaboracao {
-  catalogoId Int @map("catalog_id")
-  usuarioId  Int @map("usuario_id")
+  catalogoId Int                @map("catalog_id")
+  usuarioId  Int                @map("usuario_id")
+  status     StatusColaboracao  @default(pendente)
 
   catalogo Catalogo @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
   usuario  Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
@@ -159,17 +164,44 @@ enum StatusMensagem {
 }
 
 model Mensagem {
-  id             Int            @id @default(autoincrement())
-  remetenteId    Int            @map("remetente_id")
-  destinatarioId Int            @map("destinatario_id")
-  conteudo       String         @db.Text
-  dataEnvio      DateTime       @default(now()) @map("data_envio")
-  status         StatusMensagem @default(nao_lido)
+  id                Int            @id @default(autoincrement())
+  remetenteId       Int            @map("remetente_id")
+  destinatarioId    Int            @map("destinatario_id")
+  conteudo          String         @default("") @db.Text
+  imagem            String?        @db.Text
+  dataEnvio         DateTime       @default(now()) @map("data_envio")
+  status            StatusMensagem @default(nao_lido)
+  apagadaParaTodos  Boolean        @default(false) @map("apagada_para_todos")
 
-  remetente    Usuario @relation("Remetente", fields: [remetenteId], references: [id], onDelete: Cascade)
-  destinatario Usuario @relation("Destinatario", fields: [destinatarioId], references: [id], onDelete: Cascade)
+  remetente         Usuario              @relation("Remetente", fields: [remetenteId], references: [id], onDelete: Cascade)
+  destinatario      Usuario              @relation("Destinatario", fields: [destinatarioId], references: [id], onDelete: Cascade)
+  deletadasPorMim   MensagemDeletada[]
 
   @@map("mensagens")
+}
+
+model MensagemDeletada {
+  usuarioId   Int @map("usuario_id")
+  mensagemId  Int @map("mensagem_id")
+
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  mensagem Mensagem @relation(fields: [mensagemId], references: [id], onDelete: Cascade)
+
+  @@id([usuarioId, mensagemId])
+  @@map("mensagens_deletadas")
+}
+
+model ConversaConfig {
+  usuarioId      Int      @map("usuario_id")
+  outroUsuarioId Int      @map("outro_usuario_id")
+  arquivada      Boolean  @default(false)
+  deletadaEm     DateTime? @map("deletada_em")
+  solicitacao    String   @default("nenhuma") @map("solicitacao") // "nenhuma" | "recebida" | "enviada"
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@id([usuarioId, outroUsuarioId])
+  @@map("conversa_configs")
 }
 
 model Seguidor {
@@ -189,6 +221,8 @@ enum TipoNotificacao {
   comentario
   seguindo
   colaboracao
+  colaboracao_catalogo
+  mensagem
 }
 
 model Notificacao {
@@ -197,12 +231,14 @@ model Notificacao {
   remetenteId Int             @map("remetente_id")
   tipo        TipoNotificacao
   postId      Int?            @map("post_id")
+  catalogoId  Int?            @map("catalogo_id")
   lida        Boolean         @default(false)
   data        DateTime        @default(now())
 
-  usuario   Usuario  @relation("NotifDestinatario", fields: [usuarioId], references: [id], onDelete: Cascade)
-  remetente Usuario  @relation("NotifRemetente", fields: [remetenteId], references: [id], onDelete: Cascade)
-  post      Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+  usuario   Usuario   @relation("NotifDestinatario", fields: [usuarioId], references: [id], onDelete: Cascade)
+  remetente Usuario   @relation("NotifRemetente", fields: [remetenteId], references: [id], onDelete: Cascade)
+  post      Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+  catalogo  Catalogo? @relation(fields: [catalogoId], references: [id], onDelete: SetNull)
 
   @@map("notificacoes")
 }

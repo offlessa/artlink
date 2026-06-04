@@ -91,12 +91,20 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 2rem;
+    margin-bottom: 1.2rem;
     gap: 1rem;
     flex-wrap: wrap;
   }
 
   &__header-info { flex: 1; }
+
+  &__header-acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
 
   &__titulo {
     font-family: 'Playfair Display', Georgia, serif;
@@ -118,6 +126,341 @@
   &__meta {
     font-size: 0.78rem;
     color: #8A9E7A;
+    margin-bottom: 8px;
+  }
+
+  &__colab-badge { color: #5C7A3A; font-weight: 600; }
+
+  // ── AVATARES DOS COLABORADORES ─────────────────────────────────
+  &__colab-avatares {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  &__colab-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #fff;
+    background: #5C7A3A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+    margin-left: -6px;
+    &:first-child { margin-left: 0; }
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  // ── BANNER DE CONVITE ──────────────────────────────────────────
+  &__convite-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #EBF0E4;
+    border: 1.5px solid #B8D4A0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 1.4rem;
+    flex-wrap: wrap;
+  }
+
+  &__convite-texto {
+    font-size: 0.88rem;
+    color: #2A3B1C;
+    flex: 1;
+  }
+
+  &__convite-acoes {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__convite-aceitar {
+    background: #2A3B1C;
+    color: #FAF8F3;
+    border: none;
+    border-radius: 99px;
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    &:hover { background: #364D24; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__convite-recusar {
+    background: none;
+    color: #8A9E7A;
+    border: 1.5px solid #8A9E7A;
+    border-radius: 99px;
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    &:hover { color: #c0392b; border-color: #c0392b; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  // ── BOTÃO COLABORADORES / SAIR ─────────────────────────────────
+  &__colab-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    color: #546248;
+    border: 1.5px solid #B8C4AE;
+    border-radius: 99px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    &:hover { border-color: #2A3B1C; color: #2A3B1C; }
+  }
+
+  &__colab-badge-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #E8623A;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__sair-btn {
+    background: none;
+    color: #8A9E7A;
+    border: 1.5px solid #B8C4AE;
+    border-radius: 99px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    &:hover { color: #c0392b; border-color: #c0392b; }
+  }
+
+  // ── PAINEL DE COLABORADORES ────────────────────────────────────
+  &__colab-panel {
+    background: #fff;
+    border: 1px solid #E0D9CC;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 1.8rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  }
+
+  &__colab-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1C2616;
+
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #8A9E7A;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      &:hover { color: #1C2616; }
+    }
+  }
+
+  &__colab-busca {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #F5F0E8;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    color: #8A9E7A;
+
+    input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      color: #1C2616;
+      &::placeholder { color: #B8C4AE; }
+    }
+  }
+
+  &__colab-buscando {
+    font-size: 0.8rem;
+    color: #8A9E7A;
+    padding: 4px 0;
+  }
+
+  &__colab-resultados {
+    border: 1px solid #E8E0D4;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  &__colab-resultado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-bottom: 1px solid #F0EBE3;
+    &:last-child { border-bottom: none; }
+    &:hover { background: #FAFAF7; }
+  }
+
+  &__colab-resultado-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #5C7A3A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__colab-resultado-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__colab-resultado-nome { font-size: 0.85rem; font-weight: 600; color: #1C2616; }
+  &__colab-resultado-user { font-size: 0.75rem; color: #8A9E7A; }
+
+  &__colab-convidar {
+    background: #2A3B1C;
+    color: #FAF8F3;
+    border: none;
+    border-radius: 99px;
+    padding: 6px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    &:hover { background: #364D24; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__colab-vazio {
+    font-size: 0.84rem;
+    color: #8A9E7A;
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  &__colab-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  &__colab-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    &:hover { background: #FAFAF7; }
+  }
+
+  &__colab-item-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #5C7A3A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__colab-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  &__colab-item-nome {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #1C2616;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__colab-item-user { font-size: 0.73rem; color: #8A9E7A; }
+
+  &__colab-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 99px;
+    padding: 3px 9px;
+    flex-shrink: 0;
+
+    &--pendente { background: #FEF3CD; color: #856404; }
+    &--aceito   { background: #D4EDDA; color: #155724; }
+    &--recusado { background: #F8D7DA; color: #721C24; }
+  }
+
+  &__colab-remover {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #B8C4AE;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    &:hover { color: #c0392b; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 
   // ── ADD BUTTON ─────────────────────────────────────────────────

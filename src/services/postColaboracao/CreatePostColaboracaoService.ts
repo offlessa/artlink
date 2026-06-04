@@ -6,6 +6,7 @@ import {
 } from "../../../utils/createError";
 import prismaClient from "../../prisma";
 import { PostColaboracaoRequest } from "../../types/PostColaboracao";
+import { criarNotificacao } from "../../../utils/criarNotificacao";
 
 export class CreatePostColaboracaoService {
   async execute({
@@ -43,6 +44,21 @@ export class CreatePostColaboracaoService {
         return createError("Usuário não encontrado.", HttpStatusCode.NOT_FOUND);
       }
 
+      // Checar config de privacidade do convidado
+      const cfgConvidadoRaw = (await prismaClient.usuario.findUnique({
+        where: { id: usuarioId }, select: { configuracoes: true },
+      }))?.configuracoes;
+      const cfgConv = cfgConvidadoRaw ? JSON.parse(cfgConvidadoRaw) : null;
+      const quemPodeConvidar = cfgConv?.privacidade?.quemPodeConvidar ?? "todos";
+      if (quemPodeConvidar === "seguidos") {
+        const convidadoSegueAutor = await prismaClient.seguidor.findUnique({
+          where: { seguidorId_seguidoId: { seguidorId: usuarioId, seguidoId: post.usuarioId } },
+        });
+        if (!convidadoSegueAutor) {
+          return createError("Este usuário só aceita convites de quem segue.", HttpStatusCode.FORBIDDEN);
+        }
+      }
+
       const colaboracaoExists = await prismaClient.postColaboracao.findUnique({
         where: { postId_usuarioId: { postId, usuarioId } },
       });
@@ -65,15 +81,7 @@ export class CreatePostColaboracaoService {
         },
       });
 
-      // Notifica o colaborador convidado
-      await prismaClient.notificacao.create({
-        data: {
-          usuarioId,
-          remetenteId: post.usuarioId,
-          tipo: "colaboracao",
-          postId,
-        },
-      });
+      await criarNotificacao({ usuarioId, remetenteId: post.usuarioId, tipo: "colaboracao", postId });
 
       return createSuccess(colaboracao);
     } catch (error) {

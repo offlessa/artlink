@@ -17,7 +17,7 @@
   }
 
   &__sidebar-header {
-    padding: 20px 20px 12px;
+    padding: 20px 20px 10px;
     border-bottom: 1px solid $borda-suave;
     h2 {
       font-family: $font-serif;
@@ -25,6 +25,49 @@
       color: $texto;
       margin: 0;
     }
+  }
+
+  // ── ABAS ─────────────────────────────────────────
+  &__abas {
+    display: flex;
+    border-bottom: 1px solid $borda-suave;
+    padding: 0 8px;
+  }
+
+  &__aba {
+    flex: 1;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 9px 4px;
+    font-family: $font-sans;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $texto-suave;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    &--ativa { color: $brand; border-bottom-color: $brand; }
+    &:hover:not(&--ativa) { color: $texto-medio; }
+  }
+
+  &__aba-badge {
+    background: $brand;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
   }
 
   &__busca-wrap {
@@ -78,21 +121,94 @@
     overflow-y: auto;
   }
 
+  // Wrapper com menu de contexto
+  &__conversa-wrap {
+    position: relative;
+    border-bottom: 1px solid $borda-suave;
+    display: flex;
+    align-items: stretch;
+
+    &--ativa { background: $brand-subtle; }
+    &:hover .msgs__menu-btn { opacity: 1; }
+  }
+
   &__conversa {
     display: flex;
     align-items: center;
     gap: 12px;
-    width: 100%;
+    flex: 1;
     padding: 14px 16px;
     border: none;
     background: none;
     cursor: pointer;
     text-align: left;
-    border-bottom: 1px solid $borda-suave;
     transition: background 0.15s;
+    min-width: 0;
     &:hover { background: $brand-subtle; }
-    &--ativa { background: $brand-subtle; }
   }
+
+  &__menu-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-right: 8px;
+    flex-shrink: 0;
+  }
+
+  &__menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    font-size: 1rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    &:hover { background: $borda; }
+  }
+
+  &__menu-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 2px);
+    background: $surface;
+    border: 1px solid $borda;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    min-width: 150px;
+    overflow: hidden;
+    z-index: 50;
+    animation: fade-drop 0.12s ease;
+
+    @keyframes fade-drop {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      background: none;
+      font-family: $font-sans;
+      font-size: 0.85rem;
+      color: $texto;
+      cursor: pointer;
+      transition: background 0.12s;
+      &:hover { background: $brand-subtle; }
+      & + button { border-top: 1px solid $borda-suave; }
+    }
+  }
+
+  &__menu-deletar { color: #c0392b !important; }
 
   &__conversa-info {
     flex: 1;
@@ -110,6 +226,23 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  &__conversa-badges {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: 6px;
+  }
+
+  &__badge-pendente {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #856404;
+    background: #FEF3CD;
+    border-radius: 99px;
+    padding: 2px 7px;
   }
 
   &__preview {
@@ -167,6 +300,83 @@
     background: $surface;
   }
 
+  &__chat-header-info { flex: 1; }
+
+  &__pendente-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #856404;
+    background: #FEF3CD;
+    border-radius: 99px;
+    padding: 4px 10px;
+    flex-shrink: 0;
+  }
+
+  &__desarquivar-btn {
+    background: none;
+    border: 1.5px solid $borda;
+    border-radius: 99px;
+    padding: 5px 12px;
+    font-family: $font-sans;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $texto-medio;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    flex-shrink: 0;
+    &:hover { border-color: $brand; color: $brand; }
+  }
+
+  // ── BANNER DE SOLICITAÇÃO ─────────────────────────
+  &__solicitacao-banner {
+    background: #FEF3CD;
+    border-bottom: 1px solid #F8D7A3;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    p { font-size: 0.88rem; color: #5A4A00; margin: 0; flex: 1; }
+  }
+
+  &__solicitacao-acoes {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  &__sol-aceitar {
+    background: $brand;
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 7px 16px;
+    font-family: $font-sans;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    &:hover { background: $brand-hover; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__sol-recusar {
+    background: none;
+    color: $texto-suave;
+    border: 1.5px solid $borda;
+    border-radius: 99px;
+    padding: 7px 16px;
+    font-family: $font-sans;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    &:hover { color: #c0392b; border-color: #c0392b; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
   &__mensagens {
     flex: 1;
     overflow-y: auto;
@@ -195,10 +405,92 @@
     }
   }
 
+  // ── WRAPPER com menu de mensagem ─────────────────
+  &__balao-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    position: relative;
+
+    &--eu  { flex-direction: row-reverse; justify-content: flex-start; }
+    &--outro { flex-direction: row; }
+
+    &:hover .msgs__balao-menu-btn { opacity: 1; }
+  }
+
+  &__balao-menu-wrap {
+    position: relative;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  &__balao-menu-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    font-size: 1rem;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    &:hover { background: $borda; opacity: 1; }
+    &:disabled { pointer-events: none; }
+  }
+
+  &__balao-dropdown {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    background: $surface;
+    border: 1px solid $borda;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+    min-width: 170px;
+    overflow: hidden;
+    z-index: 60;
+    animation: fade-drop 0.12s ease;
+
+    &--eu    { right: 0; }
+    &--outro { left: 0; }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      background: none;
+      font-family: $font-sans;
+      font-size: 0.83rem;
+      color: $texto;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s;
+      &:hover { background: $brand-subtle; }
+      & + button { border-top: 1px solid $borda-suave; }
+    }
+  }
+
+  &__balao-drop-todos { color: #c0392b !important; }
+
+  &__balao-apagada {
+    font-style: italic;
+    color: $texto-suave !important;
+    background: transparent !important;
+    border: 1px dashed $borda !important;
+    font-size: 0.82rem !important;
+    padding: 8px 12px !important;
+  }
+
   &__balao {
     display: flex;
     flex-direction: column;
     max-width: 68%;
+
+    &--apagando { opacity: 0.5; }
     p {
       margin: 0;
       padding: 10px 14px;
@@ -213,24 +505,84 @@
       margin-top: 3px;
       padding: 0 4px;
     }
+    &-img {
+      max-width: 240px;
+      max-height: 300px;
+      border-radius: $radius;
+      object-fit: cover;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      &:hover { opacity: 0.9; }
+    }
     &--eu {
       align-self: flex-end;
       align-items: flex-end;
       p { background: $brand; color: #fff; border-bottom-right-radius: 4px; }
+      .msgs__balao-img { border-bottom-right-radius: 4px; }
     }
     &--outro {
       align-self: flex-start;
       align-items: flex-start;
       p { background: $surface; border: 1px solid $borda; color: $texto; border-bottom-left-radius: 4px; }
+      .msgs__balao-img { border-bottom-left-radius: 4px; }
     }
+  }
+
+  // ── PREVIEW DE IMAGEM ─────────────────────────────
+  &__img-preview {
+    position: relative;
+    padding: 8px 20px 0;
+    background: $surface;
+
+    img {
+      max-height: 120px;
+      border-radius: $radius;
+      object-fit: cover;
+    }
+  }
+
+  &__img-preview-rm {
+    position: absolute;
+    top: 4px;
+    right: 14px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    &:hover { background: rgba(0,0,0,0.8); }
   }
 
   &__form {
     display: flex;
-    gap: 10px;
-    padding: 14px 20px;
+    gap: 8px;
+    padding: 12px 20px;
     border-top: 1px solid $borda;
     background: $surface;
+    align-items: center;
+
+    &--bloqueado { opacity: 0.5; pointer-events: none; }
+  }
+
+  &__foto-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: color 0.15s, background 0.15s;
+    &:hover { color: $brand; background: $brand-subtle; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 
   &__input {

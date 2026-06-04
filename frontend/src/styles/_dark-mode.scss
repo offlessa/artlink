@@ -1,0 +1,623 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// DARK MODE — overrides para todos os componentes
+// Ativo quando: html[data-tema="escuro"]
+// ─────────────────────────────────────────────────────────────────────────────
+
+$D: "html[data-tema='escuro']";
+
+// Paleta escura
+$dk-bg:       #131A0D;
+$dk-surface:  #1B2414;
+$dk-surface2: #222D18;
+$dk-surface3: #2A3820;
+$dk-borda:    #2C3C1E;
+$dk-borda-s:  #243018;
+$dk-texto:    #DCE8CA;
+$dk-medio:    #90B070;
+$dk-suave:    #537840;
+$dk-brand:    #5C7A3A;
+$dk-accent:   #3A5228;
+
+// ── BODY / BASE ───────────────────────────────────────────────────────────────
+#{$D} body {
+  background: $dk-bg;
+  color: $dk-texto;
+}
+
+// ── NAVBAR ────────────────────────────────────────────────────────────────────
+#{$D} .navbar {
+  background: #0E1409;
+  border-bottom: 1px solid $dk-borda;
+
+  &__dropdown {
+    background: $dk-surface;
+    border-color: $dk-borda;
+
+    a, button { color: $dk-texto !important; }
+    a:hover, button:hover { background: $dk-surface3 !important; }
+    button { border-top-color: $dk-borda !important; color: $dk-medio !important; }
+  }
+
+  &__notif-dropdown {
+    background: $dk-surface;
+    border-color: $dk-borda;
+  }
+
+  &__notif-header {
+    border-bottom-color: $dk-borda;
+    span { color: $dk-texto; }
+  }
+
+  &__notif-item {
+    border-bottom-color: $dk-borda-s;
+    &:hover { background: $dk-surface3; }
+    &--nova { background: $dk-surface2; }
+  }
+
+  &__notif-texto { color: $dk-texto; }
+  &__notif-avatar { background: $dk-surface3; color: $dk-texto; }
+  &__notif-recusar { border-color: $dk-borda; color: $dk-medio; background: transparent; }
+  &__badge { border-color: #0E1409; }
+}
+
+// ── HOME / GRID ───────────────────────────────────────────────────────────────
+#{$D} .home {
+  background: $dk-bg;
+
+  // Sidebar
+  &__sidebar { background: $dk-surface; border-right-color: $dk-borda; }
+  &__sidebar-busca { background: $dk-surface2; border-color: $dk-borda; input { color: $dk-texto; &::placeholder { color: $dk-suave; } } }
+  &__nav-item { color: $dk-medio; &:hover { background: $dk-surface3; color: $dk-texto; } &--ativo { background: $dk-surface3; color: $dk-brand; } }
+  &__sidebar-novo { background: $dk-brand; &:hover { background: $dk-accent; } }
+  &__sidebar-user { &:hover { background: $dk-surface3; } }
+  &__sidebar-user-nome { color: $dk-texto; }
+  &__sidebar-user-user { color: $dk-suave; }
+
+  // Tabs e filtros
+  &__tabs { background: $dk-surface; border-bottom-color: $dk-borda; button { color: $dk-suave; &.active { color: $dk-brand; border-bottom-color: $dk-brand; } } }
+  &__filters { background: $dk-surface; border-bottom-color: $dk-borda; }
+  &__feed-tabs button { color: $dk-medio; border-bottom-color: $dk-borda-s; }
+  &__feed-tabs button.active { color: $dk-texto; border-bottom-color: $dk-texto; }
+
+  &__filters { border-bottom-color: $dk-borda; }
+
+  &__pill {
+    background: $dk-surface2;
+    border-color: $dk-borda;
+    color: $dk-medio;
+    &--ativo { background: $dk-brand; border-color: $dk-brand; color: #DCE8CA; }
+  }
+
+  &__grid {
+    .post-card { border-right-color: $dk-borda !important; border-top-color: $dk-borda !important; }
+    .post-card:nth-child(3n+1),
+    .post-card:nth-child(3n+2),
+    .post-card:nth-child(3n) { background: $dk-surface !important; }
+    .post-card:nth-child(even) { background: $dk-surface2 !important; }
+  }
+
+  &__skeleton { background: $dk-surface2; }
+  &__empty { color: $dk-medio; }
+}
+
+// ── POST CARD ─────────────────────────────────────────────────────────────────
+#{$D} .post-card {
+  background: $dk-surface;
+  border-color: $dk-borda;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+
+  &:hover { box-shadow: 0 10px 28px rgba(0,0,0,0.45); }
+
+  &__titulo    { color: $dk-texto; }
+  &__subtitulo { color: $dk-suave; }
+  &__image-wrapper { background: $dk-surface3; }
+  &__bottom    { border-top-color: $dk-borda-s; }
+  &__autor     { color: $dk-suave; }
+  &__like      { color: $dk-suave; }
+  &__cta       { border-color: $dk-borda; color: $dk-medio; &:hover { border-color: $dk-brand; color: $dk-brand; background: $dk-surface3; } }
+}
+
+// ── POST DETALHE ──────────────────────────────────────────────────────────────
+#{$D} .post-detalhe {
+  background: $dk-bg;
+
+  &__breadcrumb { color: $dk-suave; span { color: $dk-brand; } }
+  &__imagem-wrapper { background: $dk-surface3; }
+  &__autor-nome { color: $dk-texto; }
+  &__autor-user { color: $dk-suave; }
+  &__avatar { border-color: $dk-borda; }
+  &__curtir { border-color: $dk-borda; color: $dk-medio; }
+  &__descricao { color: $dk-medio; border-top-color: $dk-borda; }
+  &__titulo { color: $dk-texto; }
+  &__secao-titulo { color: $dk-suave; border-bottom-color: $dk-borda; }
+  &__comentario-body { background: $dk-surface2; }
+  &__comentario-autor { color: $dk-brand; }
+  &__comentario-texto { color: $dk-texto; }
+  &__ocultos-lista { background: $dk-surface3; }
+  &__ocultos-toggle { color: $dk-suave; &:hover { color: $dk-texto; } }
+  &__ocultos { border-top-color: $dk-borda; }
+  &__oculto-badge { background: $dk-surface3; color: $dk-medio; }
+  &__collab-chip { background: $dk-surface3; color: $dk-texto; }
+  &__collabs { border-top-color: $dk-borda; }
+  &__collabs-label { color: $dk-suave; }
+  &__sem-comentarios { color: $dk-suave; }
+
+  &__form {
+    input {
+      background: $dk-surface;
+      border-color: $dk-borda;
+      color: $dk-texto;
+      &::placeholder { color: $dk-suave; }
+      &:focus { border-color: $dk-brand; }
+    }
+  }
+}
+
+// ── PERFIL ────────────────────────────────────────────────────────────────────
+#{$D} .perfil {
+  &__card {
+    background: $dk-surface;
+    border-color: $dk-borda;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+
+  &__nome { color: $dk-texto; }
+  &__username { color: $dk-suave; }
+  &__bio { color: $dk-medio; }
+  &__cidade { color: $dk-suave; }
+  &__stats span { color: $dk-medio; strong { color: $dk-texto; } }
+  &__tab-count { background: $dk-surface3; color: $dk-suave; }
+
+  &__tabbar {
+    background: $dk-surface;
+    border-bottom-color: $dk-borda;
+    border-top-color: $dk-borda;
+  }
+
+  &__tabs {
+    button { color: $dk-suave; border-bottom-color: transparent; }
+    button.active { color: $dk-texto; border-bottom-color: $dk-texto; }
+  }
+
+  &__post-card {
+    background: $dk-surface;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.45); }
+  }
+
+  &__post-titulo { color: $dk-texto; }
+  &__post-colab-badge { color: $dk-suave; }
+  &__post-stats { color: $dk-suave; }
+  &__post-no-img { background: $dk-surface3; color: $dk-suave; }
+
+  &__empty { color: $dk-suave; }
+  &__empty-txt { color: $dk-suave; }
+  &__skeleton { background: $dk-surface2; }
+
+  &__edit-input,
+  &__edit-textarea {
+    background: $dk-surface2;
+    border-color: $dk-borda;
+    color: $dk-texto;
+    &::placeholder { color: $dk-suave; }
+    &:focus { border-color: $dk-brand; }
+  }
+
+  // Painel de customização
+  &__custom-panel {
+    background: $dk-surface;
+    border-color: $dk-borda;
+    color: $dk-texto;
+  }
+  &__custom-header { border-bottom-color: $dk-borda; span { color: $dk-texto; } button { color: $dk-suave; } }
+  &__custom-label { color: $dk-suave; }
+  &__custom-section { border-bottom-color: $dk-borda-s; }
+  &__texture-btn,
+  &__style-btn,
+  &__layout-btn {
+    background: $dk-surface2;
+    border-color: $dk-borda;
+    color: $dk-medio;
+    &.active { background: $dk-brand; border-color: $dk-brand; color: $dk-texto; }
+    &:hover { background: $dk-surface3; }
+  }
+  &__custom-footer { border-top-color: $dk-borda; }
+}
+
+// ── PERFIL PÚBLICO ────────────────────────────────────────────────────────────
+#{$D} .pp {
+  &__nome, &__titulo { color: $dk-texto; }
+  &__username, &__bio, &__cidade { color: $dk-medio; }
+  &__stats span { color: $dk-medio; strong { color: $dk-texto; } }
+  &__tab-count { background: $dk-surface3; color: $dk-suave; }
+
+  &__tabs button { color: $dk-suave; border-bottom-color: transparent; }
+  &__tabs button.active { color: $dk-texto; border-bottom-color: $dk-texto; }
+  &__tabbar { background: $dk-surface; border-color: $dk-borda; }
+
+  &__post-card { background: $dk-surface; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  &__post-titulo { color: $dk-texto; }
+  &__post-stats { color: $dk-suave; }
+  &__post-no-img { background: $dk-surface3; color: $dk-suave; }
+  &__empty { color: $dk-suave; }
+}
+
+// ── CATÁLOGO DETALHE ──────────────────────────────────────────────────────────
+#{$D} .cat-det {
+  background: $dk-bg;
+
+  &__container { background: $dk-bg; }
+  &__back { color: $dk-suave; &:hover { color: $dk-texto; } }
+  &__titulo { color: $dk-texto; }
+  &__desc { color: $dk-medio; }
+  &__meta { color: $dk-suave; }
+  &__section-label { color: $dk-suave; }
+
+  &__add-menu {
+    background: $dk-surface;
+    border-color: $dk-borda;
+    button { color: $dk-texto; &:hover { background: $dk-surface3; } }
+    button + button { border-top-color: $dk-borda-s; }
+  }
+
+  &__card {
+    background: $dk-surface;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    &:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.45); }
+  }
+  &__card-titulo { color: $dk-texto; }
+  &__card-stats { color: $dk-suave; }
+  &__card-img { background: $dk-surface3; }
+  &__no-img { color: $dk-suave; }
+
+  &__foto { background: $dk-surface3; }
+  &__foto--loading { border-color: $dk-borda; color: $dk-suave; }
+
+  &__empty { color: $dk-suave; }
+
+  &__picker {
+    background: $dk-surface;
+    border-color: $dk-borda;
+  }
+  &__picker-header {
+    border-bottom-color: $dk-borda;
+    span { color: $dk-texto; }
+    button { color: $dk-suave; }
+  }
+  &__picker-search {
+    border-bottom-color: $dk-borda-s;
+    background: $dk-surface2;
+    color: $dk-suave;
+    input { color: $dk-texto; &::placeholder { color: $dk-suave; } }
+  }
+  &__picker-title { color: $dk-texto; }
+  &__picker-author { color: $dk-suave; }
+  &__picker-item {
+    &:hover:not(:disabled) { background: $dk-surface3; border-color: $dk-brand; }
+    &--adding { background: $dk-surface2; border-color: $dk-brand; }
+  }
+  &__picker-noimg { background: $dk-surface3; color: $dk-suave; }
+  &__picker-empty { color: $dk-suave; }
+
+  &__convite-banner { background: $dk-surface2; border-color: $dk-borda; }
+  &__convite-texto { color: $dk-texto; strong { color: $dk-brand; } }
+
+  &__colab-panel { background: $dk-surface; border-color: $dk-borda; }
+  &__colab-panel-header { color: $dk-texto; button { color: $dk-suave; } }
+  &__colab-busca { background: $dk-surface2; color: $dk-suave; input { color: $dk-texto; &::placeholder { color: $dk-suave; } } }
+  &__colab-resultados { border-color: $dk-borda; }
+  &__colab-resultado { border-bottom-color: $dk-borda-s; &:hover { background: $dk-surface2; } }
+  &__colab-resultado-nome { color: $dk-texto; }
+  &__colab-resultado-user { color: $dk-suave; }
+  &__colab-vazio { color: $dk-suave; }
+  &__colab-item { &:hover { background: $dk-surface2; } }
+  &__colab-item-nome { color: $dk-texto; }
+  &__colab-item-user { color: $dk-suave; }
+  &__colab-btn { color: $dk-medio; border-color: $dk-borda; &:hover { border-color: $dk-brand; color: $dk-texto; } }
+  &__sair-btn { color: $dk-suave; border-color: $dk-borda; }
+  &__capa-placeholder { background: linear-gradient(135deg, #0E1409, #1B2414); }
+}
+
+// ── MENSAGENS ─────────────────────────────────────────────────────────────────
+#{$D} .msgs {
+  background: $dk-bg;
+
+  &__sidebar { background: $dk-surface; border-right-color: $dk-borda; }
+  &__sidebar-header { border-bottom-color: $dk-borda; h2 { color: $dk-texto; } }
+  &__abas { border-bottom-color: $dk-borda; }
+  &__aba { color: $dk-suave; &--ativa { color: $dk-brand; border-bottom-color: $dk-brand; } }
+  &__busca-wrap { border-bottom-color: $dk-borda-s; }
+  &__busca { background: $dk-surface2; border-color: $dk-borda; color: $dk-texto; &::placeholder { color: $dk-suave; } &:focus { border-color: $dk-brand; } }
+  &__busca-resultados { background: $dk-surface; border-color: $dk-borda; }
+  &__busca-item { color: $dk-texto; &:hover { background: $dk-surface3; } }
+
+  &__conversa-wrap { border-bottom-color: $dk-borda-s; &--ativa { background: $dk-surface3; } }
+  &__conversa { &:hover { background: $dk-surface2; } }
+  &__nome { color: $dk-texto; }
+  &__username { color: $dk-suave; }
+  &__preview { color: $dk-suave; }
+  &__data { color: $dk-suave; }
+  &__vazio { color: $dk-medio; p { color: $dk-medio; } }
+
+  &__menu-btn { color: $dk-suave; &:hover { background: $dk-surface3; } }
+  &__menu-dropdown { background: $dk-surface; border-color: $dk-borda; button { color: $dk-texto; &:hover { background: $dk-surface3; } } }
+  &__menu-deletar { color: #e88 !important; }
+
+  &__chat { background: $dk-bg; }
+  &__chat-header { background: $dk-surface; border-bottom-color: $dk-borda; }
+  &__chat-header-info .msgs__nome { color: $dk-texto; }
+  &__mensagens { background: $dk-bg; }
+  &__chat-vazio { color: $dk-suave; p { color: $dk-suave; } }
+
+  &__balao {
+    &--eu p { background: $dk-brand; }
+    &--outro p { background: $dk-surface2; border-color: $dk-borda; color: $dk-texto; }
+    &-data { color: $dk-suave; }
+    &-apagada { color: $dk-suave !important; border-color: $dk-borda !important; background: transparent !important; }
+  }
+
+  &__balao-menu-btn { color: $dk-suave; &:hover { background: $dk-surface3; } }
+  &__balao-dropdown { background: $dk-surface; border-color: $dk-borda; button { color: $dk-texto; &:hover { background: $dk-surface3; } } }
+  &__balao-drop-todos { color: #e88 !important; }
+
+  &__solicitacao-banner { background: $dk-surface2; border-bottom-color: $dk-borda; p { color: $dk-texto; } }
+  &__sol-recusar { color: $dk-suave; border-color: $dk-borda; }
+
+  &__img-preview { background: $dk-surface; }
+  &__img-preview-rm { background: rgba(0,0,0,0.6); }
+
+  &__form { background: $dk-surface; border-top-color: $dk-borda; }
+  &__input { background: $dk-surface2; border-color: $dk-borda; color: $dk-texto; &::placeholder { color: $dk-suave; } &:focus { border-color: $dk-brand; } }
+  &__foto-btn { color: $dk-suave; &:hover { background: $dk-surface3; } }
+  &__pendente-tag { background: $dk-surface3; color: $dk-medio; }
+  &__deserquivar-btn { border-color: $dk-borda; color: $dk-medio; }
+}
+
+// ── BUSCA ─────────────────────────────────────────────────────────────────────
+#{$D} .busca {
+  background: $dk-bg;
+
+  &__input-wrap { background: $dk-surface; border-color: $dk-borda; }
+  &__input { background: transparent; color: $dk-texto; &::placeholder { color: $dk-suave; } }
+
+  &__section-title { color: $dk-suave; }
+
+  &__user-card {
+    background: $dk-surface;
+    border-color: $dk-borda;
+    &:hover { background: $dk-surface2; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  }
+  &__user-nome { color: $dk-texto; }
+  &__user-username { color: $dk-suave; }
+  &__user-bio { color: $dk-medio; }
+
+  &__post-card { background: $dk-surface; border-color: $dk-borda; }
+  &__post-titulo { color: $dk-texto; }
+  &__post-autor { color: $dk-suave; }
+  &__post-stats { color: $dk-suave; }
+}
+
+// ── MODAIS (post, catálogo) ────────────────────────────────────────────────────
+#{$D} .cpm-overlay,
+#{$D} .catm-overlay {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+#{$D} .cpm {
+  background: $dk-surface;
+  border-color: $dk-borda;
+  color: $dk-texto;
+
+  input, textarea, select {
+    background: $dk-surface2;
+    border-color: $dk-borda;
+    color: $dk-texto;
+    &::placeholder { color: $dk-suave; }
+    &:focus { border-color: $dk-brand; }
+  }
+
+  label, p { color: $dk-medio; }
+  h2, span { color: $dk-texto; }
+}
+
+// ── CONFIGURAÇÕES ─────────────────────────────────────────────────────────────
+#{$D} .cfg {
+  background: $dk-bg;
+
+  &__container h1 { color: $dk-texto; }
+  &__header { color: $dk-texto; }
+
+  &__secao { background: $dk-surface; border-color: $dk-borda; }
+  &__secao-titulo { background: $dk-surface2; color: $dk-suave; border-bottom-color: $dk-borda; }
+
+  &__item { border-bottom-color: $dk-borda-s; &:hover { background: rgba(255,255,255,0.02); } }
+  &__item--master { background: $dk-surface3; &:hover { background: $dk-surface3; } }
+  &__item--som { background: $dk-surface2; &:hover { background: $dk-surface2; } }
+  &__item-label { color: $dk-texto; }
+  &__item-desc { color: $dk-suave; }
+  &__sublabel { color: $dk-suave; }
+
+  &__subbloco { border-bottom-color: $dk-borda-s; &--perigo { background: rgba(180,40,40,0.06); } }
+
+  &__input {
+    background: $dk-surface2;
+    border-color: $dk-borda;
+    color: $dk-texto;
+    &::placeholder { color: $dk-suave; }
+    &:focus { border-color: $dk-brand; }
+    &--perigo { border-color: rgba(200,60,60,0.4); }
+  }
+
+  &__btn-sec { border-color: $dk-borda; color: $dk-medio; &:hover { border-color: $dk-brand; color: $dk-texto; } }
+}
+
+#{$D} .cfg-select {
+  background-color: $dk-surface2;
+  border-color: $dk-borda;
+  color: $dk-texto;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2390B070' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+
+  option { background: $dk-surface2; color: $dk-texto; }
+}
+
+#{$D} .cfg-toggle { background: $dk-borda; }
+#{$D} .cfg-range { background: $dk-borda; }
+
+// ── NOTIFICAÇÕES ─────────────────────────────────────────────────────────────
+#{$D} .notif-page {
+  background: $dk-bg;
+
+  &__header-left { color: $dk-texto; h1 { color: $dk-texto; } }
+  &__badge-total { background: $dk-brand; }
+
+  &__item {
+    background: $dk-surface;
+    border-color: $dk-borda-s;
+    &:hover:not(&--colab) { background: $dk-surface3; }
+    &--nova { background: $dk-surface2; border-color: $dk-borda; }
+  }
+
+  &__avatar { background: $dk-surface3; color: $dk-brand; }
+  &__texto p { color: $dk-texto; }
+  &__remetente { color: $dk-texto; }
+  &__data { color: $dk-suave; }
+  &__recusar { color: $dk-suave; border-color: $dk-borda; }
+  &__nova-dot { background: $dk-brand; }
+
+  &__vazio { color: $dk-suave; p { color: $dk-medio; } }
+  &__skeleton {
+    background: linear-gradient(90deg, $dk-surface2 25%, $dk-surface3 50%, $dk-surface2 75%);
+    background-size: 200% 100%;
+  }
+}
+
+// ── EXPLORAR CATÁLOGOS ────────────────────────────────────────────────────────
+#{$D} .exp-cat {
+  background: $dk-bg;
+
+  &__header { background: $dk-surface; border-bottom-color: $dk-borda; }
+  &__titulo { color: $dk-texto; }
+  &__subtitulo { color: $dk-suave; }
+  &__busca { background: $dk-surface2; border-color: $dk-borda; input { color: $dk-texto; &::placeholder { color: $dk-suave; } } }
+  &__busca-clear { color: $dk-suave; }
+
+  &__autor-nome { color: $dk-texto; }
+  &__autor-user { color: $dk-suave; }
+
+  &__stack-1 { background: rgba(40,55,25,0.9); }
+  &__stack-2 { background: rgba(30,42,18,0.85); }
+
+  &__skeleton {
+    background: linear-gradient(90deg, $dk-surface2 25%, $dk-surface3 50%, $dk-surface2 75%);
+    background-size: 200% 100%;
+  }
+
+  &__vazio { color: $dk-suave; }
+}
+
+// ── FOOTER ────────────────────────────────────────────────────────────────────
+#{$D} footer,
+#{$D} .footer {
+  background: $dk-surface !important;
+  border-top-color: $dk-borda !important;
+  color: $dk-suave !important;
+  a { color: $dk-suave !important; &:hover { color: $dk-texto !important; } }
+}
+
+// ── LOGIN / CADASTRO ──────────────────────────────────────────────────────────
+#{$D} .auth-page { background: $dk-bg; }
+
+#{$D} .auth-panel,
+#{$D} .auth-box {
+  background: $dk-surface;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  border-color: $dk-borda;
+}
+
+#{$D} .auth-form-side { background: $dk-surface2; }
+
+#{$D} .auth-form {
+  input, textarea {
+    background: $dk-surface2;
+    border-color: $dk-borda;
+    color: $dk-texto;
+    &::placeholder { color: $dk-suave; }
+    &:focus { border-color: $dk-brand; }
+  }
+  label { color: $dk-medio; }
+  a { color: $dk-brand; }
+  h1, h2, p { color: $dk-texto; }
+}
+
+// ── CATÁLOGO MODAL ────────────────────────────────────────────────────────────
+#{$D} .catm {
+  background: $dk-surface;
+  &__header { border-bottom-color: $dk-borda; span { color: $dk-texto; } button { color: $dk-suave; } }
+  &__input, &__textarea {
+    background: $dk-surface2;
+    border-color: $dk-borda;
+    color: $dk-texto;
+    &::placeholder { color: $dk-suave; }
+    &:focus { border-color: $dk-brand; }
+  }
+}
+
+// ── SOBRE ──────────────────────────────────────────────────────────────────────
+#{$D} .sobre {
+  background: $dk-bg;
+
+  &__section { background: $dk-bg; }
+  &__section--alt { background: $dk-surface2; }
+  &__card { background: $dk-surface; border-color: $dk-borda; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  &__card-titulo { color: $dk-texto; }
+  &__card-texto { color: $dk-medio; }
+  &__section-title { color: $dk-texto; }
+  &__section-texto { color: $dk-medio; }
+  &__membro-nome { color: $dk-texto; }
+  &__membro-role { color: $dk-suave; }
+}
+
+// ── HOVERS COM brand-subtle (#EBF0E4 → fica estranho no escuro) ───────────────
+// Qualquer hover que use o verde claríssimo precisa ser substituído no escuro
+
+#{$D} .perfil__galeria .perfil__post-card:hover,
+#{$D} .busca__user-card:hover,
+#{$D} .navbar__busca-item:hover,
+#{$D} .msgs__busca-item:hover  { background: $dk-surface3 !important; }
+
+// Inputs e areas gerais que ficaram com fundo branco
+#{$D} input:not([type="range"]),
+#{$D} textarea,
+#{$D} select {
+  background-color: $dk-surface2;
+  border-color: $dk-borda;
+  color: $dk-texto;
+  color-scheme: dark;
+
+  &::placeholder { color: $dk-suave; }
+}
+
+// Imagens ausentes (fundos placeholder em vários componentes)
+#{$D} .perfil__post-no-img,
+#{$D} .cat-det__card-img,
+#{$D} .cat-det__picker-noimg,
+#{$D} .msgs__balao-img { filter: brightness(0.85); }
+
+// Banner de perfil placeholder (gradiente muito claro no escuro)
+#{$D} .perfil__banner-placeholder { filter: brightness(0.7); }
+
+// Cards de catálogo — camadas "album" no escuro
+#{$D} .perfil__cat-card::before { background: rgba(40,55,25,0.9) !important; }
+#{$D} .perfil__cat-card::after  { background: rgba(50,68,32,0.85) !important; }
+#{$D} .pp__cat-card::before { background: rgba(40,55,25,0.9) !important; }
+#{$D} .pp__cat-card::after  { background: rgba(50,68,32,0.85) !important; }
+
+// ProfileCard (componente separado, se usado)
+#{$D} .profile-card { background: $dk-surface; border-color: $dk-borda; color: $dk-texto; }
+
+// ── SCROLLBAR ─────────────────────────────────────────────────────────────────
+#{$D} ::-webkit-scrollbar-track { background: $dk-surface2; }
+#{$D} ::-webkit-scrollbar-thumb { background: $dk-borda; }
+
+// ── SELEÇÃO DE TEXTO ──────────────────────────────────────────────────────────
+#{$D} ::selection { background: rgba(92,122,58,0.4); color: $dk-texto; }

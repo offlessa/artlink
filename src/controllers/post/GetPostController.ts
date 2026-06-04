@@ -18,9 +18,10 @@ export class GetPostController {
 
   getByUsuario = async (req: Request, res: Response) => {
     const { usuarioId } = req.params;
+    const solicitanteId = req.query.solicitanteId ? Number(req.query.solicitanteId) : undefined;
     const service = new GetPostService();
     try {
-      const posts = await service.getByUsuario(Number(usuarioId));
+      const posts = await service.getByUsuario(Number(usuarioId), solicitanteId);
       return res.json(posts);
     } catch (error: any) {
       return res.status(500).json({ message: error.message });

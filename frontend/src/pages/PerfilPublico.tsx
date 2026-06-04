@@ -3,11 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
-import { HeartIcon, CommentIcon, FolderIcon, ImageOffIcon, UsersIcon, MessageIcon } from "../components/Icons";
+import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon } from "../components/Icons";
 import "../styles/components/PerfilPublico.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number; usuarioId: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
-interface Catalogo { id: number; nome: string; posts: { postId: number }[] }
+interface Catalogo { id: number; nome: string; capa?: string; capaDinamica?: string; ehColaborador?: boolean; posts: { postId: number }[] }
 interface PerfilData { id: number; nome: string; username: string; bio?: string; cidade?: string; fotoPerfil?: string; fotoCapa?: string; perfilConfig?: string }
 interface Contadores { seguidores: number; seguindo: number }
 
@@ -197,10 +197,19 @@ export default function PerfilPublico() {
           {catalogos.length === 0
             ? <p className="pp__empty">Nenhum catálogo ainda.</p>
             : catalogos.map(cat => (
-              <div key={cat.id} className="pp__cat-card">
-                <div className="pp__cat-icon"><FolderIcon size={28} /></div>
-                <p className="pp__cat-nome">{cat.nome}</p>
-                <span className="pp__cat-count">{cat.posts.length} item{cat.posts.length !== 1 ? "s" : ""}</span>
+              <div key={cat.id} className="pp__cat-card" onClick={() => navigate(`/catalogo/${cat.id}`)}>
+                <div className="pp__cat-cover">
+                  {cat.capaDinamica
+                    ? <img src={cat.capaDinamica} alt={cat.nome} />
+                    : <div className="pp__cat-placeholder" />}
+                  {cat.ehColaborador && (
+                    <span className="pp__cat-colab-tag">collab</span>
+                  )}
+                  <div className="pp__cat-overlay">
+                    <p className="pp__cat-nome">{cat.nome}</p>
+                    <span className="pp__cat-count">{cat.posts.length} item{cat.posts.length !== 1 ? "s" : ""}</span>
+                  </div>
+                </div>
               </div>
             ))}
         </div>

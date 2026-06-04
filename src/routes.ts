@@ -18,6 +18,8 @@ import { CreateUsuarioController } from "./controllers/usuario/CreateUsuarioCont
 import { GetUsuarioController } from "./controllers/usuario/GetUsuarioController";
 import { UpdateUsuarioController } from "./controllers/usuario/UpdateUsuarioController";
 import { DeleteUsuarioController } from "./controllers/usuario/DeleteUsuarioController";
+import { AlterarSenhaController } from "./controllers/usuario/AlterarSenhaController";
+import { ExportarDadosController } from "./controllers/usuario/ExportarDadosController";
 
 // === POST ===
 import { CreatePostController } from "./controllers/post/CreatePostController";
@@ -40,8 +42,10 @@ import { DeleteCatalogoController } from "./controllers/catalogo/DeleteCatalogoC
 
 // === CATÁLOGO COLABORAÇÃO ===
 import { CreateCatalogoColaboracaoController } from "./controllers/catalogoColaboracao/CreateCatalogoColaboracaoController";
+import { GetCatalogoColaboracaoController } from "./controllers/catalogoColaboracao/GetCatalogoColaboracaoController";
 import { UpdateCatalogoColaboracaoController } from "./controllers/catalogoColaboracao/UpdateCatalogoColaboracaoController";
 import { DeleteCatalogoColaboracaoController } from "./controllers/catalogoColaboracao/DeleteCatalogoColaboracaoController";
+import { RespostaCatalogoColaboracaoController } from "./controllers/catalogoColaboracao/RespostaCatalogoColaboracaoController";
 
 // === CATÁLOGO POST ===
 import { CreateCatalogoPostController } from "./controllers/catalogoPost/CreateCatalogoPostController";
@@ -71,6 +75,7 @@ import { CreateMensagemController } from "./controllers/mensagem/CreateMensagemC
 import { GetMensagemController } from "./controllers/mensagem/GetMensagemController";
 import { UpdateMensagemController } from "./controllers/mensagem/UpdateMensagemController";
 import { DeleteMensagemController } from "./controllers/mensagem/DeleteMensagemController";
+import { ConversaConfigController } from "./controllers/mensagem/ConversaConfigController";
 
 // === SEGUIDOR ===
 import { CreateSeguidorController } from "./controllers/seguidor/CreateSeguidorController";
@@ -99,6 +104,7 @@ router.post("/auth/redefinir-senha", new RedefinirSenhaController().handle);
 // ===================== USUÁRIO =====================
 // ===================================================
 router.post("/usuario", new CreateUsuarioController().handle);
+router.get("/usuario/artistas", new GetUsuarioController().getArtistas);
 router.get("/usuario", new GetUsuarioController().getAll);
 router.get("/usuario/:id", new GetUsuarioController().getById);
 router.get(
@@ -106,6 +112,8 @@ router.get(
   new GetUsuarioController().getByUsername
 );
 router.put("/usuario/:id", authMiddleware, new UpdateUsuarioController().handle);
+router.put("/usuario/:id/senha", authMiddleware, new AlterarSenhaController().handle);
+router.get("/usuario/:id/exportar", authMiddleware, new ExportarDadosController().handle);
 router.delete("/usuario/:id", authMiddleware, new DeleteUsuarioController().handle);
 
 // ===================================================
@@ -156,21 +164,15 @@ router.delete("/catalogo/:id", authMiddleware, new DeleteCatalogoController().ha
 // ===================================================
 // ============ CATÁLOGO COLABORAÇÃO =================
 // ===================================================
-router.post(
-  "/catalogo/colaboracao",
-  authMiddleware,
-  new CreateCatalogoColaboracaoController().handle
-);
-router.put(
-  "/catalogo/colaboracao/:catalogoId/:usuarioId",
-  authMiddleware,
-  new UpdateCatalogoColaboracaoController().handle
-);
-router.delete(
-  "/catalogo/colaboracao/:catalogoId/:usuarioId",
-  authMiddleware,
-  new DeleteCatalogoColaboracaoController().handle
-);
+const respostaCatalogoColabCtrl = new RespostaCatalogoColaboracaoController();
+
+router.post("/catalogo/colaboracao", authMiddleware, new CreateCatalogoColaboracaoController().handle);
+// Rotas específicas antes das parametrizadas
+router.get("/catalogo/colaboracao/usuario/:usuarioId", authMiddleware, new GetCatalogoColaboracaoController().getByUsuario);
+router.patch("/catalogo/colaboracao/:catalogoId/aceitar", authMiddleware, respostaCatalogoColabCtrl.aceitar.bind(respostaCatalogoColabCtrl));
+router.patch("/catalogo/colaboracao/:catalogoId/recusar", authMiddleware, respostaCatalogoColabCtrl.recusar.bind(respostaCatalogoColabCtrl));
+router.get("/catalogo/colaboracao/:catalogoId", new GetCatalogoColaboracaoController().getByCatalogo);
+router.delete("/catalogo/colaboracao/:catalogoId/:usuarioId", authMiddleware, new DeleteCatalogoColaboracaoController().handle);
 
 // ===================================================
 // ================== CATÁLOGO POST ==================
@@ -219,28 +221,24 @@ router.delete("/curtida/:id", authMiddleware, new DeleteCurtidaController().hand
 // ===================================================
 router.post("/mensagem", authMiddleware, new CreateMensagemController().handle);
 const getMensagemController = new GetMensagemController();
+const conversaConfigCtrl = new ConversaConfigController();
 
-// Contagem de não lidas (antes da rota genérica para não conflitar)
-router.get(
-  "/mensagem/nao-lidas/:destinatarioId",
-  authMiddleware,
-  getMensagemController.contarNaoLidas.bind(getMensagemController)
-);
+// Rotas específicas antes das paramétricas
+router.get("/mensagem/nao-lidas/:destinatarioId", authMiddleware, getMensagemController.contarNaoLidas.bind(getMensagemController));
+router.get("/mensagem/configs/:usuarioId", authMiddleware, getMensagemController.getConfigs.bind(getMensagemController));
+router.get("/mensagem/destinatario/:destinatarioId", authMiddleware, getMensagemController.getByDestinatario.bind(getMensagemController));
+router.get("/mensagem/remetente/:remetenteId", authMiddleware, getMensagemController.getByRemetente.bind(getMensagemController));
 
-// Mensagens recebidas
-router.get(
-  "/mensagem/destinatario/:destinatarioId",
-  authMiddleware,
-  getMensagemController.getByDestinatario.bind(getMensagemController)
-);
+// Conversa config
+router.patch("/mensagem/conversa/:outroId/aceitar", authMiddleware, conversaConfigCtrl.aceitar.bind(conversaConfigCtrl));
+router.patch("/mensagem/conversa/:outroId/recusar", authMiddleware, conversaConfigCtrl.recusar.bind(conversaConfigCtrl));
+router.patch("/mensagem/conversa/:outroId/arquivar", authMiddleware, conversaConfigCtrl.arquivar.bind(conversaConfigCtrl));
+router.patch("/mensagem/conversa/:outroId/desarquivar", authMiddleware, conversaConfigCtrl.desarquivar.bind(conversaConfigCtrl));
+router.patch("/mensagem/conversa/:outroId/deletar", authMiddleware, conversaConfigCtrl.deletar.bind(conversaConfigCtrl));
 
-// Mensagens enviadas
-router.get(
-  "/mensagem/remetente/:remetenteId",
-  authMiddleware,
-  getMensagemController.getByRemetente.bind(getMensagemController)
-);
 router.put("/mensagem/:id", authMiddleware, new UpdateMensagemController().handle);
+router.delete("/mensagem/:id/para-mim", authMiddleware, new DeleteMensagemController().apagarParaMim);
+router.delete("/mensagem/:id/para-todos", authMiddleware, new DeleteMensagemController().apagarParaTodos);
 router.delete("/mensagem/:id", authMiddleware, new DeleteMensagemController().handle);
 
 // ===================================================

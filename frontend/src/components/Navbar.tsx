@@ -1,19 +1,64 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { SearchIcon, UserIcon, LogOutIcon, PlusIcon, BellIcon, MessageIcon } from "./Icons";
+import { SearchIcon, UserIcon, LogOutIcon, PlusIcon, BellIcon, MessageIcon, SettingsIcon } from "./Icons";
 import CreatePostModal from "./CreatePostModal";
 import { api } from "../api/api";
 import "../styles/components/Navbar.scss";
 
+type TipoNotif = "curtida" | "comentario" | "seguindo" | "colaboracao" | "colaboracao_catalogo" | "mensagem";
+
 interface Notificacao {
   id: number;
-  tipo: "curtida" | "comentario" | "seguindo" | "colaboracao";
+  tipo: TipoNotif;
   lida: boolean;
   data: string;
   postId?: number;
+  catalogoId?: number;
   remetente: { id: number; nome: string; username: string; fotoPerfil?: string };
   post?: { id: number; titulo: string };
+  catalogo?: { id: number; nome: string };
+}
+
+interface ConfigNotif {
+  ativas: boolean;
+  curtida: boolean;
+  comentario: boolean;
+  seguindo: boolean;
+  colaboracao: boolean;
+  colaboracao_catalogo: boolean;
+  mensagem: boolean;
+  som: boolean;
+}
+
+const DEFAULT_CONFIG: ConfigNotif = {
+  ativas: true, curtida: true, comentario: true, seguindo: true,
+  colaboracao: true, colaboracao_catalogo: true, mensagem: true, som: true,
+};
+
+function parseConfigNotif(raw?: string): ConfigNotif {
+  if (!raw) return DEFAULT_CONFIG;
+  try {
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_CONFIG, ...(parsed.notificacoes ?? {}) };
+  } catch { return DEFAULT_CONFIG; }
+}
+
+function tocarSom() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.35);
+  } catch { /* silencioso */ }
 }
 
 export default function Navbar() {
@@ -29,7 +74,13 @@ export default function Navbar() {
   const [msgNaoLidas, setMsgNaoLidas] = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const naoLidas = notificacoes.filter(n => !n.lida).length;
+  const configNotif = parseConfigNotif(usuario?.configuracoes);
+
+  const notificacoesFiltradas = configNotif.ativas
+    ? notificacoes.filter(n => configNotif[n.tipo as keyof ConfigNotif] !== false)
+    : [];
+
+  const naoLidas = notificacoesFiltradas.filter(n => !n.lida).length;
 
   useEffect(() => {
     if (!usuario) return;
@@ -61,8 +112,12 @@ export default function Navbar() {
     if (!usuario) return;
     try {
       const res = await api.get(`/notificacao/${usuario.id}`);
-      const dados = res.data?.data ?? res.data ?? [];
-      setNotificacoes(Array.isArray(dados) ? dados : []);
+      const dados: Notificacao[] = Array.isArray(res.data?.data ?? res.data) ? (res.data?.data ?? res.data) : [];
+      const cfg = parseConfigNotif(usuario.configuracoes);
+      const anteriores = notificacoes.filter(n => !n.lida).length;
+      const novas = dados.filter(n => !n.lida && cfg.ativas && cfg[n.tipo as keyof ConfigNotif] !== false);
+      if (novas.length > anteriores && cfg.som) tocarSom();
+      setNotificacoes(dados);
     } catch { /* silencioso */ }
   }
 
@@ -88,11 +143,14 @@ export default function Navbar() {
   }
 
   async function responderColaboracao(n: Notificacao, aceitar: boolean) {
-    if (!n.post) return;
     setRespondendo(n.id);
     try {
       const acao = aceitar ? "aceitar" : "recusar";
-      await api.patch(`/post/colaboracao/${n.post.id}/${acao}`);
+      if (n.tipo === "colaboracao_catalogo" && n.catalogoId) {
+        await api.patch(`/catalogo/colaboracao/${n.catalogoId}/${acao}`);
+      } else if (n.post) {
+        await api.patch(`/post/colaboracao/${n.post.id}/${acao}`);
+      }
       await carregarNotificacoes();
     } catch { /* silencioso */ }
     finally { setRespondendo(null); }
@@ -117,6 +175,8 @@ export default function Navbar() {
       case "comentario": return `comentou no seu post "${n.post?.titulo ?? ""}"`;
       case "seguindo": return "começou a te seguir";
       case "colaboracao": return `te convidou para colaborar em "${n.post?.titulo ?? ""}"`;
+      case "colaboracao_catalogo": return `te convidou para colaborar no catálogo "${n.catalogo?.nome ?? ""}"`;
+      case "mensagem": return "te enviou uma mensagem";
     }
   }
 
@@ -152,7 +212,7 @@ export default function Navbar() {
       </form>
 
       <div className="navbar__links">
-        <Link to="/">Arte</Link>
+        <Link to="/arte">Arte</Link>
         <Link to="/artistas">Artistas</Link>
         <Link to="/sobre">Sobre nós</Link>
       </div>
@@ -185,20 +245,21 @@ export default function Navbar() {
                 <div className="navbar__notif-header">
                   <span>Notificações</span>
                 </div>
-                {notificacoes.length === 0 ? (
+                {notificacoesFiltradas.length === 0 ? (
                   <p className="navbar__notif-empty">Nenhuma notificação ainda.</p>
                 ) : (
-                  notificacoes.slice(0, 20).map(n => (
+                  notificacoesFiltradas.slice(0, 20).map(n => (
                     <div
                       key={n.id}
                       className={`navbar__notif-item ${!n.lida ? "navbar__notif-item--nova" : ""} ${n.tipo === "colaboracao" ? "navbar__notif-item--colab" : ""}`}
                       onClick={() => {
-                        if (n.tipo === "colaboracao") return;
+                        if (n.tipo === "colaboracao" || n.tipo === "colaboracao_catalogo") return;
                         setShowNotif(false);
-                        if (n.post) navigate(`/post/${n.post.id}`);
+                        if (n.tipo === "mensagem") navigate("/mensagens");
+                        else if (n.post) navigate(`/post/${n.post.id}`);
                         else navigate(`/u/${n.remetente.username}`);
                       }}
-                      style={{ cursor: n.tipo === "colaboracao" ? "default" : "pointer" }}
+                      style={{ cursor: (n.tipo === "colaboracao" || n.tipo === "colaboracao_catalogo") ? "default" : "pointer" }}
                     >
                       <div className="navbar__notif-avatar">
                         {n.remetente.fotoPerfil
@@ -259,6 +320,9 @@ export default function Navbar() {
             <div className="navbar__dropdown">
               <Link to="/perfil" onClick={() => setMenuAberto(false)}>
                 <UserIcon size={14} /> Meu Perfil
+              </Link>
+              <Link to="/configuracoes" onClick={() => setMenuAberto(false)}>
+                <SettingsIcon size={14} /> Configurações
               </Link>
               <button onClick={handleLogout}>
                 <LogOutIcon size={14} /> Sair

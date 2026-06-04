@@ -12,10 +12,11 @@ export interface UpdateUsuarioRequest {
   fotoPerfil?: string;
   fotoCapa?: string;
   perfilConfig?: string;
+  configuracoes?: string;
 }
 
 export class UpdateUsuarioService {
-  async execute({ id, nome, username, email, senha, bio, cidade, contato, fotoPerfil, fotoCapa, perfilConfig }: UpdateUsuarioRequest) {
+  async execute({ id, nome, username, email, senha, bio, cidade, contato, fotoPerfil, fotoCapa, perfilConfig, configuracoes }: UpdateUsuarioRequest) {
     const usuarioExistente = await prismaClient.usuario.findUnique({ where: { id } });
     if (!usuarioExistente) throw new Error("Usuário não encontrado");
 
@@ -32,6 +33,7 @@ export class UpdateUsuarioService {
         ...(fotoPerfil !== undefined && { fotoPerfil: fotoPerfil || null }),
         ...(fotoCapa !== undefined && { fotoCapa: fotoCapa || null }),
         ...(perfilConfig !== undefined && { perfilConfig: perfilConfig || null }),
+        ...(configuracoes !== undefined && { configuracoes: configuracoes || null }),
       },
     });
   }

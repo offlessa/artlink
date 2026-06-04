@@ -1,5 +1,6 @@
 import { HttpStatusCode, ServiceResponse, createError, createSuccess } from "../../../utils/createError";
 import prismaClient from "../../prisma";
+import { criarNotificacao } from "../../../utils/criarNotificacao";
 
 export class CreateSeguidorService {
   async execute({ seguidorId, seguidoId }: { seguidorId: number; seguidoId: number }): Promise<ServiceResponse> {
@@ -23,12 +24,7 @@ export class CreateSeguidorService {
       });
 
       // criar notificação
-      const seguido = await prismaClient.usuario.findUnique({ where: { id: seguidoId } });
-      if (seguido) {
-        await prismaClient.notificacao.create({
-          data: { usuarioId: seguidoId, remetenteId: seguidorId, tipo: "seguindo" },
-        });
-      }
+      await criarNotificacao({ usuarioId: seguidoId, remetenteId: seguidorId, tipo: "seguindo" });
 
       return createSuccess(seguidor);
     } catch (error) {

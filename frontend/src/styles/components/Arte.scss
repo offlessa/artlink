@@ -1,0 +1,109 @@
+@use '../variables' as *;
+
+.arte {
+  min-height: calc(100vh - 68px);
+  background: $creme;
+  padding-bottom: 40px;
+
+  &__header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid $borda;
+    background: $surface;
+
+    @media (max-width: 700px) { padding: 32px 20px 24px; }
+  }
+
+  &__titulo {
+    font-family: $font-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: $texto;
+    margin: 0 0 6px;
+  }
+
+  &__sub {
+    font-size: 0.9rem;
+    color: $texto-suave;
+    margin: 0;
+  }
+
+  &__body {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px;
+
+    @media (max-width: 700px) { padding: 16px 14px; }
+  }
+
+  // ── Filtros de categoria ────────────────────────────────────────────────────
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  &__pill {
+    padding: 6px 16px;
+    border-radius: 99px;
+    border: 1.5px solid $borda;
+    background: $surface;
+    color: $texto-medio;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+    &:hover {
+      border-color: $brand-mid;
+      color: $brand-mid;
+    }
+
+    &--ativo {
+      background: $brand;
+      border-color: $brand;
+      color: #fff;
+
+      &:hover {
+        background: $brand-hover;
+        border-color: $brand-hover;
+        color: #fff;
+      }
+    }
+  }
+
+  // ── Grid de posts ──────────────────────────────────────────────────────────
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+
+    @media (max-width: 700px) {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__skeleton {
+    height: 320px;
+    border-radius: $radius-lg;
+    background: linear-gradient(90deg, $borda 25%, $borda-suave 50%, $borda 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+
+  &__vazio {
+    text-align: center;
+    padding: 64px 20px;
+    color: $texto-suave;
+    font-size: 0.95rem;
+  }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

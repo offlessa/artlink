@@ -6,6 +6,7 @@ import {
 } from "../../../utils/createError";
 import prismaClient from "../../prisma";
 import { ComentarioRequest } from "../../types/Comentario";
+import { criarNotificacao } from "../../../utils/criarNotificacao";
 
 export class CreateComentarioService {
   async execute({
@@ -67,11 +68,8 @@ export class CreateComentarioService {
         },
       });
 
-      // notificar autor do post (se não for o mesmo usuário)
       if (postExiste.usuarioId !== usuarioId) {
-        await prismaClient.notificacao.create({
-          data: { usuarioId: postExiste.usuarioId, remetenteId: usuarioId, tipo: "comentario", postId },
-        });
+        await criarNotificacao({ usuarioId: postExiste.usuarioId, remetenteId: usuarioId, tipo: "comentario", postId });
       }
 
       return createSuccess(comentario);

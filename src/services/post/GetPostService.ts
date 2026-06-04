@@ -86,8 +86,25 @@ export class GetPostService {
     }
   }
 
-  async getByUsuario(usuarioId: number) {
+  async isContaPrivada(usuarioId: number): Promise<boolean> {
+    const u = await prismaClient.usuario.findUnique({ where: { id: usuarioId }, select: { configuracoes: true } });
+    if (!u?.configuracoes) return false;
+    try { return JSON.parse(u.configuracoes)?.privacidade?.contaPrivada === true; } catch { return false; }
+  }
+
+  async getByUsuario(usuarioId: number, solicitanteId?: number) {
     try {
+      // Conta privada: só o próprio usuário e seguidores veem os posts
+      if (solicitanteId !== undefined && solicitanteId !== usuarioId) {
+        const privada = await this.isContaPrivada(usuarioId);
+        if (privada) {
+          const segue = await prismaClient.seguidor.findUnique({
+            where: { seguidorId_seguidoId: { seguidorId: solicitanteId, seguidoId: usuarioId } },
+          });
+          if (!segue) return [];
+        }
+      }
+
       const posts = await prismaClient.post.findMany({
         where: { usuarioId },
         include: {

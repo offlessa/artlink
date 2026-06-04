@@ -7,14 +7,14 @@ import Footer from "../components/Footer";
 import CreatePostModal from "../components/CreatePostModal";
 import CatalogoModal from "../components/CatalogoModal";
 import {
-  HeartIcon, CommentIcon, FolderIcon, ImageOffIcon,
+  HeartIcon, CommentIcon, ImageOffIcon,
   PlusIcon, PaletteIcon, CameraIcon, TrashIcon,
   GridIcon, ListIcon,
 } from "../components/Icons";
 import "../styles/components/Perfil.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
-interface Catalogo { id: number; nome: string; posts: { postId: number }[] }
+interface Catalogo { id: number; nome: string; capa?: string; capaDinamica?: string; ehColaborador?: boolean; posts: { postId: number }[] }
 
 interface ProfileConfig {
   bgType: "solid" | "gradient" | "texture";
@@ -55,6 +55,7 @@ export default function Perfil() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [catalogos, setCatalogos] = useState<Catalogo[]>([]);
+  const [contadores, setContadores] = useState({ seguidores: 0, seguindo: 0 });
   const [carregando, setCarregando] = useState(true);
   const [tab, setTab] = useState<"posts" | "catalogos">("posts");
 
@@ -75,10 +76,11 @@ export default function Perfil() {
   async function carregarDados() {
     if (!usuario) return;
     try {
-      const [rp, rcolab, rc] = await Promise.all([
+      const [rp, rcolab, rc, rcont] = await Promise.all([
         api.get(`/post/usuario/${usuario.id}`),
         api.get(`/post/colaboracao/usuario/${usuario.id}`).catch(() => ({ data: [] })),
         api.get(`/catalogo/usuario/${usuario.id}`),
+        api.get(`/seguidor/contadores/${usuario.id}`).catch(() => ({ data: { data: { seguidores: 0, seguindo: 0 } } })),
       ]);
       const proprios: Post[] = Array.isArray(rp.data) ? rp.data : [];
       const colab: Post[] = Array.isArray(rcolab.data) ? rcolab.data : [];
@@ -89,6 +91,8 @@ export default function Perfil() {
       ].sort((a, b) => b.id - a.id);
       setPosts(todos);
       setCatalogos(Array.isArray(rc.data) ? rc.data : []);
+      const c = rcont.data?.data ?? rcont.data;
+      setContadores({ seguidores: c?.seguidores ?? 0, seguindo: c?.seguindo ?? 0 });
     } finally {
       setCarregando(false);
     }
@@ -222,6 +226,8 @@ export default function Perfil() {
             <div className="perfil__stats">
               <span><strong>{posts.length}</strong> posts</span>
               <span><strong>{catalogos.length}</strong> catálogos</span>
+              <span><strong>{contadores.seguidores}</strong> seguidores</span>
+              <span><strong>{contadores.seguindo}</strong> seguindo</span>
             </div>
           </div>
         )}
@@ -321,9 +327,18 @@ export default function Perfil() {
             <p className="perfil__empty-txt">Nenhum catálogo ainda.</p>
           ) : catalogos.map(cat => (
             <div key={cat.id} className="perfil__cat-card" onClick={() => navigate(`/catalogo/${cat.id}`)}>
-              <div className="perfil__cat-icon"><FolderIcon size={28} /></div>
-              <p className="perfil__cat-nome">{cat.nome}</p>
-              <span className="perfil__cat-count">{cat.posts.length} item{cat.posts.length !== 1 ? "s" : ""}</span>
+              <div className="perfil__cat-cover">
+                {cat.capaDinamica
+                  ? <img src={cat.capaDinamica} alt={cat.nome} />
+                  : <div className="perfil__cat-placeholder" />}
+                {cat.ehColaborador && (
+                  <span className="perfil__cat-colab-tag">collab</span>
+                )}
+                <div className="perfil__cat-overlay">
+                  <p className="perfil__cat-nome">{cat.nome}</p>
+                  <span className="perfil__cat-count">{cat.posts.length} item{cat.posts.length !== 1 ? "s" : ""}</span>
+                </div>
+              </div>
             </div>
           ))}
         </div>

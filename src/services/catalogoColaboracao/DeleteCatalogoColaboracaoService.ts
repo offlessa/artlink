@@ -2,25 +2,30 @@ import prismaClient from "../../prisma";
 
 export class DeleteCatalogoColaboracaoService {
   async execute(catalogoId: number, usuarioId: number) {
-    // Verifica se a colaboração existe
-    const colaboracaoExistente =
-      await prismaClient.catalogoColaboracao.findUnique({
-        where: {
-          catalogoId_usuarioId: { catalogoId, usuarioId },
-        },
-      });
+    const colaboracao = await prismaClient.catalogoColaboracao.findUnique({
+      where: { catalogoId_usuarioId: { catalogoId, usuarioId } },
+    });
+    if (!colaboracao) throw new Error("Colaboração não encontrada");
 
-    if (!colaboracaoExistente) {
-      throw new Error("Colaboração não encontrada");
+    // Remove posts do colaborador que saiu
+    const postsDele = await prismaClient.catalogoPost.findMany({
+      where: { catalogoId },
+      include: { post: { select: { usuarioId: true } } },
+    });
+    const idsRemover = postsDele
+      .filter(cp => cp.post.usuarioId === usuarioId)
+      .map(cp => cp.postId);
+
+    if (idsRemover.length > 0) {
+      await prismaClient.catalogoPost.deleteMany({
+        where: { catalogoId, postId: { in: idsRemover } },
+      });
     }
 
-    // Deleta a colaboração
     await prismaClient.catalogoColaboracao.delete({
-      where: {
-        catalogoId_usuarioId: { catalogoId, usuarioId },
-      },
+      where: { catalogoId_usuarioId: { catalogoId, usuarioId } },
     });
 
-    return { message: "Colaboração deletada com sucesso" };
+    return { message: "Colaboração removida com sucesso" };
   }
 }

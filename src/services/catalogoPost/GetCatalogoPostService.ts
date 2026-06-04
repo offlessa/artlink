@@ -16,6 +16,8 @@ export class GetCatalogoPostService {
                   fotoPerfil: true,
                 },
               },
+              curtidas: true,
+              comentarios: true,
             },
           },
         },

@@ -9,6 +9,7 @@ export class GetNotificacaoService {
         include: {
           remetente: { select: { id: true, nome: true, username: true, fotoPerfil: true } },
           post: { select: { id: true, titulo: true, imagem: true } },
+          catalogo: { select: { id: true, nome: true } },
         },
         orderBy: { data: "desc" },
         take: 50,

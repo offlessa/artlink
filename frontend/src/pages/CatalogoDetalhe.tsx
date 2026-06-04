@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 import CreatePostModal from "../components/CreatePostModal";
 import {
   ChevronRightIcon, HeartIcon, CommentIcon,
-  ImageOffIcon, PlusIcon, TrashIcon, XIcon, CameraIcon, SearchIcon,
+  ImageOffIcon, PlusIcon, TrashIcon, XIcon, CameraIcon, SearchIcon, UsersIcon,
 } from "../components/Icons";
 import "../styles/components/CatalogoDetalhe.scss";
 
@@ -35,6 +35,19 @@ interface Catalogo {
   dono: { id: number; nome: string; username: string; fotoPerfil?: string };
 }
 
+interface Colaborador {
+  usuarioId: number;
+  status: "pendente" | "aceito" | "recusado";
+  usuario: { id: number; nome: string; username: string; fotoPerfil?: string };
+}
+
+interface UsuarioBusca {
+  id: number;
+  nome: string;
+  username: string;
+  fotoPerfil?: string;
+}
+
 export default function CatalogoDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -45,11 +58,13 @@ export default function CatalogoDetalhe() {
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [imagens, setImagens] = useState<Imagem[]>([]);
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [showColabPanel, setShowColabPanel] = useState(false);
 
   const [todosPosts, setTodosPosts] = useState<Post[]>([]);
   const [buscaPicker, setBuscaPicker] = useState("");
@@ -58,6 +73,13 @@ export default function CatalogoDetalhe() {
   const [removendoImagem, setRemovendoImagem] = useState<number | null>(null);
   const [salvandoCapa, setSalvandoCapa] = useState(false);
   const [uploadandoFotos, setUploadandoFotos] = useState(false);
+
+  const [buscaColab, setBuscaColab] = useState("");
+  const [resultadosColab, setResultadosColab] = useState<UsuarioBusca[]>([]);
+  const [buscandoColab, setBuscandoColab] = useState(false);
+  const [convidando, setConvidando] = useState<number | null>(null);
+  const [removendoColab, setRemovendoColab] = useState<number | null>(null);
+  const [respondendoConvite, setRespondendoConvite] = useState(false);
 
   async function carregar() {
     try {
@@ -68,21 +90,43 @@ export default function CatalogoDetalhe() {
       return;
     }
     try {
-      const [resPosts, resImagens] = await Promise.all([
+      const [resPosts, resImagens, resColab] = await Promise.all([
         api.get(`/catalogo/post/${id}`),
         api.get(`/catalogo/imagem/${id}`),
+        api.get(`/catalogo/colaboracao/${id}`),
       ]);
       setPosts(Array.isArray(resPosts.data) ? resPosts.data : []);
       setImagens(Array.isArray(resImagens.data) ? resImagens.data : []);
+      setColaboradores(Array.isArray(resColab.data) ? resColab.data : []);
     } catch {
       setPosts([]);
       setImagens([]);
+      setColaboradores([]);
     } finally {
       setCarregando(false);
     }
   }
 
   useEffect(() => { carregar(); }, [id]);
+
+  // Busca colaboradores com debounce
+  useEffect(() => {
+    if (!buscaColab.trim()) { setResultadosColab([]); return; }
+    const timer = setTimeout(async () => {
+      setBuscandoColab(true);
+      try {
+        const res = await api.get(`/usuario?q=${encodeURIComponent(buscaColab.trim())}`);
+        const dados = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+        const jaConvidados = new Set([
+          catalogo?.usuarioId,
+          ...colaboradores.map(c => c.usuarioId),
+        ]);
+        setResultadosColab(dados.filter((u: UsuarioBusca) => !jaConvidados.has(u.id)).slice(0, 6));
+      } catch { setResultadosColab([]); }
+      finally { setBuscandoColab(false); }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [buscaColab, colaboradores, catalogo]);
 
   async function removerPost(e: React.MouseEvent, postId: number) {
     e.stopPropagation();
@@ -105,8 +149,34 @@ export default function CatalogoDetalhe() {
   async function abrirPicker() {
     setShowAddMenu(false);
     setBuscaPicker("");
-    const res = await api.get("/post");
-    setTodosPosts(Array.isArray(res.data) ? res.data : []);
+    try {
+      const [resMeus, resColab] = await Promise.all([
+        api.get(`/post/usuario/${usuario!.id}`),
+        api.get(`/post/colaboracao/usuario/${usuario!.id}`),
+      ]);
+      const meus: Post[] = Array.isArray(resMeus.data) ? resMeus.data : [];
+      const colab: Post[] = Array.isArray(resColab.data) ? resColab.data : [];
+
+      // Se for colaborador aceito, também busca posts dos outros colaboradores aceitos
+      const colabsAceitos = colaboradores.filter(c => c.status === "aceito");
+      const postsDosColabs: Post[] = [];
+      for (const c of colabsAceitos) {
+        if (c.usuarioId === usuario!.id) continue;
+        try {
+          const r = await api.get(`/post/usuario/${c.usuarioId}`);
+          if (Array.isArray(r.data)) postsDosColabs.push(...r.data);
+        } catch { /* silencioso */ }
+      }
+
+      const idsVistos = new Set<number>();
+      const todos: Post[] = [];
+      for (const p of [...meus, ...colab, ...postsDosColabs]) {
+        if (!idsVistos.has(p.id)) { idsVistos.add(p.id); todos.push(p); }
+      }
+      setTodosPosts(todos);
+    } catch {
+      setTodosPosts([]);
+    }
     setShowPicker(true);
   }
 
@@ -145,14 +215,9 @@ export default function CatalogoDetalhe() {
       for (const file of files) {
         try {
           const url = await uploadImagem(file);
-          const res = await api.post("/catalogo/imagem", {
-            catalogoId: catalogo.id,
-            imagem: url,
-          });
+          const res = await api.post("/catalogo/imagem", { catalogoId: catalogo.id, imagem: url });
           novas.push(res.data);
-        } catch {
-          // pula foto com erro e continua as demais
-        }
+        } catch { /* pula foto com erro */ }
       }
       if (novas.length) setImagens(imgs => [...imgs, ...novas]);
     } finally {
@@ -160,10 +225,52 @@ export default function CatalogoDetalhe() {
     }
   }
 
+  async function convidarColaborador(userId: number) {
+    setConvidando(userId);
+    try {
+      await api.post("/catalogo/colaboracao", { catalogoId: Number(id), usuarioId: userId });
+      const res = await api.get(`/catalogo/colaboracao/${id}`);
+      setColaboradores(Array.isArray(res.data) ? res.data : []);
+      setBuscaColab("");
+      setResultadosColab([]);
+    } catch { /* silencioso */ }
+    finally { setConvidando(null); }
+  }
+
+  async function removerColaborador(userId: number) {
+    setRemovendoColab(userId);
+    try {
+      await api.delete(`/catalogo/colaboracao/${id}/${userId}`);
+      setColaboradores(prev => prev.filter(c => c.usuarioId !== userId));
+      const resPosts = await api.get(`/catalogo/post/${id}`);
+      setPosts(Array.isArray(resPosts.data) ? resPosts.data : []);
+    } catch { /* silencioso */ }
+    finally { setRemovendoColab(null); }
+  }
+
+  async function responderConvite(aceitar: boolean) {
+    setRespondendoConvite(true);
+    try {
+      const acao = aceitar ? "aceitar" : "recusar";
+      await api.patch(`/catalogo/colaboracao/${id}/${acao}`);
+      if (aceitar) {
+        await carregar();
+      } else {
+        navigate("/perfil");
+      }
+    } catch { /* silencioso */ }
+    finally { setRespondendoConvite(false); }
+  }
+
   if (carregando) return <div className="cat-det__loading">Carregando...</div>;
   if (!catalogo) return null;
 
   const isDono = usuario?.id === catalogo.usuarioId;
+  const minhaColaboracao = colaboradores.find(c => c.usuarioId === usuario?.id);
+  const isPendente = minhaColaboracao?.status === "pendente";
+  const isColaborador = minhaColaboracao?.status === "aceito";
+  const podeEditar = isDono || isColaborador;
+
   const idsNoCatalogo = new Set(posts.map(p => p.id));
 
   const postsFiltrados = todosPosts.filter(p => {
@@ -176,6 +283,12 @@ export default function CatalogoDetalhe() {
       p.autor.nome.toLowerCase().includes(q)
     );
   });
+
+  const statusLabel: Record<string, string> = {
+    pendente: "Pendente",
+    aceito: "Colaborador",
+    recusado: "Recusado",
+  };
 
   return (
     <div className="cat-det">
@@ -206,52 +319,210 @@ export default function CatalogoDetalhe() {
           Voltar ao perfil
         </button>
 
+        {/* ── BANNER DE CONVITE PENDENTE ───────────────────────── */}
+        {isPendente && (
+          <div className="cat-det__convite-banner">
+            <div className="cat-det__convite-texto">
+              <strong>@{catalogo.dono.username}</strong> te convidou para colaborar neste catálogo.
+            </div>
+            <div className="cat-det__convite-acoes">
+              <button
+                className="cat-det__convite-aceitar"
+                onClick={() => responderConvite(true)}
+                disabled={respondendoConvite}
+              >
+                {respondendoConvite ? "..." : "Aceitar"}
+              </button>
+              <button
+                className="cat-det__convite-recusar"
+                onClick={() => responderConvite(false)}
+                disabled={respondendoConvite}
+              >
+                Recusar
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ── HEADER ─────────────────────────────────────────── */}
         <div className="cat-det__header">
           <div className="cat-det__header-info">
             <h1 className="cat-det__titulo">{catalogo.nome}</h1>
             {catalogo.descricao && <p className="cat-det__desc">{catalogo.descricao}</p>}
             <p className="cat-det__meta">
-              por @{catalogo.dono.username} · {posts.length} publicaç{posts.length !== 1 ? "ões" : "ão"}
+              por @{catalogo.dono.username}
+              {isColaborador && <span className="cat-det__colab-badge"> · você colabora</span>}
+              {" "}· {posts.length} publicaç{posts.length !== 1 ? "ões" : "ão"}
               {imagens.length > 0 && ` · ${imagens.length} foto${imagens.length !== 1 ? "s" : ""}`}
             </p>
+
+            {/* Avatares dos colaboradores aceitos */}
+            {colaboradores.filter(c => c.status === "aceito").length > 0 && (
+              <div className="cat-det__colab-avatares">
+                {colaboradores.filter(c => c.status === "aceito").map(c => (
+                  <div key={c.usuarioId} className="cat-det__colab-avatar" title={`@${c.usuario.username}`}>
+                    {c.usuario.fotoPerfil
+                      ? <img src={c.usuario.fotoPerfil} alt={c.usuario.nome} />
+                      : <span>{c.usuario.nome.charAt(0).toUpperCase()}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {isDono && (
-            <div className="cat-det__add-wrap">
+          <div className="cat-det__header-acoes">
+            {/* Botão gerenciar colaboradores (dono) */}
+            {isDono && (
               <button
-                className="cat-det__add-btn"
-                onClick={() => setShowAddMenu(v => !v)}
+                className="cat-det__colab-btn"
+                onClick={() => setShowColabPanel(v => !v)}
+                title="Colaboradores"
               >
-                <PlusIcon size={14} /> Adicionar
+                <UsersIcon size={14} />
+                Colaboradores
+                {colaboradores.filter(c => c.status === "pendente").length > 0 && (
+                  <span className="cat-det__colab-badge-count">
+                    {colaboradores.filter(c => c.status === "pendente").length}
+                  </span>
+                )}
               </button>
-              {showAddMenu && (
-                <>
-                  <div className="cat-det__add-backdrop" onClick={() => setShowAddMenu(false)} />
-                  <div className="cat-det__add-menu">
-                    <button onClick={() => { setShowAddMenu(false); fotosRef.current?.click(); }}>
-                      Fotos diretas
-                    </button>
-                    <button onClick={() => { setShowAddMenu(false); setShowNewPost(true); }}>
-                      Nova publicação
-                    </button>
-                    <button onClick={abrirPicker}>
-                      Buscar publicações
-                    </button>
-                  </div>
-                </>
-              )}
+            )}
+
+            {/* Sair do catálogo (colaborador aceito) */}
+            {isColaborador && (
+              <button
+                className="cat-det__sair-btn"
+                onClick={() => {
+                  if (confirm("Sair do catálogo? Seus posts serão removidos dele.")) {
+                    removerColaborador(usuario!.id);
+                  }
+                }}
+              >
+                Sair do catálogo
+              </button>
+            )}
+
+            {/* Adicionar conteúdo (dono ou colaborador aceito) */}
+            {podeEditar && (
+              <div className="cat-det__add-wrap">
+                <button
+                  className="cat-det__add-btn"
+                  onClick={() => setShowAddMenu(v => !v)}
+                >
+                  <PlusIcon size={14} /> Adicionar
+                </button>
+                {showAddMenu && (
+                  <>
+                    <div className="cat-det__add-backdrop" onClick={() => setShowAddMenu(false)} />
+                    <div className="cat-det__add-menu">
+                      {isDono && (
+                        <button onClick={() => { setShowAddMenu(false); fotosRef.current?.click(); }}>
+                          Fotos diretas
+                        </button>
+                      )}
+                      <button onClick={() => { setShowAddMenu(false); setShowNewPost(true); }}>
+                        Nova publicação
+                      </button>
+                      <button onClick={abrirPicker}>
+                        Buscar publicações
+                      </button>
+                    </div>
+                  </>
+                )}
+                {isDono && (
+                  <input
+                    ref={fotosRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    hidden
+                    onChange={uploadFotos}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── PAINEL DE COLABORADORES ────────────────────────── */}
+        {showColabPanel && isDono && (
+          <div className="cat-det__colab-panel">
+            <div className="cat-det__colab-panel-header">
+              <span>Colaboradores</span>
+              <button onClick={() => setShowColabPanel(false)}><XIcon size={16} /></button>
+            </div>
+
+            {/* Busca para convidar */}
+            <div className="cat-det__colab-busca">
+              <SearchIcon size={14} />
               <input
-                ref={fotosRef}
-                type="file"
-                accept="image/*"
-                multiple
-                hidden
-                onChange={uploadFotos}
+                type="text"
+                placeholder="Buscar artista pelo username..."
+                value={buscaColab}
+                onChange={e => setBuscaColab(e.target.value)}
               />
             </div>
-          )}
-        </div>
+
+            {buscandoColab && <p className="cat-det__colab-buscando">Buscando...</p>}
+
+            {resultadosColab.length > 0 && (
+              <div className="cat-det__colab-resultados">
+                {resultadosColab.map(u => (
+                  <div key={u.id} className="cat-det__colab-resultado">
+                    <div className="cat-det__colab-resultado-avatar">
+                      {u.fotoPerfil
+                        ? <img src={u.fotoPerfil} alt={u.nome} />
+                        : <span>{u.nome.charAt(0).toUpperCase()}</span>}
+                    </div>
+                    <div className="cat-det__colab-resultado-info">
+                      <span className="cat-det__colab-resultado-nome">{u.nome}</span>
+                      <span className="cat-det__colab-resultado-user">@{u.username}</span>
+                    </div>
+                    <button
+                      className="cat-det__colab-convidar"
+                      onClick={() => convidarColaborador(u.id)}
+                      disabled={convidando === u.id}
+                    >
+                      {convidando === u.id ? "..." : "Convidar"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Lista de colaboradores */}
+            {colaboradores.length === 0 ? (
+              <p className="cat-det__colab-vazio">Nenhum colaborador ainda.</p>
+            ) : (
+              <div className="cat-det__colab-lista">
+                {colaboradores.map(c => (
+                  <div key={c.usuarioId} className="cat-det__colab-item">
+                    <div className="cat-det__colab-item-avatar">
+                      {c.usuario.fotoPerfil
+                        ? <img src={c.usuario.fotoPerfil} alt={c.usuario.nome} />
+                        : <span>{c.usuario.nome.charAt(0).toUpperCase()}</span>}
+                    </div>
+                    <div className="cat-det__colab-item-info">
+                      <span className="cat-det__colab-item-nome">{c.usuario.nome}</span>
+                      <span className="cat-det__colab-item-user">@{c.usuario.username}</span>
+                    </div>
+                    <span className={`cat-det__colab-status cat-det__colab-status--${c.status}`}>
+                      {statusLabel[c.status]}
+                    </span>
+                    <button
+                      className="cat-det__colab-remover"
+                      onClick={() => removerColaborador(c.usuarioId)}
+                      disabled={removendoColab === c.usuarioId}
+                      title="Remover colaborador"
+                    >
+                      <XIcon size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── GALERIA DE FOTOS DIRETAS ───────────────────────── */}
         {(imagens.length > 0 || uploadandoFotos) && (
@@ -285,7 +556,7 @@ export default function CatalogoDetalhe() {
           </div>
         )}
 
-        {/* ── PUBLICAÇÕES (POSTS) ────────────────────────────── */}
+        {/* ── PUBLICAÇÕES ────────────────────────────────────── */}
         {posts.length > 0 && (
           <p className="cat-det__section-label" style={{ marginTop: imagens.length > 0 ? "2rem" : 0 }}>
             Publicações
@@ -295,11 +566,13 @@ export default function CatalogoDetalhe() {
         {posts.length === 0 && imagens.length === 0 ? (
           <div className="cat-det__empty">
             <p>Este catálogo ainda não tem nada.</p>
-            {isDono && (
+            {podeEditar && (
               <div className="cat-det__empty-actions">
-                <button className="cat-det__empty-btn" onClick={() => fotosRef.current?.click()}>
-                  <PlusIcon size={14} /> Adicionar fotos
-                </button>
+                {isDono && (
+                  <button className="cat-det__empty-btn" onClick={() => fotosRef.current?.click()}>
+                    <PlusIcon size={14} /> Adicionar fotos
+                  </button>
+                )}
                 <button className="cat-det__empty-btn cat-det__empty-btn--outline" onClick={abrirPicker}>
                   <PlusIcon size={14} /> Buscar publicações
                 </button>
@@ -322,7 +595,7 @@ export default function CatalogoDetalhe() {
                       <HeartIcon size={11} filled /> {post.curtidas.length}
                       &nbsp;&nbsp;<CommentIcon size={11} /> {post.comentarios.length}
                     </span>
-                    {isDono && (
+                    {podeEditar && (post.autor.id === usuario?.id || isDono) && (
                       <button
                         className="cat-det__card-del"
                         onClick={e => removerPost(e, post.id)}

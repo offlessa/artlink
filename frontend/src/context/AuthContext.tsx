@@ -12,6 +12,7 @@ export interface Usuario {
   fotoPerfil?: string;
   fotoCapa?: string;
   perfilConfig?: string;
+  configuracoes?: string;
   criadoEm: string;
 }
 

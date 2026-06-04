@@ -6,6 +6,7 @@ import {
 } from "../../../utils/createError";
 import prismaClient from "../../prisma";
 import { CurtidaRequest } from "../../types/Curtida";
+import { criarNotificacao } from "../../../utils/criarNotificacao";
 
 export class CreateCurtidaService {
   async execute({
@@ -72,11 +73,8 @@ export class CreateCurtidaService {
         },
       });
 
-      // notificar autor do post (se não for o mesmo usuário)
       if (postExiste.usuarioId !== usuarioId) {
-        await prismaClient.notificacao.create({
-          data: { usuarioId: postExiste.usuarioId, remetenteId: usuarioId, tipo: "curtida", postId },
-        });
+        await criarNotificacao({ usuarioId: postExiste.usuarioId, remetenteId: usuarioId, tipo: "curtida", postId });
       }
 
       return createSuccess(curtida);
