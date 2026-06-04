@@ -8,7 +8,9 @@ import CreatePostModal from "../components/CreatePostModal";
 import {
   ChevronRightIcon, HeartIcon, CommentIcon,
   ImageOffIcon, PlusIcon, TrashIcon, XIcon, CameraIcon, SearchIcon, UsersIcon,
+  BookmarkIcon, ShareIcon,
 } from "../components/Icons";
+import Toast from "../components/Toast";
 import "../styles/components/CatalogoDetalhe.scss";
 
 interface Post {
@@ -80,6 +82,8 @@ export default function CatalogoDetalhe() {
   const [convidando, setConvidando] = useState<number | null>(null);
   const [removendoColab, setRemovendoColab] = useState<number | null>(null);
   const [respondendoConvite, setRespondendoConvite] = useState(false);
+  const [salvo, setSalvo] = useState(false);
+  const [toast, setToast] = useState("");
 
   async function carregar() {
     try {
@@ -108,6 +112,38 @@ export default function CatalogoDetalhe() {
   }
 
   useEffect(() => { carregar(); }, [id]);
+
+  useEffect(() => {
+    if (!usuario || !id) return;
+    api.get(`/catalogo-salvo/checar/${usuario.id}/${id}`)
+      .then(r => setSalvo(r.data?.salvo ?? false))
+      .catch(() => {});
+  }, [usuario?.id, id]);
+
+  function mostrarToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2500);
+  }
+
+  async function toggleSalvar() {
+    if (!catalogo || !usuario) { navigate("/login"); return; }
+    try {
+      if (salvo) {
+        await api.delete(`/catalogo-salvo/${usuario.id}/${catalogo.id}`);
+        setSalvo(false);
+        mostrarToast("Removido dos salvos");
+      } else {
+        await api.post("/catalogo-salvo", { usuarioId: usuario.id, catalogoId: catalogo.id });
+        setSalvo(true);
+        mostrarToast("Catálogo salvo!");
+      }
+    } catch {}
+  }
+
+  function compartilhar() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => mostrarToast("Link copiado!")).catch(() => {});
+  }
 
   // Busca colaboradores com debounce
   useEffect(() => {
@@ -371,6 +407,22 @@ export default function CatalogoDetalhe() {
           </div>
 
           <div className="cat-det__header-acoes">
+            {/* Salvar e Compartilhar */}
+            <button
+              className={`cat-det__icon-btn ${salvo ? "cat-det__icon-btn--ativo" : ""}`}
+              onClick={toggleSalvar}
+              title={salvo ? "Remover dos salvos" : "Salvar catálogo"}
+            >
+              <BookmarkIcon size={15} filled={salvo} />
+            </button>
+            <button
+              className="cat-det__icon-btn"
+              onClick={compartilhar}
+              title="Compartilhar"
+            >
+              <ShareIcon size={15} />
+            </button>
+
             {/* Botão gerenciar colaboradores (dono) */}
             {isDono && (
               <button
@@ -663,6 +715,8 @@ export default function CatalogoDetalhe() {
           </div>
         </div>
       )}
+
+      {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
 
       {showNewPost && (
         <CreatePostModal

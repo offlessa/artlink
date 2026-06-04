@@ -86,6 +86,10 @@ import { GetSeguidorController } from "./controllers/seguidor/GetSeguidorControl
 import { GetNotificacaoController } from "./controllers/notificacao/GetNotificacaoController";
 import { UpdateNotificacaoController } from "./controllers/notificacao/UpdateNotificacaoController";
 
+// === SALVOS ===
+import { PostSalvoController } from "./controllers/postSalvo/PostSalvoController";
+import { CatalogoSalvoController } from "./controllers/catalogoSalvo/CatalogoSalvoController";
+
 const router = Router();
 
 // ===================================================
@@ -259,5 +263,23 @@ const getNotificacaoController = new GetNotificacaoController();
 router.get("/notificacao/:usuarioId", authMiddleware, getNotificacaoController.getByUsuario.bind(getNotificacaoController));
 router.get("/notificacao/nao-lidas/:usuarioId", authMiddleware, getNotificacaoController.contarNaoLidas.bind(getNotificacaoController));
 router.put("/notificacao/marcar-lidas/:usuarioId", authMiddleware, new UpdateNotificacaoController().marcarTodasLidas);
+
+// ===================================================
+// =================== POST SALVOS ===================
+// ===================================================
+const postSalvoCtrl = new PostSalvoController();
+router.post("/post-salvo", authMiddleware, postSalvoCtrl.salvar.bind(postSalvoCtrl));
+router.delete("/post-salvo/:usuarioId/:postId", authMiddleware, postSalvoCtrl.remover.bind(postSalvoCtrl));
+router.get("/post-salvo/checar/:usuarioId/:postId", authMiddleware, postSalvoCtrl.checar.bind(postSalvoCtrl));
+router.get("/post-salvo/:usuarioId", authMiddleware, postSalvoCtrl.getSalvos.bind(postSalvoCtrl));
+
+// ===================================================
+// ================ CATÁLOGO SALVOS ==================
+// ===================================================
+const catalogoSalvoCtrl = new CatalogoSalvoController();
+router.post("/catalogo-salvo", authMiddleware, catalogoSalvoCtrl.salvar.bind(catalogoSalvoCtrl));
+router.delete("/catalogo-salvo/:usuarioId/:catalogoId", authMiddleware, catalogoSalvoCtrl.remover.bind(catalogoSalvoCtrl));
+router.get("/catalogo-salvo/checar/:usuarioId/:catalogoId", authMiddleware, catalogoSalvoCtrl.checar.bind(catalogoSalvoCtrl));
+router.get("/catalogo-salvo/:usuarioId", authMiddleware, catalogoSalvoCtrl.getSalvos.bind(catalogoSalvoCtrl));
 
 export { router };

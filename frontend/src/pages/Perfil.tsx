@@ -9,12 +9,15 @@ import CatalogoModal from "../components/CatalogoModal";
 import {
   HeartIcon, CommentIcon, ImageOffIcon,
   PlusIcon, PaletteIcon, CameraIcon, TrashIcon,
-  GridIcon, ListIcon,
+  GridIcon, ListIcon, ShareIcon,
 } from "../components/Icons";
+import Toast from "../components/Toast";
 import "../styles/components/Perfil.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
 interface Catalogo { id: number; nome: string; capa?: string; capaDinamica?: string; ehColaborador?: boolean; posts: { postId: number }[] }
+interface PostSalvo { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
+interface CatalogoSalvo { id: number; nome: string; capaDinamica?: string; dono?: { username: string }; posts: { postId?: number }[] }
 
 interface ProfileConfig {
   bgType: "solid" | "gradient" | "texture";
@@ -55,9 +58,12 @@ export default function Perfil() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [catalogos, setCatalogos] = useState<Catalogo[]>([]);
+  const [postsSalvos, setPostsSalvos] = useState<PostSalvo[]>([]);
+  const [catalogosSalvos, setCatalogosSalvos] = useState<CatalogoSalvo[]>([]);
   const [contadores, setContadores] = useState({ seguidores: 0, seguindo: 0 });
   const [carregando, setCarregando] = useState(true);
-  const [tab, setTab] = useState<"posts" | "catalogos">("posts");
+  const [tab, setTab] = useState<"posts" | "catalogos" | "salvos">("posts");
+  const [toast, setToast] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [showCatalogoModal, setShowCatalogoModal] = useState(false);
@@ -76,11 +82,13 @@ export default function Perfil() {
   async function carregarDados() {
     if (!usuario) return;
     try {
-      const [rp, rcolab, rc, rcont] = await Promise.all([
+      const [rp, rcolab, rc, rcont, rps, rcs] = await Promise.all([
         api.get(`/post/usuario/${usuario.id}`),
         api.get(`/post/colaboracao/usuario/${usuario.id}`).catch(() => ({ data: [] })),
         api.get(`/catalogo/usuario/${usuario.id}`),
         api.get(`/seguidor/contadores/${usuario.id}`).catch(() => ({ data: { data: { seguidores: 0, seguindo: 0 } } })),
+        api.get(`/post-salvo/${usuario.id}`).catch(() => ({ data: [] })),
+        api.get(`/catalogo-salvo/${usuario.id}`).catch(() => ({ data: [] })),
       ]);
       const proprios: Post[] = Array.isArray(rp.data) ? rp.data : [];
       const colab: Post[] = Array.isArray(rcolab.data) ? rcolab.data : [];
@@ -93,9 +101,19 @@ export default function Perfil() {
       setCatalogos(Array.isArray(rc.data) ? rc.data : []);
       const c = rcont.data?.data ?? rcont.data;
       setContadores({ seguidores: c?.seguidores ?? 0, seguindo: c?.seguindo ?? 0 });
+      setPostsSalvos(Array.isArray(rps.data) ? rps.data : []);
+      setCatalogosSalvos(Array.isArray(rcs.data) ? rcs.data : []);
     } finally {
       setCarregando(false);
     }
+  }
+
+  function compartilharPerfil() {
+    const url = `${window.location.origin}/u/${usuario?.username}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setToast("Link copiado!");
+      setTimeout(() => setToast(""), 2500);
+    }).catch(() => {});
   }
 
   useEffect(() => {
@@ -239,6 +257,9 @@ export default function Perfil() {
               <button className="perfil__btn-custom" onClick={() => setShowCustomize(true)}>
                 <PaletteIcon size={15} />
               </button>
+              <button className="perfil__btn-share" onClick={compartilharPerfil} title="Compartilhar perfil">
+                <ShareIcon size={15} />
+              </button>
             </>
           )}
         </div>
@@ -253,13 +274,18 @@ export default function Perfil() {
           <button className={tab === "catalogos" ? "active" : ""} onClick={() => setTab("catalogos")}>
             Catálogos <span className="perfil__tab-count">{catalogos.length}</span>
           </button>
+          <button className={tab === "salvos" ? "active" : ""} onClick={() => setTab("salvos")}>
+            Salvos <span className="perfil__tab-count">{postsSalvos.length + catalogosSalvos.length}</span>
+          </button>
         </div>
-        <button
-          className="perfil__novo-btn"
-          onClick={() => tab === "catalogos" ? setShowCatalogoModal(true) : setShowModal(true)}
-        >
-          <PlusIcon size={14} /> {tab === "catalogos" ? "Novo catálogo" : "Nova publicação"}
-        </button>
+        {tab !== "salvos" && (
+          <button
+            className="perfil__novo-btn"
+            onClick={() => tab === "catalogos" ? setShowCatalogoModal(true) : setShowModal(true)}
+          >
+            <PlusIcon size={14} /> {tab === "catalogos" ? "Novo catálogo" : "Nova publicação"}
+          </button>
+        )}
       </div>
 
       {/* ── GALLERY ── */}
@@ -341,6 +367,80 @@ export default function Perfil() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── SALVOS (privado) ── */}
+      {tab === "salvos" && (
+        <div className="perfil__salvos">
+          <div className="perfil__salvos-aviso">
+            🔒 Apenas você vê seus itens salvos
+          </div>
+
+          {postsSalvos.length === 0 && catalogosSalvos.length === 0 ? (
+            <div className="perfil__empty">
+              <p>Nenhum item salvo ainda.</p>
+              <p style={{ fontSize: "0.85rem", color: "#8A9E7A", marginTop: 4 }}>
+                Use o ícone 🔖 em posts e catálogos para salvá-los aqui.
+              </p>
+            </div>
+          ) : (
+            <>
+              {postsSalvos.length > 0 && (
+                <>
+                  <p className="perfil__salvos-secao">Posts salvos ({postsSalvos.length})</p>
+                  <div className={`perfil__galeria perfil__galeria--${config.layout} perfil__galeria--${config.cardStyle}`}>
+                    {postsSalvos.map(post => (
+                      <div key={post.id} className="perfil__post-card" onClick={() => navigate(`/post/${post.id}`)}>
+                        <div className="perfil__post-img">
+                          {post.imagem
+                            ? <img src={post.imagem} alt={post.titulo} />
+                            : <div className="perfil__post-no-img"><ImageOffIcon size={26} /></div>}
+                        </div>
+                        <div className="perfil__post-info">
+                          <span className="perfil__post-titulo">{post.titulo}</span>
+                          {post.autor && (
+                            <span className="perfil__post-colab-badge">@{post.autor.username}</span>
+                          )}
+                          <div className="perfil__post-row">
+                            <span className="perfil__post-stats">
+                              <HeartIcon size={11} filled /> {post.curtidas.length}
+                              &nbsp;&nbsp;<CommentIcon size={11} /> {post.comentarios.length}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {catalogosSalvos.length > 0 && (
+                <>
+                  <p className="perfil__salvos-secao" style={{ marginTop: postsSalvos.length > 0 ? "2rem" : 0 }}>
+                    Catálogos salvos ({catalogosSalvos.length})
+                  </p>
+                  <div className="perfil__cat-grid">
+                    {catalogosSalvos.map(cat => (
+                      <div key={cat.id} className="perfil__cat-card" onClick={() => navigate(`/catalogo/${cat.id}`)}>
+                        <div className="perfil__cat-cover">
+                          {cat.capaDinamica
+                            ? <img src={cat.capaDinamica} alt={cat.nome} />
+                            : <div className="perfil__cat-placeholder" />}
+                          <div className="perfil__cat-overlay">
+                            <p className="perfil__cat-nome">{cat.nome}</p>
+                            {cat.dono && (
+                              <span className="perfil__cat-count">@{cat.dono.username}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
       )}
 
@@ -439,6 +539,7 @@ export default function Perfil() {
 
       {showModal && <CreatePostModal onClose={() => setShowModal(false)} onSuccess={carregarDados} />}
       {showCatalogoModal && <CatalogoModal onClose={() => setShowCatalogoModal(false)} />}
+      {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
 
       <Footer />
     </div>

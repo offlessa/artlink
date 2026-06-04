@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
-import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon } from "../components/Icons";
+import Toast from "../components/Toast";
+import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon, BookmarkIcon, ShareIcon } from "../components/Icons";
 import "../styles/components/PostDetalhe.scss";
 
 interface Comentario {
@@ -42,6 +43,8 @@ export default function PostDetalhe() {
   const [enviando, setEnviando] = useState(false);
   const [acaoComentario, setAcaoComentario] = useState<number | null>(null);
   const [verOcultos, setVerOcultos] = useState(false);
+  const [salvo, setSalvo] = useState(false);
+  const [toast, setToast] = useState("");
 
   async function carregarPost() {
     try {
@@ -60,6 +63,13 @@ export default function PostDetalhe() {
 
   useEffect(() => { carregarPost(); }, [id]);
 
+  useEffect(() => {
+    if (!usuario || !id) return;
+    api.get(`/post-salvo/checar/${usuario.id}/${id}`)
+      .then(r => setSalvo(r.data?.salvo ?? false))
+      .catch(() => {});
+  }, [usuario?.id, id]);
+
   if (carregando) return <div className="post-detalhe__loading">Carregando...</div>;
   if (!post) return null;
 
@@ -75,6 +85,11 @@ export default function PostDetalhe() {
   const visiveis = comentarios.filter(c => !c.oculto);
   const ocultos  = comentarios.filter(c => c.oculto);
 
+  function mostrarToast(msg: string) {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2500);
+  }
+
   async function toggleCurtida() {
     if (!post || !usuario) return;
     try {
@@ -86,6 +101,26 @@ export default function PostDetalhe() {
       }
       carregarPost();
     } catch {}
+  }
+
+  async function toggleSalvar() {
+    if (!post || !usuario) { navigate("/login"); return; }
+    try {
+      if (salvo) {
+        await api.delete(`/post-salvo/${usuario.id}/${post.id}`);
+        setSalvo(false);
+        mostrarToast("Removido dos salvos");
+      } else {
+        await api.post("/post-salvo", { usuarioId: usuario.id, postId: post.id });
+        setSalvo(true);
+        mostrarToast("Post salvo!");
+      }
+    } catch {}
+  }
+
+  function compartilhar() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => mostrarToast("Link copiado!")).catch(() => {});
   }
 
   async function enviarComentario(e: React.FormEvent) {
@@ -209,13 +244,29 @@ export default function PostDetalhe() {
                 <span className="post-detalhe__autor-user">@{post.autor.username}</span>
               </div>
             </div>
-            <button
-              className={`post-detalhe__curtir ${jaCurtiu ? "post-detalhe__curtir--ativo" : ""}`}
-              onClick={toggleCurtida}
-            >
-              <HeartIcon size={15} filled={jaCurtiu} />
-              {totalCurtidas}
-            </button>
+            <div className="post-detalhe__acoes">
+              <button
+                className={`post-detalhe__curtir ${jaCurtiu ? "post-detalhe__curtir--ativo" : ""}`}
+                onClick={toggleCurtida}
+              >
+                <HeartIcon size={15} filled={jaCurtiu} />
+                {totalCurtidas}
+              </button>
+              <button
+                className={`post-detalhe__icon-btn ${salvo ? "post-detalhe__icon-btn--ativo" : ""}`}
+                onClick={toggleSalvar}
+                title={salvo ? "Remover dos salvos" : "Salvar"}
+              >
+                <BookmarkIcon size={16} filled={salvo} />
+              </button>
+              <button
+                className="post-detalhe__icon-btn"
+                onClick={compartilhar}
+                title="Compartilhar"
+              >
+                <ShareIcon size={16} />
+              </button>
+            </div>
           </div>
           {post.descricao && <p className="post-detalhe__descricao">{post.descricao}</p>}
 
@@ -292,6 +343,7 @@ export default function PostDetalhe() {
 
       </div>
       <Footer />
+      {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
     </div>
   );
 }

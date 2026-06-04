@@ -149,6 +149,22 @@
     &:hover { background: $brand-subtle; border-color: $brand; }
   }
 
+  &__btn-share {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: $surface;
+    color: $texto-medio;
+    border: 1.5px solid $borda;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+    &:hover { background: $brand-subtle; border-color: $brand-mid; color: $brand-mid; }
+  }
+
   &__tabs {
     display: flex;
     align-items: center;

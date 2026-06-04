@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
-import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon } from "../components/Icons";
+import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon } from "../components/Icons";
+import Toast from "../components/Toast";
 import "../styles/components/PerfilPublico.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number; usuarioId: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
@@ -35,6 +36,7 @@ export default function PerfilPublico() {
   const [seguindo, setSeguindo] = useState(false);
   const [contadores, setContadores] = useState<Contadores>({ seguidores: 0, seguindo: 0 });
   const [loadingFollow, setLoadingFollow] = useState(false);
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     if (!username) return;
@@ -76,6 +78,14 @@ export default function PerfilPublico() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [username, eu?.id]);
+
+  function compartilharPerfil() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      setToast("Link copiado!");
+      setTimeout(() => setToast(""), 2500);
+    }).catch(() => {});
+  }
 
   async function toggleSeguir() {
     if (!eu || !perfil || loadingFollow) return;
@@ -134,26 +144,35 @@ export default function PerfilPublico() {
             <span><strong>{catalogos.length}</strong> catálogos</span>
           </div>
 
-          {eu && eu.id !== perfil.id && (
-            <div className="pp__acoes">
-              <button
-                className={`pp__btn-seguir ${seguindo ? "pp__btn-seguir--ativo" : ""}`}
-                onClick={toggleSeguir}
-                disabled={loadingFollow}
-              >
-                <UsersIcon size={14} />
-                {loadingFollow ? "..." : seguindo ? "Seguindo" : "Seguir"}
-              </button>
-              <button
-                className="pp__btn-msg"
-                onClick={() => navigate("/mensagens")}
-                title="Enviar mensagem"
-              >
-                <MessageIcon size={14} />
-                Mensagem
-              </button>
-            </div>
-          )}
+          <div className="pp__acoes">
+            {eu && eu.id !== perfil.id && (
+              <>
+                <button
+                  className={`pp__btn-seguir ${seguindo ? "pp__btn-seguir--ativo" : ""}`}
+                  onClick={toggleSeguir}
+                  disabled={loadingFollow}
+                >
+                  <UsersIcon size={14} />
+                  {loadingFollow ? "..." : seguindo ? "Seguindo" : "Seguir"}
+                </button>
+                <button
+                  className="pp__btn-msg"
+                  onClick={() => navigate("/mensagens")}
+                  title="Enviar mensagem"
+                >
+                  <MessageIcon size={14} />
+                  Mensagem
+                </button>
+              </>
+            )}
+            <button
+              className="pp__btn-share"
+              onClick={compartilharPerfil}
+              title="Compartilhar perfil"
+            >
+              <ShareIcon size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -216,6 +235,7 @@ export default function PerfilPublico() {
       )}
 
       <Footer />
+      {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
     </div>
   );
 }

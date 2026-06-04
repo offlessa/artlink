@@ -106,13 +106,35 @@
     &--ativo { color: #C0392B; }
   }
 
+  &__acoes {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+  }
+
+  &__icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    padding: 5px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+
+    &:hover { color: $brand-mid; background: $brand-subtle; }
+    &--ativo { color: $brand; }
+  }
+
   &__autor {
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 0.73rem;
     color: $texto-suave;
-    flex: 1;
     min-width: 0;
 
     span {
@@ -139,6 +161,7 @@
 
   &__cta {
     flex-shrink: 0;
+    margin-left: 0;
     padding: 6px 14px;
     background: none;
     border: 1.5px solid $borda;

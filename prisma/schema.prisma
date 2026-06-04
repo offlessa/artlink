@@ -40,6 +40,8 @@ model Usuario {
   seguindo               Seguidor[] @relation("Seguidor")
   notificacoesRecebidas  Notificacao[] @relation("NotifDestinatario")
   notificacoesEnviadas   Notificacao[] @relation("NotifRemetente")
+  postsSalvos            PostSalvo[]
+  catalogosSalvos        CatalogoSalvo[]
 
   @@map("usuarios")
 }
@@ -58,6 +60,7 @@ model Post {
   curtidas      Curtida[]
   comentarios   Comentario[]
   notificacoes  Notificacao[]
+  salvos        PostSalvo[]
 
   @@map("posts")
 }
@@ -93,6 +96,7 @@ model Catalogo {
   posts         CatalogoPost[]
   imagens       CatalogoImagem[]
   notificacoes  Notificacao[]
+  salvos        CatalogoSalvo[]
 
   @@map("catalogos")
 }
@@ -241,4 +245,30 @@ model Notificacao {
   catalogo  Catalogo? @relation(fields: [catalogoId], references: [id], onDelete: SetNull)
 
   @@map("notificacoes")
+}
+
+model PostSalvo {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int      @map("usuario_id")
+  postId    Int      @map("post_id")
+  salvadoEm DateTime @default(now()) @map("salvo_em")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, postId])
+  @@map("posts_salvos")
+}
+
+model CatalogoSalvo {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int      @map("usuario_id")
+  catalogoId Int      @map("catalogo_id")
+  salvadoEm  DateTime @default(now()) @map("salvo_em")
+
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  catalogo Catalogo @relation(fields: [catalogoId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, catalogoId])
+  @@map("catalogos_salvos")
 }

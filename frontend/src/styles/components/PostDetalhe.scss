@@ -114,6 +114,29 @@
     color: #8A9E7A;
   }
 
+  &__acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: 1.5px solid #E0D9CC;
+    border-radius: 50%;
+    color: #546248;
+    cursor: pointer;
+    transition: all 0.18s;
+
+    &:hover { border-color: #5C7A3A; color: #5C7A3A; background: #EBF0E4; }
+    &--ativo { color: #2A3B1C; border-color: #2A3B1C; }
+  }
+
   &__curtir {
     display: flex;
     align-items: center;
