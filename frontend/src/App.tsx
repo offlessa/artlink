@@ -36,8 +36,9 @@ function AppTheme() {
 }
 
 function RootPage() {
-  const { loading } = useAuth();
+  const { loading, usuario } = useAuth();
   if (loading) return null;
+  if (!usuario) return <Navigate to="/cadastro" replace />;
   return <PublicLayout><Home /></PublicLayout>;
 }
 
