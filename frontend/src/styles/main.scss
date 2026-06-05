@@ -36,6 +36,11 @@ img {
   max-width: 100%;
 }
 
+// Garante que nenhum elemento estoure o container
+* {
+  min-width: 0;
+}
+
 input, textarea {
   font-family: $font-sans;
 }

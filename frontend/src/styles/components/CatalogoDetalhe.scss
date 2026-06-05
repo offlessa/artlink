@@ -130,6 +130,8 @@
     color: #1C2616;
     line-height: 1.2;
     margin-bottom: 6px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   &__desc {
@@ -138,6 +140,8 @@
     line-height: 1.6;
     margin-bottom: 8px;
     max-width: 600px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   &__meta {
