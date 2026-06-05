@@ -45,7 +45,7 @@ export default function Login() {
     setCarregando(true);
     try {
       await login(email, senha, lembrar);
-      navigate("/");
+      navigate("/home");
     } catch (err: any) {
       setErro(err?.response?.data?.message || "E-mail ou senha inválidos.");
     } finally {

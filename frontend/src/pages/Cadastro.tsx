@@ -55,7 +55,7 @@ export default function Cadastro() {
       const data = await res.json();
       if (data.success) {
         await login(email, senha, true);
-        navigate("/");
+        navigate("/home");
       } else {
         setErro(true);
         setMensagem(data.message || "Erro ao criar conta.");

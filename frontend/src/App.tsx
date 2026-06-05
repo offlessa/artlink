@@ -35,20 +35,22 @@ function AppTheme() {
   return null;
 }
 
-function RootPage() {
-  const { loading, usuario } = useAuth();
-  if (loading) return null;
-  if (!usuario) return <Navigate to="/cadastro" replace />;
-  return <PublicLayout><Home /></PublicLayout>;
-}
-
 export default function App() {
   return (
     <AuthProvider>
       <Router>
         <AppTheme />
         <Routes>
-          <Route path="/" element={<RootPage />} />
+          <Route path="/" element={<Cadastro />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Navbar />
+                <main><Home /></main>
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
