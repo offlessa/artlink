@@ -148,14 +148,17 @@ export default function Configuracoes() {
   }
 
   async function excluirConta() {
-    const confirmado = excluirRef.current?.value === usuario?.username;
-    if (!confirmado) { alert(`Digite seu username "@${usuario?.username}" para confirmar.`); return; }
+    const confirmado = excluirRef.current?.value === `@${usuario?.username}`;
+    if (!confirmado) { alert(`Digite @${usuario?.username} para confirmar.`); return; }
     if (!confirm("Tem certeza? Esta ação é irreversível.")) return;
     try {
       await api.delete(`/usuario/${usuario!.id}`);
       logout();
       navigate("/");
-    } catch { alert("Erro ao excluir conta."); }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? "Erro ao excluir conta.";
+      alert(msg);
+    }
   }
 
   const n = config.notificacoes;
