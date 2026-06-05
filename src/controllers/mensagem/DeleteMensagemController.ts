@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/authMiddleware";
 import { DeleteMensagemService } from "../../services/mensagem/DeleteMensagemService";
+import { sendResponse } from "../../../utils/createError";
 
 const service = new DeleteMensagemService();
 
@@ -9,14 +10,14 @@ export class DeleteMensagemController {
     const mensagemId = Number(req.params["id"]);
     const usuarioId = req.usuarioId!;
     const result = await service.apagarParaMim(mensagemId, usuarioId);
-    return res.status(result.statusCode).json(result.data);
+    return sendResponse(res, result);
   }
 
   async apagarParaTodos(req: AuthRequest, res: Response) {
     const mensagemId = Number(req.params["id"]);
     const usuarioId = req.usuarioId!;
     const result = await service.apagarParaTodos(mensagemId, usuarioId);
-    return res.status(result.statusCode).json(result.data);
+    return sendResponse(res, result);
   }
 
   // rota legada

@@ -5,6 +5,12 @@ const selecionarUsuario = {
 };
 
 export class GetCatalogoColaboracaoService {
+  async getAll() {
+    return prismaClient.catalogoColaboracao.findMany({
+      include: { usuario: selecionarUsuario },
+    });
+  }
+
   async getByCatalogo(catalogoId: number) {
     return prismaClient.catalogoColaboracao.findMany({
       where: { catalogoId },

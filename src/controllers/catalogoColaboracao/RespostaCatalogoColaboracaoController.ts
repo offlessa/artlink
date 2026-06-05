@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/authMiddleware";
 import { RespostaCatalogoColaboracaoService } from "../../services/catalogoColaboracao/RespostaCatalogoColaboracaoService";
+import { sendResponse } from "../../../utils/createError";
 
 const service = new RespostaCatalogoColaboracaoService();
 
@@ -9,13 +10,13 @@ export class RespostaCatalogoColaboracaoController {
     const catalogoId = Number(req.params["catalogoId"]);
     const usuarioId = req.usuarioId!;
     const result = await service.aceitar(catalogoId, usuarioId);
-    return res.status(result.statusCode).json(result.data);
+    return sendResponse(res, result);
   }
 
   async recusar(req: AuthRequest, res: Response) {
     const catalogoId = Number(req.params["catalogoId"]);
     const usuarioId = req.usuarioId!;
     const result = await service.recusar(catalogoId, usuarioId);
-    return res.status(result.statusCode).json(result.data);
+    return sendResponse(res, result);
   }
 }
