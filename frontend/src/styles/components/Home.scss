@@ -2,7 +2,7 @@
 
 .home {
   display: flex;
-  min-height: calc(100vh - 68px);
+  min-height: calc(100vh - var(--navbar-h));
   background: $creme;
 
   // ── SIDEBAR ─────────────────────────────────────────────────────────────────
@@ -10,8 +10,8 @@
     width: 240px;
     min-width: 240px;
     position: sticky;
-    top: 68px;
-    height: calc(100vh - 68px);
+    top: var(--navbar-h);
+    height: calc(100vh - var(--navbar-h));
     background: $surface;
     border-right: 1px solid $borda;
     display: flex;
@@ -203,6 +203,11 @@
     background: $surface;
     border-bottom: 1px solid $borda-suave;
     padding: 0 2rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+
+    @media (max-width: 640px) { padding: 0 1rem; }
 
     button {
       padding: 14px 20px;
@@ -215,7 +220,11 @@
       color: $texto-suave;
       cursor: pointer;
       margin-bottom: -1px;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: color 0.18s, border-color 0.18s;
+
+      @media (max-width: 640px) { padding: 12px 14px; font-size: 0.82rem; }
 
       &.active { color: $brand; border-bottom-color: $brand; }
       &:hover:not(.active) { color: $texto-medio; }
@@ -232,6 +241,8 @@
     overflow-x: auto;
     scrollbar-width: none;
     &::-webkit-scrollbar { display: none; }
+
+    @media (max-width: 640px) { padding: 10px 1rem; }
   }
 
   &__pill {

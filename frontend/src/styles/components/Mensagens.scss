@@ -2,7 +2,7 @@
 
 .msgs {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - var(--navbar-h));
   background: $creme;
 
   // ── SIDEBAR ──────────────────────────────────────
@@ -289,6 +289,21 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  &__back-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-medio;
+    padding: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+    &:hover { background: $borda-suave; color: $texto; }
+
+    @media (max-width: 640px) { display: flex; align-items: center; }
   }
 
   &__chat-header {
@@ -658,17 +673,29 @@
 
   @media (max-width: 640px) {
     flex-direction: column;
-    height: auto;
+    height: calc(100vh - var(--navbar-h));
 
     &__sidebar {
       width: 100%;
-      height: 300px;
+      flex: 1;
       border-right: none;
       border-bottom: 1px solid $borda;
+      min-height: 0;
     }
 
     &__chat {
-      height: calc(100vh - 360px);
+      display: none;
+    }
+
+    // Quando uma conversa está selecionada: mostra só o chat
+    &.msgs--conversa-ativa &__sidebar {
+      display: none;
+    }
+
+    &.msgs--conversa-ativa &__chat {
+      display: flex;
+      flex: 1;
+      min-height: 0;
     }
   }
 }

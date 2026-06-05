@@ -1,7 +1,7 @@
 @use '../variables' as *;
 
 .notif-page {
-  min-height: calc(100vh - 68px);
+  min-height: calc(100vh - var(--navbar-h));
   background: $creme;
   display: flex;
   flex-direction: column;

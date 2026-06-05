@@ -1,7 +1,7 @@
 @use '../variables' as *;
 
 .arte {
-  min-height: calc(100vh - 68px);
+  min-height: calc(100vh - var(--navbar-h));
   background: $creme;
   padding-bottom: 40px;
 

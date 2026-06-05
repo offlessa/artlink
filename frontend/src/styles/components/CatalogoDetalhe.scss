@@ -1,5 +1,5 @@
 .cat-det {
-  min-height: calc(100vh - 68px);
+  min-height: calc(100vh - var(--navbar-h));
   display: flex;
   flex-direction: column;
   background: #FAF8F3;
@@ -8,7 +8,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: calc(100vh - 68px);
+    height: calc(100vh - var(--navbar-h));
     color: #8A9E7A;
     font-size: 1rem;
   }

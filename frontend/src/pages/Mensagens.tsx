@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
-import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon } from "../components/Icons";
+import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon, ArrowLeftIcon } from "../components/Icons";
 import "../styles/components/Mensagens.scss";
 
 interface Usuario {
@@ -330,7 +330,7 @@ export default function Mensagens() {
   const conversaArquivada = configDaConversa?.arquivada ?? false;
 
   return (
-    <div className="msgs">
+    <div className={`msgs${conversaSelecionada ? " msgs--conversa-ativa" : ""}`}>
       {/* SIDEBAR */}
       <aside className="msgs__sidebar">
         <div className="msgs__sidebar-header">
@@ -473,6 +473,13 @@ export default function Mensagens() {
         ) : (
           <>
             <div className="msgs__chat-header">
+              <button
+                className="msgs__back-btn"
+                onClick={() => setConversaSelecionada(null)}
+                aria-label="Voltar"
+              >
+                <ArrowLeftIcon size={18} />
+              </button>
               <div className="msgs__avatar msgs__avatar--sm">
                 {conversaSelecionada.fotoPerfil
                   ? <img src={conversaSelecionada.fotoPerfil} alt={conversaSelecionada.nome} />

@@ -8,6 +8,11 @@
   --c-medio:    #546248;
   --c-suave:    #8A9E7A;
   --font-scale: 1;
+  --navbar-h:   68px;
+
+  @media (max-width: 768px) {
+    --navbar-h: 60px;
+  }
 }
 
 // ── Tema escuro ───────────────────────────────────────────────────────────────

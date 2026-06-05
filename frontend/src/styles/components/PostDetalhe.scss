@@ -1,13 +1,13 @@
 .post-detalhe {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 68px);
+  min-height: calc(100vh - var(--navbar-h));
 
   &__loading {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: calc(100vh - 68px);
+    height: calc(100vh - var(--navbar-h));
     color: #8A9E7A;
     font-size: 1rem;
   }
@@ -26,13 +26,18 @@
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
       gap: 1.5rem;
+      padding: 1.5rem 1rem;
     }
   }
 
   // ── Coluna da imagem ──────────────────────────────────────────────────────
   &__imagem-col {
     position: sticky;
-    top: 88px;
+    top: calc(var(--navbar-h) + 20px);
+
+    @media (max-width: 768px) {
+      position: static;
+    }
   }
 
   &__voltar {
