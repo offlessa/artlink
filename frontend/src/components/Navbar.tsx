@@ -330,8 +330,8 @@ export default function Navbar() {
             </div>
             <span className="navbar__username">
               {usuario.username}
-              {isVerificado(usuario.username) && <VerificadoIcon size={12} style={{ marginLeft: 4, verticalAlign: "middle" }} />}
             </span>
+            {isVerificado(usuario.username) && <VerificadoIcon size={12} style={{ marginLeft: 2, verticalAlign: "middle", flexShrink: 0 }} />}
 
             {menuAberto && (
               <div className="navbar__dropdown">
@@ -399,7 +399,10 @@ export default function Navbar() {
                     }
                   </div>
                   <div>
-                    <div className="navbar__mobile-nome">{usuario.nome}</div>
+                    <div className="navbar__mobile-nome">
+                      {usuario.nome}
+                      {isVerificado(usuario.username) && <VerificadoIcon size={14} style={{ marginLeft: 5, verticalAlign: "middle" }} />}
+                    </div>
                     <div className="navbar__mobile-username">@{usuario.username}</div>
                   </div>
                 </Link>
