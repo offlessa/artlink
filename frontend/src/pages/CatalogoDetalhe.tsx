@@ -350,9 +350,9 @@ export default function CatalogoDetalhe() {
       </div>
 
       <div className="cat-det__container">
-        <button className="cat-det__back" onClick={() => navigate("/perfil")}>
+        <button className="cat-det__back" onClick={() => navigate(-1)}>
           <ChevronRightIcon size={13} className="cat-det__back-icon" />
-          Voltar ao perfil
+          Voltar
         </button>
 
         {/* ── BANNER DE CONVITE PENDENTE ───────────────────────── */}

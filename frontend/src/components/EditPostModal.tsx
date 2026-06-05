@@ -71,11 +71,14 @@ export default function EditPostModal({ id, tituloInicial, descricaoInicial, tag
               value={tagInput}
               onChange={e => setTagInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
               onKeyDown={e => {
-                if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                if (e.key === "Enter" || e.key === ",") {
                   e.preventDefault();
+                  e.stopPropagation();
                   const nova = tagInput.trim();
-                  if (!tags.includes(nova) && tags.length < 10) setTags(p => [...p, nova]);
-                  setTagInput("");
+                  if (nova && !tags.includes(nova) && tags.length < 10) {
+                    setTags(p => [...p, nova]);
+                    setTagInput("");
+                  }
                 }
               }}
             />

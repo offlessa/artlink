@@ -226,6 +226,7 @@ export default function PostDetalhe() {
 
         <div className="post-detalhe__imagem-col">
           <p className="post-detalhe__breadcrumb">
+            <button className="post-detalhe__voltar" onClick={() => navigate(-1)}>← Voltar</button>
             Arte / <span>{post.titulo}</span>
           </p>
           <div className="post-detalhe__imagem-wrapper">

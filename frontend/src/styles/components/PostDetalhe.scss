@@ -35,11 +35,25 @@
     top: 88px;
   }
 
+  &__voltar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #5C7A3A;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0;
+    margin-right: 10px;
+    &:hover { text-decoration: underline; }
+  }
+
   &__breadcrumb {
     font-size: 0.78rem;
     color: #8A9E7A;
     margin-bottom: 12px;
     letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
 
     span { color: #2A3B1C; font-weight: 600; }
   }
@@ -192,6 +206,11 @@
     font-size: 0.9rem;
     color: #546248;
     line-height: 1.7;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    max-width: 100%;
+    overflow: hidden;
     border-top: 1px solid #E0D9CC;
     padding-top: 14px;
   }

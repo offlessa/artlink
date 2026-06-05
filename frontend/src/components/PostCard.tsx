@@ -167,11 +167,7 @@ export default function PostCard({ id, titulo, descricao, imagem, tags, visualiz
 
         <div className="post-card__top">
           <h2 className="post-card__titulo">{titulo}</h2>
-          {autor && (
-            <p className="post-card__subtitulo">
-              {descricao ? descricao : `por ${autor.nome}`}
-            </p>
-          )}
+          {autor && <p className="post-card__subtitulo">por {autor.nome}</p>}
         </div>
 
         <div className="post-card__image-wrapper">

@@ -171,15 +171,18 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
                 <input
                   className="cpm__tag-input"
                   type="text"
-                  placeholder="Adicionar tag (ex: aquarela) e pressionar Enter"
+                  placeholder="Digite uma tag e pressione Enter"
                   value={tagInput}
                   onChange={e => setTagInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                   onKeyDown={e => {
-                    if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                    if (e.key === "Enter" || e.key === ",") {
                       e.preventDefault();
+                      e.stopPropagation();
                       const nova = tagInput.trim();
-                      if (!tags.includes(nova) && tags.length < 10) setTags(p => [...p, nova]);
-                      setTagInput("");
+                      if (nova && !tags.includes(nova) && tags.length < 10) {
+                        setTags(p => [...p, nova]);
+                        setTagInput("");
+                      }
                     }
                   }}
                 />
