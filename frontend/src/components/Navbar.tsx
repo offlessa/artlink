@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { SearchIcon, UserIcon, LogOutIcon, PlusIcon, BellIcon, MessageIcon, SettingsIcon } from "./Icons";
+import { SearchIcon, UserIcon, LogOutIcon, PlusIcon, BellIcon, MessageIcon, SettingsIcon, VerificadoIcon } from "./Icons";
+import { isVerificado } from "../utils/verificado";
 import CreatePostModal from "./CreatePostModal";
 import { api } from "../api/api";
 import "../styles/components/Navbar.scss";
@@ -314,7 +315,10 @@ export default function Navbar() {
               : <span>{inicial}</span>
             }
           </div>
-          <span className="navbar__username">{usuario.username}</span>
+          <span className="navbar__username">
+            {usuario.username}
+            {isVerificado(usuario.username) && <VerificadoIcon size={12} style={{ marginLeft: 4, verticalAlign: "middle" }} />}
+          </span>
 
           {menuAberto && (
             <div className="navbar__dropdown">

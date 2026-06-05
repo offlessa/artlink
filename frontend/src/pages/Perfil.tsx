@@ -9,10 +9,11 @@ import CatalogoModal from "../components/CatalogoModal";
 import {
   HeartIcon, CommentIcon, ImageOffIcon,
   PlusIcon, PaletteIcon, CameraIcon, TrashIcon,
-  GridIcon, ListIcon, ShareIcon,
+  GridIcon, ListIcon, ShareIcon, VerificadoIcon,
 } from "../components/Icons";
 import Toast from "../components/Toast";
 import { copiarLink } from "../utils/compartilhar";
+import { isVerificado } from "../utils/verificado";
 import "../styles/components/Perfil.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
@@ -237,7 +238,10 @@ export default function Perfil() {
           </div>
         ) : (
           <div className="perfil__meta">
-            <h1 className="perfil__nome">{usuario?.nome}</h1>
+            <h1 className="perfil__nome">
+              {usuario?.nome}
+              {isVerificado(usuario?.username) && <VerificadoIcon size={18} style={{ marginLeft: 6, verticalAlign: "middle" }} />}
+            </h1>
             <span className="perfil__username">@{usuario?.username}</span>
             {usuario?.bio && <p className="perfil__bio">{usuario.bio}</p>}
             {usuario?.cidade && <p className="perfil__cidade">📍 {usuario.cidade}</p>}

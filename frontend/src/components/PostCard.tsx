@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
-import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon } from "./Icons";
+import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon } from "./Icons";
 import Toast from "./Toast";
 import { copiarLink } from "../utils/compartilhar";
+import { isVerificado } from "../utils/verificado";
 import "../styles/components/PostCard.scss";
 
 interface PostCardProps {
@@ -130,6 +131,7 @@ export default function PostCard({ id, titulo, descricao, imagem, curtidas, auto
               }
             </div>
             <span>{autor?.username}</span>
+            {isVerificado(autor?.username) && <VerificadoIcon size={13} />}
           </div>
         </div>
       </article>

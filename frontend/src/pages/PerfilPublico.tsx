@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
-import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon } from "../components/Icons";
+import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon, VerificadoIcon } from "../components/Icons";
 import Toast from "../components/Toast";
 import { copiarLink } from "../utils/compartilhar";
+import { isVerificado } from "../utils/verificado";
 import "../styles/components/PerfilPublico.scss";
 
 interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number; usuarioId: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
@@ -133,7 +134,10 @@ export default function PerfilPublico() {
           {perfil.fotoPerfil ? <img src={perfil.fotoPerfil} alt={perfil.nome} /> : <span>{inicial}</span>}
         </div>
         <div className="pp__meta">
-          <h1 className="pp__nome">{perfil.nome}</h1>
+          <h1 className="pp__nome">
+            {perfil.nome}
+            {isVerificado(perfil.username) && <VerificadoIcon size={18} style={{ marginLeft: 6, verticalAlign: "middle" }} />}
+          </h1>
           <span className="pp__username">@{perfil.username}</span>
           {perfil.bio && <p className="pp__bio">{perfil.bio}</p>}
           {perfil.cidade && <p className="pp__cidade">📍 {perfil.cidade}</p>}

@@ -1,6 +1,9 @@
+import React from "react";
+
 interface IconProps {
   size?: number;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function SearchIcon({ size = 16, className }: IconProps) {
@@ -266,6 +269,15 @@ export function BookmarkIcon({ size = 16, filled = false, className }: IconProps
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+export function VerificadoIcon({ size = 14, className, style }: IconProps) {
+  return (
+    <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" fill="#4A90D9" />
+      <polyline points="7 12 10.5 15.5 17 9" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
