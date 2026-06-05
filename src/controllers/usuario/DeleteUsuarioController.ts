@@ -4,16 +4,16 @@ import { DeleteUsuarioService } from "../../services/usuario/DeleteUsuarioServic
 export class DeleteUsuarioController {
   async handle(req: Request, res: Response) {
     try {
-      const { usuarioId } = req.params;
+      const { id } = req.params;
 
-      if (!usuarioId) {
+      if (!id) {
         return res
           .status(400)
-          .json({ success: false, message: "usuarioId é obrigatório" });
+          .json({ success: false, message: "id é obrigatório" });
       }
 
       const service = new DeleteUsuarioService();
-      const result = await service.execute(Number(usuarioId));
+      const result = await service.execute(Number(id));
 
       if (!result.success) {
         return res.status(404).json(result);
