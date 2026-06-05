@@ -165,6 +165,28 @@
     }
   }
 
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  &__tag {
+    font-size: 0.78rem;
+    color: #5C7A3A;
+    background: #EBF0E4;
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-weight: 600;
+  }
+
+  &__views {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    color: #8A9E7A;
+  }
+
   &__descricao {
     margin-top: 14px;
     font-size: 0.9rem;

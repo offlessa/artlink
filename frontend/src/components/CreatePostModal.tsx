@@ -20,6 +20,8 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   const [buscaColab, setBuscaColab] = useState("");
   const [resultadosColab, setResultadosColab] = useState<Colaborador[]>([]);
   const [mostrarColab, setMostrarColab] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [criando, setCriando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -82,6 +84,7 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
         titulo: titulo.trim(),
         descricao: descricao.trim() || null,
         imagem: imagemUrl,
+        tags,
       });
       const postId = res.data?.data?.id ?? res.data?.id;
       for (const c of colaboradores) {
@@ -154,6 +157,33 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
                 onChange={e => setDescricao(e.target.value)}
                 maxLength={1000}
               />
+
+              {/* Tags */}
+              <div className="cpm__tags-wrap">
+                <div className="cpm__tags-list">
+                  {tags.map(t => (
+                    <span key={t} className="cpm__tag">
+                      #{t}
+                      <button type="button" onClick={() => setTags(p => p.filter(x => x !== t))}>&times;</button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  className="cpm__tag-input"
+                  type="text"
+                  placeholder="Adicionar tag (ex: aquarela) e pressionar Enter"
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                  onKeyDown={e => {
+                    if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
+                      e.preventDefault();
+                      const nova = tagInput.trim();
+                      if (!tags.includes(nova) && tags.length < 10) setTags(p => [...p, nova]);
+                      setTagInput("");
+                    }
+                  }}
+                />
+              </div>
 
               <div className="cpm__collab">
                 <button className="cpm__collab-toggle" type="button" onClick={() => setMostrarColab(p => !p)}>

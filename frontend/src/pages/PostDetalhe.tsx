@@ -26,6 +26,8 @@ interface Post {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  tags?: string[];
+  visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
   comentarios: Comentario[];
   autor: { id: number; nome: string; username: string; fotoPerfil?: string };
@@ -62,7 +64,10 @@ export default function PostDetalhe() {
     }
   }
 
-  useEffect(() => { carregarPost(); }, [id]);
+  useEffect(() => {
+    carregarPost();
+    if (id) api.patch(`/post/${id}/visualizar`).catch(() => {});
+  }, [id]);
 
   useEffect(() => {
     if (!usuario || !id) return;
@@ -269,6 +274,14 @@ export default function PostDetalhe() {
             </div>
           </div>
           {post.descricao && <p className="post-detalhe__descricao">{post.descricao}</p>}
+          {post.tags && post.tags.length > 0 && (
+            <div className="post-detalhe__tags">
+              {post.tags.map(t => <span key={t} className="post-detalhe__tag">#{t}</span>)}
+            </div>
+          )}
+          {(post.visualizacoes ?? 0) > 0 && (
+            <p className="post-detalhe__views">{post.visualizacoes} visualizaç{post.visualizacoes === 1 ? "ão" : "ões"}</p>
+          )}
 
           {post.colaboracoes.length > 0 && (
             <div className="post-detalhe__collabs">

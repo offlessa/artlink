@@ -205,6 +205,51 @@
     }
   }
 
+  // ── TAGS ─────────────────────────────────────────────────
+  &__tags-wrap {
+    padding: 8px 0;
+    border-bottom: 1px solid $borda-suave;
+  }
+
+  &__tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: $brand-subtle;
+    color: $brand;
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: $brand;
+      font-size: 0.9rem;
+      line-height: 1;
+      padding: 0;
+    }
+  }
+
+  &__tag-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 0.84rem;
+    font-family: $font-sans;
+    color: $texto;
+    background: transparent;
+    &::placeholder { color: $texto-suave; }
+  }
+
   // ── COLLAB ───────────────────────────────────────────────
   &__collab {
     margin-top: 4px;

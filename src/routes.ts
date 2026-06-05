@@ -26,6 +26,7 @@ import { CreatePostController } from "./controllers/post/CreatePostController";
 import { GetPostController } from "./controllers/post/GetPostController";
 import { UpdatePostController } from "./controllers/post/UpdatePostController";
 import { DeletePostController } from "./controllers/post/DeletePostController";
+import { VisualizarPostController } from "./controllers/post/VisualizarPostController";
 
 // === POST COLABORAÇÃO ===
 import { CreatePostColaboracaoController } from "./controllers/postColaboracao/CreatePostColaboracaoController";
@@ -130,6 +131,7 @@ router.get("/post/feed/:usuarioId", new GetPostController().getFeed);
 router.get("/post/usuario/:usuarioId", new GetPostController().getByUsuario);
 router.put("/post/:id", authMiddleware, new UpdatePostController().handle);
 router.delete("/post/:id", authMiddleware, new DeletePostController().handle);
+router.patch("/post/:id/visualizar", new VisualizarPostController().handle);
 
 // ===================================================
 // ================ POST COLABORAÇÃO =================

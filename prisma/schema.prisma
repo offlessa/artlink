@@ -47,12 +47,14 @@ model Usuario {
 }
 
 model Post {
-  id           Int      @id @default(autoincrement())
-  usuarioId    Int      @map("usuario_id")
-  titulo       String   @db.VarChar(150)
-  descricao    String?  @db.Text
-  imagem       String?  @db.Text
-  dataPostagem DateTime @default(now()) @map("data_postagem")
+  id            Int      @id @default(autoincrement())
+  usuarioId     Int      @map("usuario_id")
+  titulo        String   @db.VarChar(150)
+  descricao     String?  @db.Text
+  imagem        String?  @db.Text
+  tags          String[] @default([])
+  visualizacoes Int      @default(0)
+  dataPostagem  DateTime @default(now()) @map("data_postagem")
 
   autor         Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   colaboracoes  PostColaboracao[]

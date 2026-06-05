@@ -5,19 +5,10 @@ export class UpdatePostController {
   async handle(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { titulo, descricao, imagem } = req.body;
+      const { titulo, descricao, imagem, tags } = req.body;
 
       if (!id) {
         return res.status(400).json({ message: "ID do post não fornecido" });
-      }
-
-      if (!titulo && !descricao && !imagem) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Informe pelo menos um campo para atualizar (titulo, descricao ou imagem)",
-          });
       }
 
       const service = new UpdatePostService();
@@ -25,6 +16,7 @@ export class UpdatePostController {
         titulo,
         descricao,
         imagem,
+        tags: Array.isArray(tags) ? tags : undefined,
       });
 
       return res.json(resultado);

@@ -12,4 +12,5 @@ export interface PostRequest {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  tags?: string[];
 }

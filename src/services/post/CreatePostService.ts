@@ -13,6 +13,7 @@ export class CreatePostService {
     titulo,
     descricao,
     imagem,
+    tags,
   }: PostRequest): Promise<ServiceResponse> {
     if (!usuarioId) {
       return createError(
@@ -57,6 +58,7 @@ export class CreatePostService {
           titulo: titulo.trim(),
           descricao: descricao?.trim() || null,
           imagem: imagem?.trim() || null,
+          tags: tags ?? [],
         },
         select: {
           id: true,
@@ -64,6 +66,8 @@ export class CreatePostService {
           titulo: true,
           descricao: true,
           imagem: true,
+          tags: true,
+          visualizacoes: true,
           dataPostagem: true,
         },
       });

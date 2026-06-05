@@ -78,6 +78,30 @@
     opacity: 0.35;
   }
 
+  // ── TAGS ─────────────────────────────────────────────────────────────────
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 12px 4px;
+  }
+
+  &__tag {
+    font-size: 0.7rem;
+    color: $brand;
+    background: $brand-subtle;
+    border-radius: 99px;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+
+  &__views {
+    font-size: 0.68rem;
+    color: $texto-suave;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
   // ── RODAPÉ ────────────────────────────────────────────────────────────────
   &__bottom {
     padding: 12px 16px 14px;
@@ -196,7 +220,7 @@
     overflow: hidden;
   }
 
-  &__menu-excluir {
+  &__menu-dropdown button {
     width: 100%;
     padding: 10px 14px;
     background: none;
@@ -204,9 +228,14 @@
     text-align: left;
     font-family: $font-sans;
     font-size: 0.83rem;
-    color: #C0392B;
+    color: $texto;
     cursor: pointer;
-    &:hover { background: #fef2f2; }
+    &:hover { background: $brand-subtle; }
+  }
+
+  &__menu-excluir {
+    color: #C0392B !important;
+    &:hover { background: #fef2f2 !important; }
   }
 
   // ── MODAL ENVIAR ──────────────────────────────────────────────────────────

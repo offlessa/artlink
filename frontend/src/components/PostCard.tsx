@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
 import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon, SendIcon, XIcon } from "./Icons";
 import Toast from "./Toast";
+import EditPostModal from "./EditPostModal";
 import { copiarLink } from "../utils/compartilhar";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/PostCard.scss";
@@ -15,13 +16,16 @@ interface PostCardProps {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  tags?: string[];
+  visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
   autor?: { id: number; nome: string; username: string; fotoPerfil?: string };
   onCurtidaChange?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
-export default function PostCard({ id, titulo, descricao, imagem, curtidas, autor, onCurtidaChange, onDelete }: PostCardProps) {
+export default function PostCard({ id, titulo, descricao, imagem, tags, visualizacoes, curtidas, autor, onCurtidaChange, onDelete, onEdit }: PostCardProps) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
 
@@ -32,6 +36,7 @@ export default function PostCard({ id, titulo, descricao, imagem, curtidas, auto
   const [salvo, setSalvo] = useState(false);
   const [toast, setToast] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
+  const [modalEditar, setModalEditar] = useState(false);
   const [modalEnviar, setModalEnviar] = useState(false);
   const [busca, setBusca] = useState("");
   const [resultados, setResultados] = useState<Usuario[]>([]);
@@ -153,6 +158,7 @@ export default function PostCard({ id, titulo, descricao, imagem, curtidas, auto
             >⋮</button>
             {menuAberto && (
               <div className="post-card__menu-dropdown">
+                <button onClick={e => { e.stopPropagation(); setMenuAberto(false); setModalEditar(true); }}>Editar post</button>
                 <button className="post-card__menu-excluir" onClick={excluir}>Excluir post</button>
               </div>
             )}
@@ -174,6 +180,14 @@ export default function PostCard({ id, titulo, descricao, imagem, curtidas, auto
             : <div className="post-card__no-image"><ImageOffIcon size={36} /></div>
           }
         </div>
+
+        {tags && tags.length > 0 && (
+          <div className="post-card__tags">
+            {tags.slice(0, 3).map(t => (
+              <span key={t} className="post-card__tag" onClick={e => e.stopPropagation()}>#{t}</span>
+            ))}
+          </div>
+        )}
 
         <div className="post-card__bottom">
           <button
@@ -218,9 +232,23 @@ export default function PostCard({ id, titulo, descricao, imagem, curtidas, auto
             </div>
             <span>{autor?.username}</span>
             {isVerificado(autor?.username) && <VerificadoIcon size={13} />}
+            {visualizacoes !== undefined && visualizacoes > 0 && (
+              <span className="post-card__views">{visualizacoes} {visualizacoes === 1 ? "view" : "views"}</span>
+            )}
           </div>
         </div>
       </article>
+
+      {modalEditar && (
+        <EditPostModal
+          id={id}
+          tituloInicial={titulo}
+          descricaoInicial={descricao}
+          tagsIniciais={tags}
+          onClose={() => setModalEditar(false)}
+          onSuccess={() => { onEdit?.(); onCurtidaChange?.(); }}
+        />
+      )}
 
       {/* Modal enviar */}
       {modalEnviar && (

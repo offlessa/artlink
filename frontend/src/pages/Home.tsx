@@ -16,12 +16,12 @@ interface Post {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  tags?: string[];
+  visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
   comentarios: { id: number }[];
   autor: { id: number; nome: string; username: string; fotoPerfil?: string };
 }
-
-const CATEGORIAS = ["Metal", "Crochê", "Plumária", "Cerâmica", "Madeira", "Bordado", "Macramê"];
 
 export default function Home() {
   const { usuario } = useAuth();
@@ -83,12 +83,15 @@ export default function Home() {
 
   const listaAtiva = feedTab === "feed" ? feedPosts : posts;
 
+  const todasTags = useMemo(() => {
+    const set = new Set<string>();
+    posts.forEach(p => p.tags?.forEach(t => set.add(t)));
+    return Array.from(set).slice(0, 20);
+  }, [posts]);
+
   const filtrados = useMemo(() => {
     let lista = categoria
-      ? listaAtiva.filter(p =>
-          p.titulo.toLowerCase().includes(categoria.toLowerCase()) ||
-          (p.descricao ?? "").toLowerCase().includes(categoria.toLowerCase())
-        )
+      ? listaAtiva.filter(p => p.tags?.includes(categoria))
       : listaAtiva;
     if (ordem === "engajamento") {
       lista = [...lista].sort((a, b) => b.curtidas.length - a.curtidas.length);
@@ -210,13 +213,13 @@ export default function Home() {
           >
             Tudo
           </button>
-          {CATEGORIAS.map(cat => (
+          {todasTags.map(tag => (
             <button
-              key={cat}
-              className={`home__pill ${categoria === cat ? "home__pill--ativo" : ""}`}
-              onClick={() => setCategoria(categoria === cat ? null : cat)}
+              key={tag}
+              className={`home__pill ${categoria === tag ? "home__pill--ativo" : ""}`}
+              onClick={() => setCategoria(categoria === tag ? null : tag)}
             >
-              {cat}
+              #{tag}
             </button>
           ))}
         </div>
@@ -247,10 +250,13 @@ export default function Home() {
                   titulo={post.titulo}
                   descricao={post.descricao}
                   imagem={post.imagem}
+                  tags={post.tags}
+                  visualizacoes={post.visualizacoes}
                   curtidas={post.curtidas}
                   autor={post.autor}
                   onCurtidaChange={() => { carregarPosts(); if (usuario) carregarFeed(); }}
                   onDelete={() => { carregarPosts(); if (usuario) carregarFeed(); }}
+                  onEdit={() => { carregarPosts(); if (usuario) carregarFeed(); }}
                 />
               ))}
             </div>

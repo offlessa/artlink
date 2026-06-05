@@ -3,7 +3,7 @@ import prismaClient from "../../prisma";
 export class UpdatePostService {
   async execute(
     id: number,
-    novosDados: { titulo?: string; descricao?: string; imagem?: string }
+    novosDados: { titulo?: string; descricao?: string; imagem?: string; tags?: string[] }
   ) {
     // Verifica se o post existe
     const postExistente = await prismaClient.post.findUnique({

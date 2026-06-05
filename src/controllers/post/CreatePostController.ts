@@ -4,7 +4,7 @@ import { sendResponse } from "../../../utils/createError";
 
 export class CreatePostController {
   async handle(req: Request, res: Response) {
-    const { usuarioId, titulo, descricao, imagem } = req.body;
+    const { usuarioId, titulo, descricao, imagem, tags } = req.body;
 
     const createPostService = new CreatePostService();
 
@@ -13,6 +13,7 @@ export class CreatePostController {
       titulo,
       descricao,
       imagem,
+      tags: Array.isArray(tags) ? tags : [],
     });
 
     return sendResponse(res, post);
