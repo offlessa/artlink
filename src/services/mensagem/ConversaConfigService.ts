@@ -28,12 +28,11 @@ export class ConversaConfigService {
 
   async recusarSolicitacao(usuarioId: number, outroId: number): Promise<ServiceResponse> {
     try {
-      // Para quem recusou: deletar o registro (conversa some)
-      await prismaClient.conversaConfig.deleteMany({
-        where: { usuarioId, outroUsuarioId: outroId },
+      await prismaClient.conversaConfig.upsert({
+        where: { usuarioId_outroUsuarioId: { usuarioId, outroUsuarioId: outroId } },
+        create: { usuarioId, outroUsuarioId: outroId, solicitacao: "recusada" },
+        update: { solicitacao: "recusada" },
       });
-      // Para quem enviou: manter registro com "enviada" (fica pendente)
-      // Não apaga mensagens — ficam visíveis para o remetente
       return createSuccess({ message: "Solicitação recusada." });
     } catch (error) {
       console.error(error);

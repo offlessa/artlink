@@ -314,6 +314,7 @@ export default function Mensagens() {
   const inicial = (nome: string) => nome.charAt(0).toUpperCase();
 
   const conversasFiltradas = conversas.filter(c => {
+    if (c.solicitacao === "recusada") return false;
     if (aba === "solicitacoes") return c.solicitacao === "recebida";
     if (aba === "arquivadas") return c.arquivada;
     return !c.arquivada && c.solicitacao !== "recebida";
