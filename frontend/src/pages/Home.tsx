@@ -250,6 +250,7 @@ export default function Home() {
                   curtidas={post.curtidas}
                   autor={post.autor}
                   onCurtidaChange={() => { carregarPosts(); if (usuario) carregarFeed(); }}
+                  onDelete={() => { carregarPosts(); if (usuario) carregarFeed(); }}
                 />
               ))}
             </div>

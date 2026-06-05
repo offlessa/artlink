@@ -41,6 +41,12 @@ export default function Configuracoes() {
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
 
+  // Alterar username
+  const [novoUsername, setNovoUsername] = useState("");
+  const [erroUsername, setErroUsername] = useState("");
+  const [salvandoUsername, setSalvandoUsername] = useState(false);
+  const [usernameSalvo, setUsernameSalvo] = useState(false);
+
   // Segurança — alterar senha
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
@@ -108,6 +114,25 @@ export default function Configuracoes() {
     } catch (err: any) {
       setErroSenha(err.response?.data?.message ?? "Erro ao alterar senha.");
     } finally { setSalvandoSenha(false); }
+  }
+
+  async function alterarUsername(e: React.FormEvent) {
+    e.preventDefault();
+    setErroUsername("");
+    const u = novoUsername.trim().toLowerCase();
+    if (!u) { setErroUsername("Digite um username."); return; }
+    if (u === usuario?.username) { setErroUsername("É o mesmo username atual."); return; }
+    if (!/^[a-z0-9_]{3,30}$/.test(u)) { setErroUsername("Só letras minúsculas, números e _ (3–30 caracteres)."); return; }
+    setSalvandoUsername(true);
+    try {
+      await api.put(`/usuario/${usuario!.id}`, { username: u });
+      updateUsuario({ username: u });
+      setNovoUsername("");
+      setUsernameSalvo(true);
+      setTimeout(() => setUsernameSalvo(false), 3000);
+    } catch (err: any) {
+      setErroUsername(err.response?.data?.message ?? "Esse username já está em uso.");
+    } finally { setSalvandoUsername(false); }
   }
 
   async function exportarDados() {
@@ -392,6 +417,27 @@ export default function Configuracoes() {
         <section className="cfg__secao">
           <div className="cfg__secao-titulo">
             <LockIcon size={16} /><span>Conta & Segurança</span>
+          </div>
+
+          {/* Alterar username */}
+          <div className="cfg__subbloco">
+            <p className="cfg__sublabel">Alterar @username</p>
+            <p className="cfg__item-desc" style={{ marginBottom: 8 }}>Atual: <strong>@{usuario?.username}</strong></p>
+            <form className="cfg__senha-form" onSubmit={alterarUsername}>
+              <input
+                type="text"
+                placeholder="Novo username (ex: meu_nome)"
+                value={novoUsername}
+                onChange={e => setNovoUsername(e.target.value)}
+                className="cfg__input"
+                autoComplete="off"
+              />
+              {erroUsername && <p className="cfg__erro">{erroUsername}</p>}
+              {usernameSalvo && <p className="cfg__sucesso">✓ Username alterado com sucesso!</p>}
+              <button type="submit" className="cfg__btn-sec" disabled={salvandoUsername}>
+                {salvandoUsername ? "Salvando..." : "Alterar username"}
+              </button>
+            </form>
           </div>
 
           {/* Alterar senha */}
