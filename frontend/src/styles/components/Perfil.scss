@@ -459,6 +459,53 @@
     &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
 
+  &__post-menu-wrap {
+    position: relative;
+  }
+
+  &__post-menu-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    padding: 2px 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 1rem;
+    line-height: 1;
+    &:hover { color: $brand; background: $brand-subtle; }
+  }
+
+  &__post-menu-dropdown {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    right: 0;
+    background: $surface;
+    border: 1px solid $borda;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    min-width: 110px;
+    overflow: hidden;
+    z-index: 10;
+
+    button {
+      width: 100%;
+      padding: 9px 13px;
+      background: none;
+      border: none;
+      text-align: left;
+      font-family: $font-sans;
+      font-size: 0.82rem;
+      color: $texto;
+      cursor: pointer;
+      &:hover { background: $brand-subtle; }
+    }
+  }
+
+  &__post-menu-excluir {
+    color: #C0392B !important;
+    &:hover { background: #fef2f2 !important; }
+  }
+
   // Card style variants
   &__galeria--sharp .perfil__post-card { border-radius: 0; }
   &__galeria--glass .perfil__post-card {

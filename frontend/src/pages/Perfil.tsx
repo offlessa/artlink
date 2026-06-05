@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 import CreatePostModal from "../components/CreatePostModal";
 import CatalogoModal from "../components/CatalogoModal";
+import EditPostModal from "../components/EditPostModal";
 import {
   HeartIcon, CommentIcon, ImageOffIcon,
   PlusIcon, PaletteIcon, CameraIcon, TrashIcon,
@@ -75,6 +76,8 @@ export default function Perfil() {
   const [config, setConfig] = useState<ProfileConfig>(DEFAULT_CONFIG);
   const [editData, setEditData] = useState({ nome: "", bio: "", cidade: "", contato: "" });
   const [excluindo, setExcluindo] = useState<number | null>(null);
+  const [menuPostAberto, setMenuPostAberto] = useState<number | null>(null);
+  const [editandoPost, setEditandoPost] = useState<Post | null>(null);
   const [salvandoConfig, setSalvandoConfig] = useState(false);
   const [salvandoPerfil, setSalvandoPerfil] = useState(false);
 
@@ -334,14 +337,25 @@ export default function Perfil() {
                         <TrashIcon size={13} />
                       </button>
                     ) : (
-                      <button
-                        className="perfil__post-del"
-                        onClick={e => excluirPost(e, post.id)}
-                        disabled={excluindo === post.id}
-                        title="Excluir"
-                      >
-                        <TrashIcon size={13} />
-                      </button>
+                      <div className="perfil__post-menu-wrap" onClick={e => e.stopPropagation()}>
+                        <button
+                          className="perfil__post-menu-btn"
+                          onClick={() => setMenuPostAberto(menuPostAberto === post.id ? null : post.id)}
+                        >⋮</button>
+                        {menuPostAberto === post.id && (
+                          <div className="perfil__post-menu-dropdown">
+                            <button onClick={e => { e.stopPropagation(); setMenuPostAberto(null); setEditandoPost(post); }}>
+                              Editar
+                            </button>
+                            <button
+                              className="perfil__post-menu-excluir"
+                              onClick={e => { e.stopPropagation(); setMenuPostAberto(null); excluirPost(e, post.id); }}
+                            >
+                              Excluir
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -543,6 +557,16 @@ export default function Perfil() {
 
       {showModal && <CreatePostModal onClose={() => setShowModal(false)} onSuccess={carregarDados} />}
       {showCatalogoModal && <CatalogoModal onClose={() => setShowCatalogoModal(false)} />}
+      {editandoPost && (
+        <EditPostModal
+          id={editandoPost.id}
+          tituloInicial={editandoPost.titulo}
+          descricaoInicial={editandoPost.descricao}
+          tagsIniciais={(editandoPost as any).tags}
+          onClose={() => setEditandoPost(null)}
+          onSuccess={carregarDados}
+        />
+      )}
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
 
       <Footer />

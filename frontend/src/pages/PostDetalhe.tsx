@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 import Toast from "../components/Toast";
 import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon, BookmarkIcon, ShareIcon } from "../components/Icons";
+import EditPostModal from "../components/EditPostModal";
 import { copiarLink } from "../utils/compartilhar";
 import "../styles/components/PostDetalhe.scss";
 
@@ -48,6 +49,8 @@ export default function PostDetalhe() {
   const [verOcultos, setVerOcultos] = useState(false);
   const [salvo, setSalvo] = useState(false);
   const [toast, setToast] = useState("");
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [editando, setEditando] = useState(false);
 
   async function carregarPost() {
     try {
@@ -272,14 +275,37 @@ export default function PostDetalhe() {
               >
                 <ShareIcon size={16} />
               </button>
+              {usuario?.id === post.autor.id && (
+                <div className="post-detalhe__menu-wrap">
+                  <button
+                    className="post-detalhe__menu-btn"
+                    onClick={() => setMenuAberto(v => !v)}
+                    title="Opções"
+                  >⋮</button>
+                  {menuAberto && (
+                    <div className="post-detalhe__menu-dropdown">
+                      <button onClick={() => { setMenuAberto(false); setEditando(true); }}>Editar post</button>
+                      <button
+                        className="post-detalhe__menu-excluir"
+                        onClick={async () => {
+                          setMenuAberto(false);
+                          if (!confirm("Excluir este post?")) return;
+                          await api.delete(`/post/${post.id}`);
+                          navigate(-1);
+                        }}
+                      >Excluir post</button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-          {post.descricao && <p className="post-detalhe__descricao">{post.descricao}</p>}
           {post.tags && post.tags.length > 0 && (
             <div className="post-detalhe__tags">
               {post.tags.map(t => <span key={t} className="post-detalhe__tag">#{t}</span>)}
             </div>
           )}
+          {post.descricao && <p className="post-detalhe__descricao">{post.descricao}</p>}
           {(post.visualizacoes ?? 0) > 0 && (
             <p className="post-detalhe__views">{post.visualizacoes} visualizaç{post.visualizacoes === 1 ? "ão" : "ões"}</p>
           )}
@@ -358,6 +384,16 @@ export default function PostDetalhe() {
       </div>
       <Footer />
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
+      {editando && post && (
+        <EditPostModal
+          id={post.id}
+          tituloInicial={post.titulo}
+          descricaoInicial={post.descricao}
+          tagsIniciais={post.tags}
+          onClose={() => setEditando(false)}
+          onSuccess={carregarPost}
+        />
+      )}
     </div>
   );
 }
