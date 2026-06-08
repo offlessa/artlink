@@ -5,19 +5,18 @@ export function urlPublica(path: string): string {
   return `${base}${path}`;
 }
 
-export async function copiarLink(path: string, onSucesso: (msg: string) => void) {
+export async function copiarLink(path: string, onSucesso: (msg: string) => void, msg = "Link copiado!") {
   const url = urlPublica(path);
   try {
     await navigator.clipboard.writeText(url);
-    onSucesso("Link copiado!");
+    onSucesso(msg);
   } catch {
-    // fallback: seleciona o texto para cópia manual
     const el = document.createElement("input");
     el.value = url;
     document.body.appendChild(el);
     el.select();
     document.execCommand("copy");
     document.body.removeChild(el);
-    onSucesso("Link copiado!");
+    onSucesso(msg);
   }
 }

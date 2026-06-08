@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
+import { useI18n } from "../hooks/useI18n";
 import PostCard from "../components/PostCard";
 import Footer from "../components/Footer";
 import { SearchIcon } from "../components/Icons";
@@ -20,6 +21,7 @@ type Aba = "arte" | "artistas";
 export default function Busca() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const t = useI18n();
   const [posts, setPosts] = useState<Post[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [busca, setBusca] = useState(searchParams.get("q") ?? "");
@@ -71,13 +73,13 @@ export default function Busca() {
   return (
     <div className="busca">
       <div className="busca__header">
-        <span className="busca__label">Pesquisar</span>
+        <span className="busca__label">{t.search.label}</span>
         <div className="busca__input-wrapper">
           <SearchIcon size={16} className="busca__icon" />
           <input
             className="busca__input"
             type="text"
-            placeholder="Título, artista, técnica..."
+            placeholder={t.search.placeholder}
             value={busca}
             onChange={e => setBusca(e.target.value)}
             autoFocus
@@ -87,23 +89,23 @@ export default function Busca() {
 
         <div className="busca__abas">
           <button className={aba === "arte" ? "active" : ""} onClick={() => handleAba("arte")}>
-            Arte {!carregando && <span>{postsFiltrados.length}</span>}
+            {t.search.art} {!carregando && <span>{postsFiltrados.length}</span>}
           </button>
           <button className={aba === "artistas" ? "active" : ""} onClick={() => handleAba("artistas")}>
-            Artistas {!carregando && <span>{usersFiltrados.length}</span>}
+            {t.search.artists} {!carregando && <span>{usersFiltrados.length}</span>}
           </button>
         </div>
       </div>
 
       <div className="busca__body">
         {carregando ? (
-          <div className="busca__empty"><p>Carregando...</p></div>
+          <div className="busca__empty"><p>{t.search.loading}</p></div>
         ) : aba === "arte" ? (
           postsFiltrados.length === 0 ? (
             <div className="busca__empty">
               <SearchIcon size={40} className="busca__empty-icon" />
-              <p>Nenhum resultado encontrado</p>
-              <small>Tente buscar por outro título ou artista</small>
+              <p>{t.search.noArtResults}</p>
+              <small>{t.search.noArtHint}</small>
             </div>
           ) : (
             <div className="busca__grid">
@@ -124,8 +126,8 @@ export default function Busca() {
           usersFiltrados.length === 0 ? (
             <div className="busca__empty">
               <SearchIcon size={40} className="busca__empty-icon" />
-              <p>Nenhum artista encontrado</p>
-              <small>Tente buscar por outro nome ou @username</small>
+              <p>{t.search.noArtistResults}</p>
+              <small>{t.search.noArtistHint}</small>
             </div>
           ) : (
             <div className="busca__users">
@@ -141,7 +143,7 @@ export default function Busca() {
                     <span className="busca__user-user">@{u.username}</span>
                     {u.bio && <p className="busca__user-bio">{u.bio}</p>}
                   </div>
-                  <button className="busca__user-ver">Ver perfil</button>
+                  <button className="busca__user-ver">{t.search.viewProfile}</button>
                 </div>
               ))}
             </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../hooks/useI18n";
 import PostCard from "../components/PostCard";
 import Footer from "../components/Footer";
 import "../styles/components/Arte.scss";
@@ -19,6 +20,7 @@ const CATEGORIAS = ["Metal", "Crochê", "Plumária", "Cerâmica", "Madeira", "Bo
 
 export default function Arte() {
   const { usuario } = useAuth();
+  const t = useI18n();
   const [posts, setPosts] = useState<Post[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [categoria, setCategoria] = useState<string | null>(null);
@@ -53,8 +55,8 @@ export default function Arte() {
   return (
     <div className="arte">
       <div className="arte__header">
-        <h1 className="arte__titulo">Arte</h1>
-        <p className="arte__sub">Publicações mais curtidas da comunidade</p>
+        <h1 className="arte__titulo">{t.art.title}</h1>
+        <p className="arte__sub">{t.art.subtitle}</p>
       </div>
 
       <div className="arte__body">
@@ -64,7 +66,7 @@ export default function Arte() {
             className={`arte__pill ${!categoria ? "arte__pill--ativo" : ""}`}
             onClick={() => setCategoria(null)}
           >
-            Tudo
+            {t.art.all}
           </button>
           {CATEGORIAS.map(cat => (
             <button
@@ -85,7 +87,7 @@ export default function Arte() {
           </div>
         ) : filtrados.length === 0 ? (
           <div className="arte__vazio">
-            <p>Nenhuma publicação encontrada.</p>
+            <p>{t.art.empty}</p>
           </div>
         ) : (
           <div className="arte__grid">

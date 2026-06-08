@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon, VerificadoIcon } from "../components/Icons";
 import Toast from "../components/Toast";
@@ -28,6 +29,7 @@ export default function PerfilPublico() {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const { usuario: eu } = useAuth();
+  const t = useI18n();
 
   const [perfil, setPerfil] = useState<PerfilData | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -114,8 +116,8 @@ export default function PerfilPublico() {
     return { backgroundColor: config.bgValue || "#FAF8F3" };
   }, [config]);
 
-  if (loading) return <div className="pp-loading">Carregando...</div>;
-  if (notFound || !perfil) return <div className="pp-loading">Perfil não encontrado.</div>;
+  if (loading) return <div className="pp-loading">{t.publicProfile.loading}</div>;
+  if (notFound || !perfil) return <div className="pp-loading">{t.publicProfile.notFound}</div>;
 
   const inicial = perfil.nome.charAt(0).toUpperCase();
 
@@ -142,10 +144,10 @@ export default function PerfilPublico() {
           {perfil.bio && <p className="pp__bio">{perfil.bio}</p>}
           {perfil.cidade && <p className="pp__cidade">📍 {perfil.cidade}</p>}
           <div className="pp__stats">
-            <span><strong>{posts.length}</strong> posts</span>
-            <span><strong>{contadores.seguidores}</strong> seguidores</span>
-            <span><strong>{contadores.seguindo}</strong> seguindo</span>
-            <span><strong>{catalogos.length}</strong> catálogos</span>
+            <span><strong>{posts.length}</strong> {t.publicProfile.posts}</span>
+            <span><strong>{contadores.seguidores}</strong> {t.publicProfile.followers}</span>
+            <span><strong>{contadores.seguindo}</strong> {t.publicProfile.following2}</span>
+            <span><strong>{catalogos.length}</strong> {t.publicProfile.catalogs}</span>
           </div>
 
           <div className="pp__acoes">
@@ -157,15 +159,15 @@ export default function PerfilPublico() {
                   disabled={loadingFollow}
                 >
                   <UsersIcon size={14} />
-                  {loadingFollow ? "..." : seguindo ? "Seguindo" : "Seguir"}
+                  {loadingFollow ? "..." : seguindo ? t.publicProfile.following : t.publicProfile.follow}
                 </button>
                 <button
                   className="pp__btn-msg"
                   onClick={() => navigate("/mensagens")}
-                  title="Enviar mensagem"
+                  title={t.publicProfile.message}
                 >
                   <MessageIcon size={14} />
-                  Mensagem
+                  {t.publicProfile.message}
                 </button>
               </>
             )}
@@ -183,10 +185,10 @@ export default function PerfilPublico() {
       {/* TABS */}
       <div className="pp__tabs">
         <button className={tab === "posts" ? "active" : ""} onClick={() => setTab("posts")}>
-          Posts <span className="pp__tab-count">{posts.length}</span>
+          {t.profile.posts} <span className="pp__tab-count">{posts.length}</span>
         </button>
         <button className={tab === "catalogos" ? "active" : ""} onClick={() => setTab("catalogos")}>
-          Catálogos <span className="pp__tab-count">{catalogos.length}</span>
+          {t.profile.catalogs} <span className="pp__tab-count">{catalogos.length}</span>
         </button>
       </div>
 
@@ -194,7 +196,7 @@ export default function PerfilPublico() {
       {tab === "posts" && (
         <div className={`pp__galeria pp__galeria--${config.layout} pp__galeria--${config.cardStyle}`}>
           {posts.length === 0
-            ? <p className="pp__empty">Nenhuma publicação ainda.</p>
+            ? <p className="pp__empty">{t.publicProfile.noPosts}</p>
             : posts.map(post => (
               <div key={post.id} className="pp__post-card" onClick={() => navigate(`/post/${post.id}`)}>
                 <div className="pp__post-img">
@@ -218,7 +220,7 @@ export default function PerfilPublico() {
       {tab === "catalogos" && (
         <div className="pp__cat-grid">
           {catalogos.length === 0
-            ? <p className="pp__empty">Nenhum catálogo ainda.</p>
+            ? <p className="pp__empty">{t.publicProfile.noCatalogs}</p>
             : catalogos.map(cat => (
               <div key={cat.id} className="pp__cat-card" onClick={() => navigate(`/catalogo/${cat.id}`)}>
                 <div className="pp__cat-cover">

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../hooks/useI18n";
 import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon, ArrowLeftIcon } from "../components/Icons";
 import "../styles/components/Mensagens.scss";
 
@@ -46,6 +47,7 @@ type Aba = "mensagens" | "solicitacoes" | "arquivadas";
 export default function Mensagens() {
   const { usuario } = useAuth();
   const navigate = useNavigate();
+  const t = useI18n();
 
   const [conversas, setConversas] = useState<Conversa[]>([]);
   const [conversaSelecionada, setConversaSelecionada] = useState<Usuario | null>(null);
@@ -269,7 +271,7 @@ export default function Mensagens() {
 
   async function deletarConversa(outroId: number) {
     setMenuConversa(null);
-    if (!confirm("Deletar esta conversa? As mensagens serão removidas do seu histórico.")) return;
+    if (!confirm(t.messages.deleteConfirm)) return;
     try {
       await api.patch(`/mensagem/conversa/${outroId}/deletar`);
       if (conversaSelecionada?.id === outroId) setConversaSelecionada(null);
@@ -314,7 +316,7 @@ export default function Mensagens() {
   const inicial = (nome: string) => nome.charAt(0).toUpperCase();
 
   const conversasFiltradas = conversas.filter(c => {
-    if (c.solicitacao === "recusada") return false;
+    if ((c.solicitacao as string) === "recusada") return false;
     if (aba === "solicitacoes") return c.solicitacao === "recebida";
     if (aba === "arquivadas") return c.arquivada;
     return !c.arquivada && c.solicitacao !== "recebida";
@@ -334,7 +336,7 @@ export default function Mensagens() {
       {/* SIDEBAR */}
       <aside className="msgs__sidebar">
         <div className="msgs__sidebar-header">
-          <h2>Mensagens</h2>
+          <h2>{t.messages.title}</h2>
         </div>
 
         {/* Abas */}
@@ -343,13 +345,13 @@ export default function Mensagens() {
             className={`msgs__aba ${aba === "mensagens" ? "msgs__aba--ativa" : ""}`}
             onClick={() => setAba("mensagens")}
           >
-            Mensagens
+            {t.messages.tabMessages}
           </button>
           <button
             className={`msgs__aba ${aba === "solicitacoes" ? "msgs__aba--ativa" : ""}`}
             onClick={() => setAba("solicitacoes")}
           >
-            Solicitações
+            {t.messages.tabRequests}
             {totalSolicitacoes > 0 && (
               <span className="msgs__aba-badge">{totalSolicitacoes}</span>
             )}
@@ -358,14 +360,14 @@ export default function Mensagens() {
             className={`msgs__aba ${aba === "arquivadas" ? "msgs__aba--ativa" : ""}`}
             onClick={() => setAba("arquivadas")}
           >
-            Arquivadas
+            {t.messages.tabArchived}
           </button>
         </div>
 
         <div className="msgs__busca-wrap">
           <input
             type="text"
-            placeholder="Buscar pessoa..."
+            placeholder={t.messages.searchPerson}
             value={buscaUsuario}
             onChange={e => buscarUsuarios(e.target.value)}
             className="msgs__busca"
@@ -391,8 +393,8 @@ export default function Mensagens() {
           {conversasFiltradas.length === 0 && (
             <div className="msgs__vazio">
               <MessageIcon size={32} />
-              <p>{aba === "solicitacoes" ? "Nenhuma solicitação" : aba === "arquivadas" ? "Nenhuma conversa arquivada" : "Nenhuma conversa ainda"}</p>
-              {aba === "mensagens" && <span>Busque alguém acima para começar</span>}
+              <p>{aba === "solicitacoes" ? t.messages.noRequests : aba === "arquivadas" ? t.messages.noArchived : t.messages.noConversations}</p>
+              {aba === "mensagens" && <span>{t.messages.searchHint}</span>}
             </div>
           )}
           {conversasFiltradas.map(c => (
@@ -416,16 +418,16 @@ export default function Mensagens() {
                   </div>
                   <div className="msgs__conversa-bottom">
                     <span className="msgs__preview">
-                      {c.ultimaMensagem.remetenteId === usuario?.id ? "Você: " : ""}
+                      {c.ultimaMensagem.remetenteId === usuario?.id ? t.messages.you : ""}
                       {c.ultimaMensagem.imagem && !c.ultimaMensagem.conteudo
-                        ? "📷 Foto"
+                        ? t.messages.photo
                         : c.ultimaMensagem.conteudo.length > 30
                           ? c.ultimaMensagem.conteudo.slice(0, 30) + "..."
                           : c.ultimaMensagem.conteudo}
                     </span>
                     <div className="msgs__conversa-badges">
                       {c.solicitacao === "enviada" && (
-                        <span className="msgs__badge-pendente">Pendente</span>
+                        <span className="msgs__badge-pendente">{t.messages.pending}</span>
                       )}
                       {c.naoLidas > 0 && <span className="msgs__badge">{c.naoLidas}</span>}
                     </div>
@@ -445,15 +447,15 @@ export default function Mensagens() {
                   <div className="msgs__menu-dropdown">
                     {c.arquivada ? (
                       <button onClick={() => desarquivarConversa(c.usuario.id)}>
-                        <ArchiveIcon size={13} /> Desarquivar
+                        <ArchiveIcon size={13} /> {t.messages.unarchive}
                       </button>
                     ) : (
                       <button onClick={() => arquivarConversa(c.usuario.id)}>
-                        <ArchiveIcon size={13} /> Arquivar
+                        <ArchiveIcon size={13} /> {t.messages.archive}
                       </button>
                     )}
                     <button className="msgs__menu-deletar" onClick={() => deletarConversa(c.usuario.id)}>
-                      <TrashIcon size={13} /> Deletar
+                      <TrashIcon size={13} /> {t.messages.deleteConversation}
                     </button>
                   </div>
                 )}
@@ -468,7 +470,7 @@ export default function Mensagens() {
         {!conversaSelecionada ? (
           <div className="msgs__chat-vazio">
             <MessageIcon size={48} />
-            <p>Selecione uma conversa ou busque alguém para começar</p>
+            <p>{t.messages.selectConversation}</p>
           </div>
         ) : (
           <>
@@ -490,11 +492,11 @@ export default function Mensagens() {
                 <p className="msgs__username">@{conversaSelecionada.username}</p>
               </div>
               {conversaEhEnviada && (
-                <span className="msgs__pendente-tag">Aguardando resposta</span>
+                <span className="msgs__pendente-tag">{t.messages.waitingReply}</span>
               )}
               {conversaArquivada && (
                 <button className="msgs__desarquivar-btn" onClick={() => desarquivarConversa(conversaSelecionada.id)}>
-                  Desarquivar
+                  {t.messages.unarchive}
                 </button>
               )}
             </div>
@@ -502,21 +504,21 @@ export default function Mensagens() {
             {/* Banner de solicitação recebida */}
             {conversaEhSolicitacao && (
               <div className="msgs__solicitacao-banner">
-                <p><strong>@{conversaSelecionada.username}</strong> quer te enviar uma mensagem.</p>
+                <p>{t.messages.requestBanner(conversaSelecionada.username)}</p>
                 <div className="msgs__solicitacao-acoes">
                   <button
                     className="msgs__sol-aceitar"
                     onClick={() => aceitarSolicitacao(conversaSelecionada.id)}
                     disabled={respondendo}
                   >
-                    {respondendo ? "..." : "Aceitar"}
+                    {respondendo ? "..." : t.messages.accept}
                   </button>
                   <button
                     className="msgs__sol-recusar"
                     onClick={() => recusarSolicitacao(conversaSelecionada.id)}
                     disabled={respondendo}
                   >
-                    Recusar
+                    {t.messages.reject}
                   </button>
                 </div>
               </div>
@@ -525,7 +527,7 @@ export default function Mensagens() {
             <div className="msgs__mensagens">
               {mensagens.length === 0 && (
                 <div className="msgs__chat-vazio msgs__chat-vazio--inline">
-                  <p>Comece a conversa!</p>
+                  <p>{t.messages.startConversation}</p>
                 </div>
               )}
               {mensagens.map(m => {
@@ -549,11 +551,11 @@ export default function Mensagens() {
                         {menuMensagem === m.id && (
                           <div className={`msgs__balao-dropdown ${sou ? "msgs__balao-dropdown--eu" : "msgs__balao-dropdown--outro"}`}>
                             <button onClick={() => apagarParaMim(m.id)}>
-                              Apagar para mim
+                              {t.messages.deleteForMe}
                             </button>
                             {podePararTodos(m) && (
                               <button className="msgs__balao-drop-todos" onClick={() => apagarParaTodos(m.id)}>
-                                Apagar para todos
+                                {t.messages.deleteForAll}
                               </button>
                             )}
                           </div>
@@ -563,7 +565,7 @@ export default function Mensagens() {
 
                     <div className={`msgs__balao ${sou ? "msgs__balao--eu" : "msgs__balao--outro"} ${apagando === m.id ? "msgs__balao--apagando" : ""}`}>
                       {m.apagadaParaTodos ? (
-                        <p className="msgs__balao-apagada">🚫 Mensagem apagada</p>
+                        <p className="msgs__balao-apagada">{t.messages.deletedMessage}</p>
                       ) : (
                         <>
                           {m.imagem && (
@@ -622,7 +624,7 @@ export default function Mensagens() {
               )}
               <input
                 type="text"
-                placeholder={conversaEhSolicitacao ? "Aceite a solicitação para responder" : "Digite uma mensagem..."}
+                placeholder={conversaEhSolicitacao ? t.messages.requestPlaceholder : t.messages.messagePlaceholder}
                 value={texto}
                 onChange={e => setTexto(e.target.value)}
                 className="msgs__input"

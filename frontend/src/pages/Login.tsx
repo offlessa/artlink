@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../hooks/useI18n";
 import "../styles/components/Login.scss";
 
 const FOTOS = [
@@ -14,10 +15,12 @@ const RAIO = 200;
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const t = useI18n();
 
   useEffect(() => {
     if (isAuthenticated) navigate("/home");
   }, [isAuthenticated]);
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [lembrar, setLembrar] = useState(false);
@@ -50,7 +53,7 @@ export default function Login() {
     try {
       await login(email, senha, lembrar);
     } catch (err: any) {
-      setErro(err?.response?.data?.message || "E-mail ou senha inválidos.");
+      setErro(err?.response?.data?.message || t.login.invalidCredentials);
     } finally {
       setCarregando(false);
     }
@@ -59,7 +62,6 @@ export default function Login() {
   const veilMask = `radial-gradient(circle ${RAIO}px at ${pos.x}px ${pos.y}px, transparent 0%, transparent 25%, rgba(0,0,0,0.4) 55%, black 80%)`;
   const warmthBg = `radial-gradient(circle ${RAIO * 0.85}px at ${pos.x}px ${pos.y}px, rgba(190,145,55,0.18) 0%, transparent 70%)`;
 
-  // spotlight relativo ao elemento de texto para a camada escura
   const tx = pos.x - textoOffset.left;
   const ty = pos.y - textoOffset.top;
   const spotlightMask = `radial-gradient(circle ${RAIO}px at ${tx}px ${ty}px, black 0%, black 45%, transparent 65%)`;
@@ -80,9 +82,8 @@ export default function Login() {
             <Link to="/" className="auth-panel__logo">Artlink</Link>
             <div className="auth-panel__deco" />
             <p className="auth-panel__tagline">
-              Descubra a alma do artesanato.<br />Compartilhe o que suas mãos criam.
+              {t.login.tagline1}<br />{t.login.tagline2}
             </p>
-            {/* camada escura — visível apenas dentro do círculo de luz */}
             <div
               className="auth-panel__texto-overlay"
               style={{ WebkitMaskImage: spotlightMask, maskImage: spotlightMask }}
@@ -91,7 +92,7 @@ export default function Login() {
               <span className="auth-panel__logo">Artlink</span>
               <div className="auth-panel__deco" />
               <p className="auth-panel__tagline">
-                Descubra a alma do artesanato.<br />Compartilhe o que suas mãos criam.
+                {t.login.tagline1}<br />{t.login.tagline2}
               </p>
             </div>
           </div>
@@ -110,8 +111,8 @@ export default function Login() {
         <div className="auth-box">
           <div className="auth-box__header">
             <Link to="/" className="auth-box__logo-mobile">Artlink</Link>
-            <h1 className="auth-box__title">Bem-vindo</h1>
-            <p className="auth-box__subtitle">Entre na sua conta para continuar</p>
+            <h1 className="auth-box__title">{t.login.welcome}</h1>
+            <p className="auth-box__subtitle">{t.login.subtitle}</p>
           </div>
 
           {erro && <div className="auth-box__error">{erro}</div>}
@@ -127,7 +128,7 @@ export default function Login() {
                 required
                 autoComplete="email"
               />
-              <label className="auth-form__label">E-mail</label>
+              <label className="auth-form__label">{t.login.email}</label>
             </div>
 
             <div className="auth-form__field auth-form__field--float">
@@ -140,7 +141,7 @@ export default function Login() {
                 required
                 autoComplete="current-password"
               />
-              <label className="auth-form__label">Senha</label>
+              <label className="auth-form__label">{t.login.password}</label>
             </div>
 
             <div className="auth-form__row">
@@ -150,19 +151,19 @@ export default function Login() {
                   checked={lembrar}
                   onChange={(e) => setLembrar(e.target.checked)}
                 />
-                <span>Lembrar-me</span>
+                <span>{t.login.remember}</span>
               </label>
               <Link to="/esqueci-senha" className="auth-form__forgot-link">
-                Esqueceu a senha?
+                {t.login.forgotPassword}
               </Link>
             </div>
 
             <div className="auth-form__actions">
               <button className="auth-form__btn" type="submit" disabled={carregando}>
-                {carregando ? "Entrando..." : "Entrar"}
+                {carregando ? t.login.signingIn : t.login.signIn}
               </button>
               <Link to="/cadastro" className="auth-form__btn-outline">
-                Criar conta
+                {t.login.createAccount}
               </Link>
             </div>
           </form>

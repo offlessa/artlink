@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import { useConfiguracoes } from "../hooks/useConfiguracoes";
+import { useI18n } from "../hooks/useI18n";
 import PostCard from "../components/PostCard";
 import CreatePostModal from "../components/CreatePostModal";
 import {
@@ -28,6 +29,7 @@ export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
   const config = useConfiguracoes();
+  const t = useI18n();
   const { mostrarDescoberta, ordem } = config.feed;
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -110,13 +112,13 @@ export default function Home() {
   const inicial = usuario?.nome?.charAt(0).toUpperCase() ?? "?";
 
   const navItems = [
-    { label: "Início",          Icon: HomeIcon,    path: "/",             exact: true },
-    { label: "Explorar",        Icon: CompassIcon, path: "/busca",        exact: false },
-    { label: "Catálogos",       Icon: FolderIcon,  path: "/catalogos",    exact: false },
-    { label: "Mensagens",       Icon: MessageIcon, path: "/mensagens",    exact: false, badge: msgNaoLidas },
-    { label: "Notificações",    Icon: BellIcon,    path: "/notificacoes", exact: false, badge: notifsNaoLidas },
-    { label: "Perfil",          Icon: UserIcon,    path: "/perfil",       exact: false },
-    { label: "Configurações",   Icon: SettingsIcon,path: "/configuracoes",exact: false },
+    { label: t.home.nav.home,          Icon: HomeIcon,    path: "/",             exact: true },
+    { label: t.home.nav.explore,       Icon: CompassIcon, path: "/busca",        exact: false },
+    { label: t.home.nav.catalogs,      Icon: FolderIcon,  path: "/catalogos",    exact: false },
+    { label: t.home.nav.messages,      Icon: MessageIcon, path: "/mensagens",    exact: false, badge: msgNaoLidas },
+    { label: t.home.nav.notifications, Icon: BellIcon,    path: "/notificacoes", exact: false, badge: notifsNaoLidas },
+    { label: t.home.nav.profile,       Icon: UserIcon,    path: "/perfil",       exact: false },
+    { label: t.home.nav.settings,      Icon: SettingsIcon,path: "/configuracoes",exact: false },
   ];
 
   function isActive(path: string, exact: boolean) {
@@ -135,7 +137,7 @@ export default function Home() {
           <input
             ref={buscaRef}
             type="text"
-            placeholder="Pesquisar..."
+            placeholder={t.nav.search}
             value={buscaSidebar}
             onChange={e => setBuscaSidebar(e.target.value)}
           />
@@ -162,7 +164,7 @@ export default function Home() {
         {usuario && (
           <button className="home__sidebar-novo" onClick={() => setShowModal(true)}>
             <PlusIcon size={16} />
-            Nova publicação
+            {t.home.newPost}
           </button>
         )}
 
@@ -193,14 +195,14 @@ export default function Home() {
                 className={feedTab === "explorar" ? "active" : ""}
                 onClick={() => setFeedTab("explorar")}
               >
-                Explorar
+                {t.home.explore}
               </button>
             )}
             <button
               className={feedTab === "feed" ? "active" : ""}
               onClick={() => setFeedTab("feed")}
             >
-              Para você
+              {t.home.forYou}
             </button>
           </div>
         )}
@@ -211,7 +213,7 @@ export default function Home() {
             className={`home__pill ${!categoria ? "home__pill--ativo" : ""}`}
             onClick={() => setCategoria(null)}
           >
-            Tudo
+            {t.home.all}
           </button>
           {todasTags.map(tag => (
             <button
@@ -232,14 +234,14 @@ export default function Home() {
             </div>
           ) : feedTab === "feed" && feedPosts.length === 0 ? (
             <div className="home__empty">
-              <p>Nenhuma publicação dos seus seguidos ainda.</p>
+              <p>{t.home.emptyFeed}</p>
               <button className="home__explorar-btn" onClick={() => setFeedTab("explorar")}>
-                Explorar tudo
+                {t.home.exploreAll}
               </button>
             </div>
           ) : filtrados.length === 0 ? (
             <div className="home__empty">
-              <p>Nenhuma publicação encontrada.</p>
+              <p>{t.home.emptyResult}</p>
             </div>
           ) : (
             <div className="home__grid">

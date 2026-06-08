@@ -5,6 +5,7 @@ import { SearchIcon, UserIcon, LogOutIcon, PlusIcon, BellIcon, MessageIcon, Sett
 import { isVerificado } from "../utils/verificado";
 import CreatePostModal from "./CreatePostModal";
 import { api } from "../api/api";
+import { useI18n } from "../hooks/useI18n";
 import "../styles/components/Navbar.scss";
 
 type TipoNotif = "curtida" | "comentario" | "seguindo" | "colaboracao" | "colaboracao_catalogo" | "mensagem";
@@ -66,6 +67,7 @@ export default function Navbar() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const t = useI18n();
   const [busca, setBusca] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
@@ -183,13 +185,14 @@ export default function Navbar() {
   }
 
   function textoNotificacao(n: Notificacao) {
+    const v = t.nav.notifVerbs;
     switch (n.tipo) {
-      case "curtida": return `curtiu seu post "${n.post?.titulo ?? ""}"`;
-      case "comentario": return `comentou no seu post "${n.post?.titulo ?? ""}"`;
-      case "seguindo": return "começou a te seguir";
-      case "colaboracao": return `te convidou para colaborar em "${n.post?.titulo ?? ""}"`;
-      case "colaboracao_catalogo": return `te convidou para colaborar no catálogo "${n.catalogo?.nome ?? ""}"`;
-      case "mensagem": return "te enviou uma mensagem";
+      case "curtida":              return `${v.curtida} "${n.post?.titulo ?? ""}"`;
+      case "comentario":           return `${v.comentario} "${n.post?.titulo ?? ""}"`;
+      case "seguindo":             return v.seguindo;
+      case "colaboracao":          return `${v.colaboracao} "${n.post?.titulo ?? ""}"`;
+      case "colaboracao_catalogo": return `${v.colaboracao_catalogo} "${n.catalogo?.nome ?? ""}"`;
+      case "mensagem":             return v.mensagem;
     }
   }
 
@@ -214,7 +217,7 @@ export default function Navbar() {
           <SearchIcon size={15} className="navbar__search-icon" />
           <input
             type="text"
-            placeholder="Pesquisar..."
+            placeholder={t.nav.search}
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
           />
@@ -226,18 +229,18 @@ export default function Navbar() {
         </form>
 
         <div className="navbar__links">
-          <Link to="/arte">Arte</Link>
-          <Link to="/artistas">Artistas</Link>
-          <Link to="/sobre">Sobre nós</Link>
+          <Link to="/arte">{t.nav.art}</Link>
+          <Link to="/artistas">{t.nav.artists}</Link>
+          <Link to="/sobre">{t.nav.about}</Link>
         </div>
 
         {usuario && (
           <>
-            <button className="navbar__criar navbar__criar--desktop" onClick={() => setShowModal(true)} title="Nova publicação">
+            <button className="navbar__criar navbar__criar--desktop" onClick={() => setShowModal(true)} title={t.nav.newPost}>
               <PlusIcon size={16} />
             </button>
 
-            <Link to="/mensagens" className="navbar__icon-btn" title="Mensagens">
+            <Link to="/mensagens" className="navbar__icon-btn" title={t.nav.messages}>
               <MessageIcon size={18} />
               {msgNaoLidas > 0 && (
                 <span className="navbar__badge">{msgNaoLidas > 9 ? "9+" : msgNaoLidas}</span>
@@ -248,7 +251,7 @@ export default function Navbar() {
               <button
                 className={`navbar__icon-btn ${naoLidas > 0 ? "navbar__icon-btn--ativo" : ""}`}
                 onClick={abrirNotificacoes}
-                title="Notificações"
+                title={t.nav.notifications}
               >
                 <BellIcon size={18} />
                 {naoLidas > 0 && <span className="navbar__badge">{naoLidas > 9 ? "9+" : naoLidas}</span>}
@@ -257,10 +260,10 @@ export default function Navbar() {
               {showNotif && (
                 <div className="navbar__notif-dropdown">
                   <div className="navbar__notif-header">
-                    <span>Notificações</span>
+                    <span>{t.nav.notifications}</span>
                   </div>
                   {notificacoesFiltradas.length === 0 ? (
-                    <p className="navbar__notif-empty">Nenhuma notificação ainda.</p>
+                    <p className="navbar__notif-empty">{t.nav.noNotifications}</p>
                   ) : (
                     notificacoesFiltradas.slice(0, 20).map(n => (
                       <div
@@ -292,14 +295,14 @@ export default function Navbar() {
                                 disabled={respondendo === n.id}
                                 onClick={e => { e.stopPropagation(); responderColaboracao(n, true); }}
                               >
-                                {respondendo === n.id ? "..." : "Aceitar"}
+                                {respondendo === n.id ? "..." : t.notifications.accept}
                               </button>
                               <button
                                 className="navbar__notif-recusar"
                                 disabled={respondendo === n.id}
                                 onClick={e => { e.stopPropagation(); responderColaboracao(n, false); }}
                               >
-                                Recusar
+                                {t.notifications.reject}
                               </button>
                             </div>
                           )}
@@ -336,19 +339,19 @@ export default function Navbar() {
             {menuAberto && (
               <div className="navbar__dropdown">
                 <Link to="/perfil" onClick={() => setMenuAberto(false)}>
-                  <UserIcon size={14} /> Meu Perfil
+                  <UserIcon size={14} /> {t.nav.myProfile}
                 </Link>
                 <Link to="/configuracoes" onClick={() => setMenuAberto(false)}>
-                  <SettingsIcon size={14} /> Configurações
+                  <SettingsIcon size={14} /> {t.nav.settings}
                 </Link>
                 <button onClick={handleLogout}>
-                  <LogOutIcon size={14} /> Sair
+                  <LogOutIcon size={14} /> {t.nav.signOut}
                 </button>
               </div>
             )}
           </div>
         ) : (
-          <Link to="/login" className="navbar__entrar navbar__entrar--desktop">Entrar</Link>
+          <Link to="/login" className="navbar__entrar navbar__entrar--desktop">{t.nav.signIn}</Link>
         )}
 
         <button
@@ -367,7 +370,7 @@ export default function Navbar() {
               <SearchIcon size={15} className="navbar__search-icon" />
               <input
                 type="text"
-                placeholder="Pesquisar..."
+                placeholder={t.nav.search}
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 autoFocus
@@ -380,15 +383,15 @@ export default function Navbar() {
             </form>
 
             <nav className="navbar__mobile-links">
-              <Link to="/arte">Arte</Link>
-              <Link to="/artistas">Artistas</Link>
-              <Link to="/sobre">Sobre nós</Link>
+              <Link to="/arte">{t.nav.art}</Link>
+              <Link to="/artistas">{t.nav.artists}</Link>
+              <Link to="/sobre">{t.nav.about}</Link>
             </nav>
 
             {usuario ? (
               <>
                 <button className="navbar__mobile-criar" onClick={() => { setShowModal(true); setMenuMobileAberto(false); }}>
-                  <PlusIcon size={16} /> Nova publicação
+                  <PlusIcon size={16} /> {t.nav.newPost}
                 </button>
                 <div className="navbar__mobile-divider" />
                 <Link to="/perfil" className="navbar__mobile-user-link">
@@ -407,16 +410,16 @@ export default function Navbar() {
                   </div>
                 </Link>
                 <Link to="/configuracoes" className="navbar__mobile-item">
-                  <SettingsIcon size={16} /> Configurações
+                  <SettingsIcon size={16} /> {t.nav.settings}
                 </Link>
                 <button className="navbar__mobile-item navbar__mobile-item--sair" onClick={handleLogout}>
-                  <LogOutIcon size={16} /> Sair
+                  <LogOutIcon size={16} /> {t.nav.signOut}
                 </button>
               </>
             ) : (
               <div className="navbar__mobile-auth">
-                <Link to="/login" className="navbar__mobile-entrar">Entrar</Link>
-                <Link to="/cadastro" className="navbar__mobile-cadastrar">Criar conta</Link>
+                <Link to="/login" className="navbar__mobile-entrar">{t.nav.signIn}</Link>
+                <Link to="/cadastro" className="navbar__mobile-cadastrar">{t.login.createAccount}</Link>
               </div>
             )}
           </div>

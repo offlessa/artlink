@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useI18n } from "../hooks/useI18n";
 import { api } from "../api/api";
 import "../styles/components/Login.scss";
 
@@ -13,6 +14,7 @@ const RAIO = 200;
 
 export default function EsqueciSenha() {
   const navigate = useNavigate();
+  const t = useI18n();
   const [passo, setPasso] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
   const [codigo, setCodigo] = useState("");
@@ -48,11 +50,11 @@ export default function EsqueciSenha() {
     setCarregando(true);
     try {
       await api.post("/auth/esqueci-senha", { email });
-      setMensagem("Se esse e-mail estiver cadastrado, você receberá o código.");
+      setMensagem(t.forgotPassword.codeSent);
       setPasso(2);
     } catch (err: any) {
       setErro(true);
-      setMensagem(err?.response?.data?.message || "Erro ao enviar o código.");
+      setMensagem(err?.response?.data?.message || t.forgotPassword.sendError);
     } finally {
       setCarregando(false);
     }
@@ -65,18 +67,18 @@ export default function EsqueciSenha() {
 
     if (novaSenha !== confirmarSenha) {
       setErro(true);
-      setMensagem("As senhas não coincidem.");
+      setMensagem(t.forgotPassword.passwordMismatch);
       return;
     }
 
     setCarregando(true);
     try {
       await api.post("/auth/redefinir-senha", { email, codigo, novaSenha });
-      setMensagem("Senha redefinida com sucesso! Redirecionando...");
+      setMensagem(t.forgotPassword.success);
       setTimeout(() => navigate("/login"), 2000);
     } catch (err: any) {
       setErro(true);
-      setMensagem(err?.response?.data?.message || "Código inválido ou expirado.");
+      setMensagem(err?.response?.data?.message || t.forgotPassword.invalidCode);
     } finally {
       setCarregando(false);
     }
@@ -104,7 +106,7 @@ export default function EsqueciSenha() {
             <Link to="/" className="auth-panel__logo">Artlink</Link>
             <div className="auth-panel__deco" />
             <p className="auth-panel__tagline">
-              Descubra a alma do artesanato.<br />Compartilhe o que suas mãos criam.
+              {t.login.tagline1}<br />{t.login.tagline2}
             </p>
             <div
               className="auth-panel__texto-overlay"
@@ -114,7 +116,7 @@ export default function EsqueciSenha() {
               <span className="auth-panel__logo">Artlink</span>
               <div className="auth-panel__deco" />
               <p className="auth-panel__tagline">
-                Descubra a alma do artesanato.<br />Compartilhe o que suas mãos criam.
+                {t.login.tagline1}<br />{t.login.tagline2}
               </p>
             </div>
           </div>
@@ -135,10 +137,8 @@ export default function EsqueciSenha() {
             <>
               <div className="auth-box__header">
                 <Link to="/" className="auth-box__logo-mobile">Artlink</Link>
-                <h1 className="auth-box__title">Esqueceu a senha?</h1>
-                <p className="auth-box__subtitle">
-                  Informe seu e-mail e enviaremos um código de verificação.
-                </p>
+                <h1 className="auth-box__title">{t.forgotPassword.title}</h1>
+                <p className="auth-box__subtitle">{t.forgotPassword.subtitle}</p>
               </div>
 
               {mensagem && (
@@ -158,15 +158,15 @@ export default function EsqueciSenha() {
                     required
                     autoComplete="email"
                   />
-                  <label className="auth-form__label">E-mail</label>
+                  <label className="auth-form__label">{t.forgotPassword.email}</label>
                 </div>
 
                 <div className="auth-form__actions">
                   <button className="auth-form__btn" type="submit" disabled={carregando}>
-                    {carregando ? "Enviando..." : "Enviar código"}
+                    {carregando ? t.forgotPassword.sending : t.forgotPassword.sendCode}
                   </button>
                   <Link to="/login" className="auth-form__btn-outline">
-                    Voltar ao login
+                    {t.forgotPassword.backToLogin}
                   </Link>
                 </div>
               </form>
@@ -175,10 +175,8 @@ export default function EsqueciSenha() {
             <>
               <div className="auth-box__header">
                 <Link to="/" className="auth-box__logo-mobile">Artlink</Link>
-                <h1 className="auth-box__title">Redefinir senha</h1>
-                <p className="auth-box__subtitle">
-                  Insira o código recebido no e-mail <strong>{email}</strong> e crie uma nova senha.
-                </p>
+                <h1 className="auth-box__title">{t.forgotPassword.resetTitle}</h1>
+                <p className="auth-box__subtitle">{t.forgotPassword.resetSubtitle(email)}</p>
               </div>
 
               {mensagem && (
@@ -200,7 +198,7 @@ export default function EsqueciSenha() {
                     inputMode="numeric"
                     autoComplete="one-time-code"
                   />
-                  <label className="auth-form__label">Código de 6 dígitos</label>
+                  <label className="auth-form__label">{t.forgotPassword.code}</label>
                 </div>
 
                 <div className="auth-form__field auth-form__field--float">
@@ -213,7 +211,7 @@ export default function EsqueciSenha() {
                     required
                     autoComplete="new-password"
                   />
-                  <label className="auth-form__label">Nova senha</label>
+                  <label className="auth-form__label">{t.forgotPassword.newPassword}</label>
                 </div>
 
                 <div className="auth-form__field auth-form__field--float">
@@ -226,19 +224,19 @@ export default function EsqueciSenha() {
                     required
                     autoComplete="new-password"
                   />
-                  <label className="auth-form__label">Confirmar nova senha</label>
+                  <label className="auth-form__label">{t.forgotPassword.confirmPassword}</label>
                 </div>
 
                 <div className="auth-form__actions">
                   <button className="auth-form__btn" type="submit" disabled={carregando}>
-                    {carregando ? "Redefinindo..." : "Redefinir senha"}
+                    {carregando ? t.forgotPassword.resetting : t.forgotPassword.resetBtn}
                   </button>
                   <button
                     type="button"
                     className="auth-form__btn-outline"
                     onClick={() => { setPasso(1); setMensagem(""); setErro(false); }}
                   >
-                    Reenviar código
+                    {t.forgotPassword.resendCode}
                   </button>
                 </div>
               </form>

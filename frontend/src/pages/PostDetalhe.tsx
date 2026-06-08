@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import Toast from "../components/Toast";
 import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon, BookmarkIcon, ShareIcon } from "../components/Icons";
@@ -39,6 +40,7 @@ export default function PostDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const t = useI18n();
 
   const [post, setPost] = useState<Post | null>(null);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
@@ -79,7 +81,7 @@ export default function PostDetalhe() {
       .catch(() => {});
   }, [usuario?.id, id]);
 
-  if (carregando) return <div className="post-detalhe__loading">Carregando...</div>;
+  if (carregando) return <div className="post-detalhe__loading">{t.common.loading}</div>;
   if (!post) return null;
 
   const jaCurtiu = post.curtidas.some((c) => c.usuarioId === usuario?.id);
@@ -118,11 +120,11 @@ export default function PostDetalhe() {
       if (salvo) {
         await api.delete(`/post-salvo/${usuario.id}/${post.id}`);
         setSalvo(false);
-        mostrarToast("Removido dos salvos");
+        mostrarToast(t.postDetail.removedFromSaved);
       } else {
         await api.post("/post-salvo", { usuarioId: usuario.id, postId: post.id });
         setSalvo(true);
-        mostrarToast("Post salvo!");
+        mostrarToast(t.postDetail.postSaved);
       }
     } catch {}
   }
@@ -190,7 +192,7 @@ export default function PostDetalhe() {
                   className="post-detalhe__acao-btn"
                   onClick={() => toggleOculto(c)}
                   disabled={emAcao}
-                  title="Ocultar comentário"
+                  title={t.postDetail.hideComment}
                 >
                   <EyeOffIcon size={13} />
                 </button>
@@ -200,9 +202,9 @@ export default function PostDetalhe() {
                   className="post-detalhe__acao-btn post-detalhe__acao-btn--mostrar"
                   onClick={() => toggleOculto(c)}
                   disabled={emAcao}
-                  title="Mostrar comentário"
+                  title={t.postDetail.showComment}
                 >
-                  <EyeIcon size={13} /> <span>Mostrar</span>
+                  <EyeIcon size={13} /> <span>{t.postDetail.showComment}</span>
                 </button>
               )}
               {isMeu && (
@@ -229,7 +231,7 @@ export default function PostDetalhe() {
 
         <div className="post-detalhe__imagem-col">
           <p className="post-detalhe__breadcrumb">
-            <button className="post-detalhe__voltar" onClick={() => navigate(-1)}>← Voltar</button>
+            <button className="post-detalhe__voltar" onClick={() => navigate(-1)}>{t.postDetail.back}</button>
             Arte / <span>{post.titulo}</span>
           </p>
           <div className="post-detalhe__imagem-wrapper">
@@ -237,7 +239,7 @@ export default function PostDetalhe() {
               ? <img src={post.imagem} alt={post.titulo} />
               : <div className="post-detalhe__sem-imagem">
                   <ImageOffIcon size={40} />
-                  <span>Sem imagem</span>
+                  <span>{t.postDetail.noImage}</span>
                 </div>
             }
           </div>
@@ -264,14 +266,14 @@ export default function PostDetalhe() {
               <button
                 className={`post-detalhe__icon-btn ${salvo ? "post-detalhe__icon-btn--ativo" : ""}`}
                 onClick={toggleSalvar}
-                title={salvo ? "Remover dos salvos" : "Salvar"}
+                title={salvo ? t.postDetail.saved : t.postDetail.save}
               >
                 <BookmarkIcon size={16} filled={salvo} />
               </button>
               <button
                 className="post-detalhe__icon-btn"
                 onClick={compartilhar}
-                title="Compartilhar"
+                title={t.postDetail.share}
               >
                 <ShareIcon size={16} />
               </button>
@@ -284,16 +286,16 @@ export default function PostDetalhe() {
                   >⋮</button>
                   {menuAberto && (
                     <div className="post-detalhe__menu-dropdown">
-                      <button onClick={() => { setMenuAberto(false); setEditando(true); }}>Editar post</button>
+                      <button onClick={() => { setMenuAberto(false); setEditando(true); }}>{t.postDetail.editPost}</button>
                       <button
                         className="post-detalhe__menu-excluir"
                         onClick={async () => {
                           setMenuAberto(false);
-                          if (!confirm("Excluir este post?")) return;
+                          if (!confirm(t.postDetail.deleteConfirm)) return;
                           await api.delete(`/post/${post.id}`);
                           navigate(-1);
                         }}
-                      >Excluir post</button>
+                      >{t.postDetail.deletePost}</button>
                     </div>
                   )}
                 </div>
@@ -307,12 +309,12 @@ export default function PostDetalhe() {
           )}
           {post.descricao && <p className="post-detalhe__descricao">{post.descricao}</p>}
           {(post.visualizacoes ?? 0) > 0 && (
-            <p className="post-detalhe__views">{post.visualizacoes} visualizaç{post.visualizacoes === 1 ? "ão" : "ões"}</p>
+            <p className="post-detalhe__views">{t.postDetail.views(post.visualizacoes ?? 0)}</p>
           )}
 
           {post.colaboracoes.length > 0 && (
             <div className="post-detalhe__collabs">
-              <span className="post-detalhe__collabs-label">Com colaboração de</span>
+              <span className="post-detalhe__collabs-label">{t.postDetail.collaboration}</span>
               <div className="post-detalhe__collabs-list">
                 {post.colaboracoes.map(col => (
                   <div key={col.usuarioId} className="post-detalhe__collab-chip">
@@ -332,12 +334,12 @@ export default function PostDetalhe() {
         <div className="post-detalhe__comentarios-col">
           <h1 className="post-detalhe__titulo">{post.titulo}</h1>
           <p className="post-detalhe__secao-titulo">
-            {visiveis.length} Comentário{visiveis.length !== 1 ? "s" : ""}
+            {t.postDetail.comments(visiveis.length)}
           </p>
 
           <div className="post-detalhe__lista">
             {visiveis.length === 0
-              ? <p className="post-detalhe__sem-comentarios">Seja o primeiro a comentar.</p>
+              ? <p className="post-detalhe__sem-comentarios">{t.postDetail.firstToComment}</p>
               : visiveis.map(c => <ComentarioItem key={c.id} c={c} />)
             }
           </div>
@@ -350,7 +352,7 @@ export default function PostDetalhe() {
                 onClick={() => setVerOcultos(v => !v)}
               >
                 <EyeOffIcon size={14} />
-                {verOcultos ? "Ocultar" : `Ver comentários ocultos (${ocultos.length})`}
+                {verOcultos ? t.postDetail.hideHiddenComments : t.postDetail.hiddenComments(ocultos.length)}
                 <span className={`post-detalhe__ocultos-chevron ${verOcultos ? "open" : ""}`}>▾</span>
               </button>
 
@@ -366,17 +368,17 @@ export default function PostDetalhe() {
             <form className="post-detalhe__form" onSubmit={enviarComentario}>
               <input
                 type="text"
-                placeholder="Escreva um comentário..."
+                placeholder={t.postDetail.commentPlaceholder}
                 value={novoComentario}
                 onChange={(e) => setNovoComentario(e.target.value)}
               />
               <button type="submit" disabled={enviando || !novoComentario.trim()}>
-                {enviando ? "..." : "Enviar"}
+                {enviando ? t.common.sending : t.common.send}
               </button>
             </form>
           ) : (
             <p className="post-detalhe__sem-comentarios" style={{ marginTop: 8 }}>
-              <a href="/login" style={{ color: "#2A3B1C", fontWeight: 600 }}>Entre</a> para comentar.
+              <a href="/login" style={{ color: "#2A3B1C", fontWeight: 600 }}>{t.postDetail.signInToComment}</a> {t.postDetail.toComment}
             </p>
           )}
         </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../hooks/useI18n";
 import { BellIcon } from "../components/Icons";
 import Footer from "../components/Footer";
 import "../styles/components/Notificacoes.scss";
@@ -52,6 +53,7 @@ const TIPO_COR: Record<TipoNotif, string> = {
 export default function Notificacoes() {
   const { usuario } = useAuth();
   const navigate = useNavigate();
+  const t = useI18n();
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [respondendo, setRespondendo] = useState<number | null>(null);
@@ -95,13 +97,14 @@ export default function Notificacoes() {
   }
 
   function textoNotificacao(n: Notificacao) {
+    const v = t.notifications.notifVerbs;
     switch (n.tipo) {
-      case "curtida":              return <>curtiu seu post <strong>"{n.post?.titulo ?? ""}"</strong></>;
-      case "comentario":           return <>comentou no seu post <strong>"{n.post?.titulo ?? ""}"</strong></>;
-      case "seguindo":             return <>começou a te seguir</>;
-      case "colaboracao":          return <>te convidou para colaborar em <strong>"{n.post?.titulo ?? ""}"</strong></>;
-      case "colaboracao_catalogo": return <>te convidou para colaborar no catálogo <strong>"{n.catalogo?.nome ?? ""}"</strong></>;
-      case "mensagem":             return <>te enviou uma mensagem</>;
+      case "curtida":              return <>{v.curtida} <strong>"{n.post?.titulo ?? ""}"</strong></>;
+      case "comentario":           return <>{v.comentario} <strong>"{n.post?.titulo ?? ""}"</strong></>;
+      case "seguindo":             return <>{v.seguindo}</>;
+      case "colaboracao":          return <>{v.colaboracao} <strong>"{n.post?.titulo ?? ""}"</strong></>;
+      case "colaboracao_catalogo": return <>{v.colaboracao_catalogo} <strong>"{n.catalogo?.nome ?? ""}"</strong></>;
+      case "mensagem":             return <>{v.mensagem}</>;
     }
   }
 
@@ -125,10 +128,10 @@ export default function Notificacoes() {
         <div className="notif-page__header">
           <div className="notif-page__header-left">
             <BellIcon size={22} />
-            <h1>Notificações</h1>
+            <h1>{t.notifications.title}</h1>
           </div>
           {naoLidas > 0 && (
-            <span className="notif-page__badge-total">{naoLidas} nova{naoLidas !== 1 ? "s" : ""}</span>
+            <span className="notif-page__badge-total">{t.notifications.newBadge(naoLidas)}</span>
           )}
         </div>
 
@@ -142,8 +145,8 @@ export default function Notificacoes() {
         ) : notificacoes.length === 0 ? (
           <div className="notif-page__vazio">
             <BellIcon size={48} />
-            <p>Nenhuma notificação ainda.</p>
-            <span>Quando alguém curtir, comentar ou te seguir, você verá aqui.</span>
+            <p>{t.notifications.empty}</p>
+            <span>{t.notifications.emptyHint}</span>
           </div>
         ) : (
           <div className="notif-page__lista">
@@ -189,14 +192,14 @@ export default function Notificacoes() {
                         disabled={respondendo === n.id}
                         onClick={e => { e.stopPropagation(); responderColaboracao(n, true); }}
                       >
-                        {respondendo === n.id ? "..." : "Aceitar"}
+                        {respondendo === n.id ? "..." : t.notifications.accept}
                       </button>
                       <button
                         className="notif-page__recusar"
                         disabled={respondendo === n.id}
                         onClick={e => { e.stopPropagation(); responderColaboracao(n, false); }}
                       >
-                        Recusar
+                        {t.notifications.reject}
                       </button>
                     </div>
                   )}

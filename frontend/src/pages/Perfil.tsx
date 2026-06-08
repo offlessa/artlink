@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
+import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import CreatePostModal from "../components/CreatePostModal";
 import CatalogoModal from "../components/CatalogoModal";
@@ -17,7 +18,7 @@ import { copiarLink } from "../utils/compartilhar";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/Perfil.scss";
 
-interface Post { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
+interface Post { id: number; titulo: string; descricao?: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
 interface Catalogo { id: number; nome: string; capa?: string; capaDinamica?: string; ehColaborador?: boolean; posts: { postId: number }[] }
 interface PostSalvo { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
 interface CatalogoSalvo { id: number; nome: string; capaDinamica?: string; dono?: { username: string }; posts: { postId?: number }[] }
@@ -47,17 +48,11 @@ const BG_GRADIENTS = [
   "linear-gradient(135deg,#FDF8E8,#C4A96A)",
   "linear-gradient(135deg,#F5F5F5,#9E9E9E)",
 ];
-const CARD_STYLES: { key: ProfileConfig["cardStyle"]; label: string }[] = [
-  { key: "rounded", label: "Arredondado" },
-  { key: "sharp", label: "Reto" },
-  { key: "glass", label: "Vidro" },
-  { key: "polaroid", label: "Polaroid" },
-  { key: "minimal", label: "Minimal" },
-];
 
 export default function Perfil() {
   const { usuario, updateUsuario } = useAuth();
   const navigate = useNavigate();
+  const t = useI18n();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [catalogos, setCatalogos] = useState<Catalogo[]>([]);
@@ -83,6 +78,14 @@ export default function Perfil() {
 
   const bannerRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
+
+  const cardStyles: { key: ProfileConfig["cardStyle"]; label: string }[] = [
+    { key: "rounded", label: t.profile.cardOpts.rounded },
+    { key: "sharp",   label: t.profile.cardOpts.sharp },
+    { key: "glass",   label: t.profile.cardOpts.glass },
+    { key: "polaroid",label: t.profile.cardOpts.polaroid },
+    { key: "minimal", label: t.profile.cardOpts.minimal },
+  ];
 
   async function carregarDados() {
     if (!usuario) return;
@@ -117,7 +120,7 @@ export default function Perfil() {
     copiarLink(`/u/${usuario?.username}`, msg => {
       setToast(msg);
       setTimeout(() => setToast(""), 2500);
-    });
+    }, t.common.linkCopied);
   }
 
   useEffect(() => {
@@ -180,10 +183,10 @@ export default function Perfil() {
 
   async function excluirPost(e: React.MouseEvent, id: number) {
     e.stopPropagation();
-    if (!confirm("Excluir esta publicação?")) return;
+    if (!confirm(t.postDetail.deleteConfirm)) return;
     setExcluindo(id);
     try { await api.delete(`/post/${id}`); carregarDados(); }
-    catch { alert("Erro ao excluir."); }
+    catch { /* silencioso */ }
     finally { setExcluindo(null); }
   }
 
@@ -192,7 +195,7 @@ export default function Perfil() {
     if (!confirm("Remover esta publicação do seu perfil? O post continuará no perfil do autor.")) return;
     setExcluindo(postId);
     try { await api.delete(`/post/colaboracao/${postId}/${usuario?.id}`); carregarDados(); }
-    catch { alert("Erro ao sair da colaboração."); }
+    catch { /* silencioso */ }
     finally { setExcluindo(null); }
   }
 
@@ -209,7 +212,7 @@ export default function Perfil() {
           ? <img src={usuario.fotoCapa} alt="capa" />
           : <div className="perfil__banner-placeholder" />}
         <button className="perfil__banner-btn" onClick={() => bannerRef.current?.click()}>
-          <CameraIcon size={15} /> Mudar capa
+          <CameraIcon size={15} /> {t.profile.changeCover}
         </button>
         <input ref={bannerRef} type="file" accept="image/*" hidden onChange={uploadBanner} />
       </div>
@@ -230,13 +233,13 @@ export default function Perfil() {
 
         {editMode ? (
           <div className="perfil__edit-form">
-            <input className="perfil__edit-input" placeholder="Nome" value={editData.nome} onChange={e => setEditData(p => ({ ...p, nome: e.target.value }))} />
-            <textarea className="perfil__edit-textarea" placeholder="Bio" value={editData.bio} onChange={e => setEditData(p => ({ ...p, bio: e.target.value }))} maxLength={160} />
-            <input className="perfil__edit-input" placeholder="Cidade" value={editData.cidade} onChange={e => setEditData(p => ({ ...p, cidade: e.target.value }))} />
-            <input className="perfil__edit-input" placeholder="Contato / site" value={editData.contato} onChange={e => setEditData(p => ({ ...p, contato: e.target.value }))} />
+            <input className="perfil__edit-input" placeholder={t.profile.namePlaceholder} value={editData.nome} onChange={e => setEditData(p => ({ ...p, nome: e.target.value }))} />
+            <textarea className="perfil__edit-textarea" placeholder={t.profile.bioPlaceholder} value={editData.bio} onChange={e => setEditData(p => ({ ...p, bio: e.target.value }))} maxLength={160} />
+            <input className="perfil__edit-input" placeholder={t.profile.cityPlaceholder} value={editData.cidade} onChange={e => setEditData(p => ({ ...p, cidade: e.target.value }))} />
+            <input className="perfil__edit-input" placeholder={t.profile.contactPlaceholder} value={editData.contato} onChange={e => setEditData(p => ({ ...p, contato: e.target.value }))} />
             <div className="perfil__edit-actions">
-              <button className="perfil__btn-salvar" onClick={salvarPerfil} disabled={salvandoPerfil}>{salvandoPerfil ? "Salvando..." : "Salvar"}</button>
-              <button className="perfil__btn-cancelar" onClick={() => setEditMode(false)}>Cancelar</button>
+              <button className="perfil__btn-salvar" onClick={salvarPerfil} disabled={salvandoPerfil}>{salvandoPerfil ? t.common.saving : t.common.save}</button>
+              <button className="perfil__btn-cancelar" onClick={() => setEditMode(false)}>{t.common.cancel}</button>
             </div>
           </div>
         ) : (
@@ -249,10 +252,10 @@ export default function Perfil() {
             {usuario?.bio && <p className="perfil__bio">{usuario.bio}</p>}
             {usuario?.cidade && <p className="perfil__cidade">📍 {usuario.cidade}</p>}
             <div className="perfil__stats">
-              <span><strong>{posts.length}</strong> posts</span>
-              <span><strong>{catalogos.length}</strong> catálogos</span>
-              <span><strong>{contadores.seguidores}</strong> seguidores</span>
-              <span><strong>{contadores.seguindo}</strong> seguindo</span>
+              <span><strong>{posts.length}</strong> {t.profile.posts.toLowerCase()}</span>
+              <span><strong>{catalogos.length}</strong> {t.profile.catalogs.toLowerCase()}</span>
+              <span><strong>{contadores.seguidores}</strong> {t.profile.followers}</span>
+              <span><strong>{contadores.seguindo}</strong> {t.profile.following}</span>
             </div>
           </div>
         )}
@@ -260,11 +263,11 @@ export default function Perfil() {
         <div className="perfil__actions">
           {!editMode && (
             <>
-              <button className="perfil__btn-editar" onClick={() => setEditMode(true)}>Editar perfil</button>
+              <button className="perfil__btn-editar" onClick={() => setEditMode(true)}>{t.profile.editProfile}</button>
               <button className="perfil__btn-custom" onClick={() => setShowCustomize(true)}>
                 <PaletteIcon size={15} />
               </button>
-              <button className="perfil__btn-share" onClick={compartilharPerfil} title="Compartilhar perfil">
+              <button className="perfil__btn-share" onClick={compartilharPerfil} title={t.profile.shareProfile}>
                 <ShareIcon size={15} />
               </button>
             </>
@@ -276,13 +279,13 @@ export default function Perfil() {
       <div className="perfil__tabbar">
         <div className="perfil__tabs">
           <button className={tab === "posts" ? "active" : ""} onClick={() => setTab("posts")}>
-            Posts <span className="perfil__tab-count">{posts.length}</span>
+            {t.profile.posts} <span className="perfil__tab-count">{posts.length}</span>
           </button>
           <button className={tab === "catalogos" ? "active" : ""} onClick={() => setTab("catalogos")}>
-            Catálogos <span className="perfil__tab-count">{catalogos.length}</span>
+            {t.profile.catalogs} <span className="perfil__tab-count">{catalogos.length}</span>
           </button>
           <button className={tab === "salvos" ? "active" : ""} onClick={() => setTab("salvos")}>
-            Salvos <span className="perfil__tab-count">{postsSalvos.length + catalogosSalvos.length}</span>
+            {t.profile.saved} <span className="perfil__tab-count">{postsSalvos.length + catalogosSalvos.length}</span>
           </button>
         </div>
         {tab !== "salvos" && (
@@ -290,7 +293,7 @@ export default function Perfil() {
             className="perfil__novo-btn"
             onClick={() => tab === "catalogos" ? setShowCatalogoModal(true) : setShowModal(true)}
           >
-            <PlusIcon size={14} /> {tab === "catalogos" ? "Novo catálogo" : "Nova publicação"}
+            <PlusIcon size={14} /> {tab === "catalogos" ? t.profile.newCatalog : t.profile.newPost}
           </button>
         )}
       </div>
@@ -303,9 +306,9 @@ export default function Perfil() {
           </div>
         ) : posts.length === 0 ? (
           <div className="perfil__empty">
-            <p>Nenhuma publicação ainda.</p>
+            <p>{t.profile.noPosts}</p>
             <button className="perfil__empty-btn" onClick={() => setShowModal(true)}>
-              <PlusIcon size={14} /> Criar primeira publicação
+              <PlusIcon size={14} /> {t.profile.createFirst}
             </button>
           </div>
         ) : (
@@ -345,13 +348,13 @@ export default function Perfil() {
                         {menuPostAberto === post.id && (
                           <div className="perfil__post-menu-dropdown">
                             <button onClick={e => { e.stopPropagation(); setMenuPostAberto(null); setEditandoPost(post); }}>
-                              Editar
+                              {t.postDetail.editPost}
                             </button>
                             <button
                               className="perfil__post-menu-excluir"
                               onClick={e => { e.stopPropagation(); setMenuPostAberto(null); excluirPost(e, post.id); }}
                             >
-                              Excluir
+                              {t.postDetail.deletePost}
                             </button>
                           </div>
                         )}
@@ -368,7 +371,7 @@ export default function Perfil() {
       {tab === "catalogos" && (
         <div className="perfil__cat-grid">
           {catalogos.length === 0 ? (
-            <p className="perfil__empty-txt">Nenhum catálogo ainda.</p>
+            <p className="perfil__empty-txt">{t.profile.noCatalogs}</p>
           ) : catalogos.map(cat => (
             <div key={cat.id} className="perfil__cat-card" onClick={() => navigate(`/catalogo/${cat.id}`)}>
               <div className="perfil__cat-cover">
@@ -392,21 +395,21 @@ export default function Perfil() {
       {tab === "salvos" && (
         <div className="perfil__salvos">
           <div className="perfil__salvos-aviso">
-            🔒 Apenas você vê seus itens salvos
+            {t.profile.savedPrivate}
           </div>
 
           {postsSalvos.length === 0 && catalogosSalvos.length === 0 ? (
             <div className="perfil__empty">
-              <p>Nenhum item salvo ainda.</p>
+              <p>{t.profile.noSaved}</p>
               <p style={{ fontSize: "0.85rem", color: "#8A9E7A", marginTop: 4 }}>
-                Use o ícone 🔖 em posts e catálogos para salvá-los aqui.
+                {t.profile.savedHint}
               </p>
             </div>
           ) : (
             <>
               {postsSalvos.length > 0 && (
                 <>
-                  <p className="perfil__salvos-secao">Posts salvos ({postsSalvos.length})</p>
+                  <p className="perfil__salvos-secao">{t.profile.savedPostsTitle(postsSalvos.length)}</p>
                   <div className={`perfil__galeria perfil__galeria--${config.layout} perfil__galeria--${config.cardStyle}`}>
                     {postsSalvos.map(post => (
                       <div key={post.id} className="perfil__post-card" onClick={() => navigate(`/post/${post.id}`)}>
@@ -436,7 +439,7 @@ export default function Perfil() {
               {catalogosSalvos.length > 0 && (
                 <>
                   <p className="perfil__salvos-secao" style={{ marginTop: postsSalvos.length > 0 ? "2rem" : 0 }}>
-                    Catálogos salvos ({catalogosSalvos.length})
+                    {t.profile.savedCatalogsTitle(catalogosSalvos.length)}
                   </p>
                   <div className="perfil__cat-grid">
                     {catalogosSalvos.map(cat => (
@@ -467,13 +470,13 @@ export default function Perfil() {
         <div className="perfil__custom-overlay" onClick={() => setShowCustomize(false)}>
           <div className="perfil__custom-panel" onClick={e => e.stopPropagation()}>
             <div className="perfil__custom-header">
-              <span>Personalizar perfil</span>
+              <span>{t.profile.customize}</span>
               <button onClick={() => setShowCustomize(false)}>✕</button>
             </div>
 
             <div className="perfil__custom-body">
               <section className="perfil__custom-section">
-                <p className="perfil__custom-label">Fundo sólido</p>
+                <p className="perfil__custom-label">{t.profile.solidBg}</p>
                 <div className="perfil__color-swatches">
                   {BG_SOLIDS.map(c => (
                     <button
@@ -487,7 +490,7 @@ export default function Perfil() {
               </section>
 
               <section className="perfil__custom-section">
-                <p className="perfil__custom-label">Gradiente</p>
+                <p className="perfil__custom-label">{t.profile.gradient}</p>
                 <div className="perfil__color-swatches">
                   {BG_GRADIENTS.map(g => (
                     <button
@@ -501,9 +504,9 @@ export default function Perfil() {
               </section>
 
               <section className="perfil__custom-section">
-                <p className="perfil__custom-label">Textura</p>
+                <p className="perfil__custom-label">{t.profile.texture}</p>
                 <div className="perfil__texture-opts">
-                  {[["dots", "Pontos"], ["grid", "Grade"], ["diagonal", "Diagonal"]].map(([key, label]) => (
+                  {([["dots", t.profile.textureOpts.dots], ["grid", t.profile.textureOpts.grid], ["diagonal", t.profile.textureOpts.diagonal]] as [string, string][]).map(([key, label]) => (
                     <button
                       key={key}
                       className={`perfil__texture-btn ${config.bgType === "texture" && config.bgValue === key ? "active" : ""}`}
@@ -516,9 +519,9 @@ export default function Perfil() {
               </section>
 
               <section className="perfil__custom-section">
-                <p className="perfil__custom-label">Estilo dos cards</p>
+                <p className="perfil__custom-label">{t.profile.cardStyle}</p>
                 <div className="perfil__style-opts">
-                  {CARD_STYLES.map(s => (
+                  {cardStyles.map(s => (
                     <button
                       key={s.key}
                       className={`perfil__style-btn ${config.cardStyle === s.key ? "active" : ""}`}
@@ -531,16 +534,16 @@ export default function Perfil() {
               </section>
 
               <section className="perfil__custom-section">
-                <p className="perfil__custom-label">Layout da galeria</p>
+                <p className="perfil__custom-label">{t.profile.galleryLayout}</p>
                 <div className="perfil__layout-opts">
                   <button className={`perfil__layout-btn ${config.layout === "grid" ? "active" : ""}`} onClick={() => setConfig(p => ({ ...p, layout: "grid" }))}>
-                    <GridIcon size={18} /> Grade 3
+                    <GridIcon size={18} /> {t.profile.layoutOpts.grid}
                   </button>
                   <button className={`perfil__layout-btn ${config.layout === "compact" ? "active" : ""}`} onClick={() => setConfig(p => ({ ...p, layout: "compact" }))}>
-                    <GridIcon size={18} /> Grade 2
+                    <GridIcon size={18} /> {t.profile.layoutOpts.compact}
                   </button>
                   <button className={`perfil__layout-btn ${config.layout === "list" ? "active" : ""}`} onClick={() => setConfig(p => ({ ...p, layout: "list" }))}>
-                    <ListIcon size={18} /> Lista
+                    <ListIcon size={18} /> {t.profile.layoutOpts.list}
                   </button>
                 </div>
               </section>
@@ -548,7 +551,7 @@ export default function Perfil() {
 
             <div className="perfil__custom-footer">
               <button className="perfil__custom-save" onClick={() => salvarConfig(config)} disabled={salvandoConfig}>
-                {salvandoConfig ? "Salvando..." : "Salvar personalização"}
+                {salvandoConfig ? t.common.saving : t.profile.saveCustomization}
               </button>
             </div>
           </div>
