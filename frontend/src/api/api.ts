@@ -10,6 +10,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('@artlink:token');
       localStorage.removeItem('@artlink:usuario');
+      sessionStorage.removeItem('@artlink:token');
+      sessionStorage.removeItem('@artlink:usuario');
       delete api.defaults.headers.common['Authorization'];
       window.location.href = '/login';
     }

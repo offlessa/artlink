@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../api/api";
 import "../styles/components/Login.scss";
 
 const FOTOS = [
@@ -12,8 +13,12 @@ const FOTOS = [
 const RAIO = 200;
 
 export default function Cadastro() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) navigate("/home");
+  }, [isAuthenticated]);
   const [nome, setNome] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -47,15 +52,9 @@ export default function Cadastro() {
     setErro(false);
     setCarregando(true);
     try {
-      const res = await fetch("http://localhost:3000/usuario", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, username, email, senha }),
-      });
-      const data = await res.json();
+      const { data } = await api.post("/usuario", { nome, username, email, senha });
       if (data.success) {
         await login(email, senha, true);
-        navigate("/home");
       } else {
         setErro(true);
         setMensagem(data.message || "Erro ao criar conta.");

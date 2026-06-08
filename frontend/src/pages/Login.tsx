@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/components/Login.scss";
@@ -12,8 +12,12 @@ const FOTOS = [
 const RAIO = 200;
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) navigate("/home");
+  }, [isAuthenticated]);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [lembrar, setLembrar] = useState(false);
@@ -45,7 +49,6 @@ export default function Login() {
     setCarregando(true);
     try {
       await login(email, senha, lembrar);
-      navigate("/home");
     } catch (err: any) {
       setErro(err?.response?.data?.message || "E-mail ou senha inválidos.");
     } finally {
