@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "npm install --legacy-peer-deps && ./node_modules/.bin/prisma generate && ./node_modules/.bin/prisma db push --accept-data-loss && tsc -p tsconfig.build.json && node -e \"const fs=require('fs');fs.cpSync('src/generated','dist/src/generated',{recursive:true})\"",
-    "start": "node dist/src/server.js",
+    "build": "npm install --legacy-peer-deps && ./node_modules/.bin/prisma generate && tsc -p tsconfig.build.json && node -e \"const fs=require('fs');fs.cpSync('src/generated','dist/src/generated',{recursive:true})\"",
+    "start": "./node_modules/.bin/prisma db push --accept-data-loss && node dist/src/server.js",
     "prisma": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
     "prisma:migrate": "npx prisma migrate dev"
