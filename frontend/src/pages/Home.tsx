@@ -35,6 +35,11 @@ export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [feedPosts, setFeedPosts] = useState<Post[]>([]);
   const [carregando, setCarregando] = useState(true);
+
+  interface Artista { id: number; nome: string; username: string; fotoPerfil?: string; seguidores: number }
+  const [sugestoes, setSugestoes] = useState<Artista[]>([]);
+  const [seguindoSugestoes, setSeguindoSugestoes] = useState<Set<number>>(new Set());
+  const [loadingSeguir, setLoadingSeguir] = useState<number | null>(null);
   const [categoria, setCategoria] = useState<string | null>(null);
   const [feedTab, setFeedTab] = useState<"explorar" | "feed">(
     usuario && !mostrarDescoberta ? "feed" : "explorar"
@@ -65,6 +70,46 @@ export default function Home() {
     } catch { setFeedPosts([]); }
   }
 
+  async function carregarSugestoes() {
+    if (!usuario) return;
+    try {
+      const res = await api.get("/usuario/artistas");
+      const artistas: Artista[] = (Array.isArray(res.data) ? res.data : [])
+        .filter((a: Artista) => a.id !== usuario.id)
+        .slice(0, 6);
+      setSugestoes(artistas);
+      if (artistas.length > 0) {
+        const checks = await Promise.allSettled(
+          artistas.map(a => api.get(`/seguidor/checar/${usuario.id}/${a.id}`))
+        );
+        const ids = new Set<number>();
+        checks.forEach((r, i) => {
+          const seg = r.status === "fulfilled"
+            ? (r.value.data?.data?.seguindo ?? r.value.data?.seguindo ?? false)
+            : false;
+          if (seg) ids.add(artistas[i].id);
+        });
+        setSeguindoSugestoes(ids);
+      }
+    } catch { setSugestoes([]); }
+  }
+
+  async function toggleSeguirSugestao(artistaId: number) {
+    if (!usuario || loadingSeguir) return;
+    setLoadingSeguir(artistaId);
+    try {
+      if (seguindoSugestoes.has(artistaId)) {
+        await api.delete(`/seguidor/${usuario.id}/${artistaId}`);
+        setSeguindoSugestoes(prev => { const s = new Set(prev); s.delete(artistaId); return s; });
+      } else {
+        await api.post("/seguidor", { seguidorId: usuario.id, seguidoId: artistaId });
+        setSeguindoSugestoes(prev => new Set(prev).add(artistaId));
+        carregarFeed();
+      }
+    } catch { /* silencioso */ }
+    finally { setLoadingSeguir(null); }
+  }
+
   async function carregarBadges() {
     if (!usuario) return;
     try {
@@ -80,7 +125,7 @@ export default function Home() {
 
   useEffect(() => {
     carregarPosts();
-    if (usuario) { carregarFeed(); carregarBadges(); }
+    if (usuario) { carregarFeed(); carregarBadges(); carregarSugestoes(); }
   }, [usuario?.id]);
 
   const listaAtiva = feedTab === "feed" ? feedPosts : posts;
@@ -233,8 +278,46 @@ export default function Home() {
               {Array.from({ length: 6 }).map((_, i) => <div key={i} className="home__skeleton" />)}
             </div>
           ) : feedTab === "feed" && feedPosts.length === 0 ? (
-            <div className="home__empty">
-              <p>{t.home.emptyFeed}</p>
+            <div className="home__sugestoes">
+              <h2 className="home__sugestoes-titulo">{t.home.suggestTitle}</h2>
+              <p className="home__sugestoes-hint">{t.home.suggestHint}</p>
+              {sugestoes.length > 0 && (
+                <div className="home__sugestoes-grid">
+                  {sugestoes.map(artista => {
+                    const seguindo = seguindoSugestoes.has(artista.id);
+                    const inicial = artista.nome.charAt(0).toUpperCase();
+                    return (
+                      <div key={artista.id} className="home__sugestao-card">
+                        <div
+                          className="home__sugestao-avatar"
+                          onClick={() => navigate(`/u/${artista.username}`)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {artista.fotoPerfil
+                            ? <img src={artista.fotoPerfil} alt={artista.nome} />
+                            : <span>{inicial}</span>}
+                        </div>
+                        <div className="home__sugestao-info">
+                          <span
+                            className="home__sugestao-nome"
+                            onClick={() => navigate(`/u/${artista.username}`)}
+                          >
+                            {artista.nome}
+                          </span>
+                          <span className="home__sugestao-user">@{artista.username}</span>
+                        </div>
+                        <button
+                          className={`home__sugestao-btn ${seguindo ? "home__sugestao-btn--ativo" : ""}`}
+                          onClick={() => toggleSeguirSugestao(artista.id)}
+                          disabled={loadingSeguir === artista.id}
+                        >
+                          {loadingSeguir === artista.id ? "..." : seguindo ? "Seguindo" : "Seguir"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               <button className="home__explorar-btn" onClick={() => setFeedTab("explorar")}>
                 {t.home.exploreAll}
               </button>

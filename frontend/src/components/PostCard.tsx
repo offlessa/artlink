@@ -179,8 +179,14 @@ export default function PostCard({ id, titulo, descricao, imagem, tags, visualiz
 
         {tags && tags.length > 0 && (
           <div className="post-card__tags">
-            {tags.slice(0, 3).map(t => (
-              <span key={t} className="post-card__tag" onClick={e => e.stopPropagation()}>#{t}</span>
+            {tags.slice(0, 3).map(tag => (
+              <span
+                key={tag}
+                className="post-card__tag post-card__tag--link"
+                onClick={e => { e.stopPropagation(); navigate(`/tag/${tag}`); }}
+              >
+                #{tag}
+              </span>
             ))}
           </div>
         )}

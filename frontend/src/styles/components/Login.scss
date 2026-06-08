@@ -253,6 +253,27 @@
     padding: 10px 14px;
     font-size: 0.85rem;
     margin-bottom: 1.2rem;
+
+    &--verif {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+  }
+
+  &__resend-btn {
+    background: none;
+    border: 1px solid #E8C4BC;
+    color: #8B2020;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background 0.15s;
+    &:hover { background: #E8C4BC30; }
+    &:disabled { opacity: 0.6; cursor: default; }
   }
 
   &__success {

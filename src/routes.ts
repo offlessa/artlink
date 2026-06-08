@@ -10,6 +10,8 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 import { LoginController } from "./controllers/auth/LoginController";
 import { EsqueciSenhaController } from "./controllers/auth/EsqueciSenhaController";
 import { RedefinirSenhaController } from "./controllers/auth/RedefinirSenhaController";
+import { VerificarEmailController } from "./controllers/auth/VerificarEmailController";
+import { ReenviarVerificacaoController } from "./controllers/auth/ReenviarVerificacaoController";
 
 // ====== IMPORTS DE CONTROLLERS ======
 
@@ -104,6 +106,8 @@ router.post("/upload", authMiddleware, upload.single("file"), new UploadControll
 router.post("/auth/login", new LoginController().handle);
 router.post("/auth/esqueci-senha", new EsqueciSenhaController().handle);
 router.post("/auth/redefinir-senha", new RedefinirSenhaController().handle);
+router.post("/auth/verificar-email", new VerificarEmailController().handle);
+router.post("/auth/reenviar-verificacao", new ReenviarVerificacaoController().handle);
 
 // ===================================================
 // ===================== USUÁRIO =====================

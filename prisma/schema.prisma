@@ -25,6 +25,9 @@ model Usuario {
   criadoEm         DateTime  @default(now()) @map("criado_em")
   resetToken       String?   @map("reset_token") @db.VarChar(255)
   resetTokenExpiry DateTime? @map("reset_token_expiry")
+  emailVerificado  Boolean   @default(true) @map("email_verificado")
+  emailVerifToken  String?   @map("email_verif_token") @db.VarChar(255)
+  emailVerifExpiry DateTime? @map("email_verif_expiry")
 
   posts                  Post[]
   postsColaboracoes      PostColaboracao[]

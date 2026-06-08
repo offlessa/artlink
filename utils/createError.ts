@@ -16,6 +16,7 @@ export interface ErrorResponse {
   error: {
     message: string;
     statusCode: HttpStatusCode;
+    code?: string;
   };
 }
 
@@ -29,13 +30,15 @@ export type ServiceResponse = ErrorResponse | SuccessResponse;
 
 export const createError = (
   message: string,
-  statusCode: HttpStatusCode
+  statusCode: HttpStatusCode,
+  code?: string
 ): ErrorResponse => {
   return {
     success: false,
     error: {
       message,
       statusCode,
+      ...(code ? { code } : {}),
     },
   };
 };
@@ -57,6 +60,7 @@ export const sendResponse = (res: Response, result: ServiceResponse) => {
     return res.status(err.error.statusCode).json({
       success: false,
       message: err.error.message,
+      ...(err.error.code ? { code: err.error.code } : {}),
     });
   }
 

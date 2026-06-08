@@ -93,6 +93,12 @@
     border-radius: 99px;
     padding: 2px 8px;
     font-weight: 600;
+
+    &--link {
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      &:hover { background: $brand; color: #FAF8F3; }
+    }
   }
 
   &__views {

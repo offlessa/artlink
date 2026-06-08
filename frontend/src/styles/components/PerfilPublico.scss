@@ -155,17 +155,19 @@
   &__btn-share {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
+    gap: 6px;
+    padding: 8px 16px;
     background: $surface;
     color: $texto-medio;
     border: 1.5px solid $borda;
-    border-radius: 50%;
+    border-radius: $radius;
+    font-family: $font-sans;
+    font-size: 0.88rem;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
     flex-shrink: 0;
-    &:hover { background: $brand-subtle; border-color: $brand-mid; color: $brand-mid; }
+    &:hover { background: $brand-subtle; border-color: $brand-mid; color: $brand; }
   }
 
   &__tabs {

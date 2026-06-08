@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
+import { api } from "../api/api";
 import "../styles/components/Login.scss";
 
 const FOTOS = [
@@ -26,6 +27,9 @@ export default function Login() {
   const [lembrar, setLembrar] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [emailNaoVerif, setEmailNaoVerif] = useState(false);
+  const [reenviando, setReenviando] = useState(false);
+  const [reenviado, setReenviado] = useState(false);
 
   const [pos, setPos] = useState({ x: -999, y: -999 });
   const [textoOffset, setTextoOffset] = useState({ left: 0, top: 0 });
@@ -49,14 +53,29 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
+    setEmailNaoVerif(false);
+    setReenviado(false);
     setCarregando(true);
     try {
       await login(email, senha, lembrar);
     } catch (err: any) {
-      setErro(err?.response?.data?.message || t.login.invalidCredentials);
+      if (err?.response?.data?.code === "EMAIL_NAO_VERIFICADO") {
+        setEmailNaoVerif(true);
+      } else {
+        setErro(err?.response?.data?.message || t.login.invalidCredentials);
+      }
     } finally {
       setCarregando(false);
     }
+  }
+
+  async function reenviarVerificacao() {
+    setReenviando(true);
+    try {
+      await api.post("/auth/reenviar-verificacao", { email });
+      setReenviado(true);
+    } catch { /* silencioso */ }
+    finally { setReenviando(false); }
   }
 
   const veilMask = `radial-gradient(circle ${RAIO}px at ${pos.x}px ${pos.y}px, transparent 0%, transparent 25%, rgba(0,0,0,0.4) 55%, black 80%)`;
@@ -116,6 +135,24 @@ export default function Login() {
           </div>
 
           {erro && <div className="auth-box__error">{erro}</div>}
+          {emailNaoVerif && (
+            <div className="auth-box__error auth-box__error--verif">
+              <p>{t.login.emailNotVerified}</p>
+              {reenviado
+                ? <p style={{ fontWeight: 600, marginTop: 6 }}>{t.login.resendDone}</p>
+                : (
+                  <button
+                    type="button"
+                    className="auth-box__resend-btn"
+                    onClick={reenviarVerificacao}
+                    disabled={reenviando}
+                  >
+                    {reenviando ? "..." : t.login.resendVerification}
+                  </button>
+                )
+              }
+            </div>
+          )}
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="auth-form__field auth-form__field--float">

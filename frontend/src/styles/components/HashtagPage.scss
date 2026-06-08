@@ -1,0 +1,80 @@
+@use '../variables' as *;
+
+.hashtag-page {
+  min-height: calc(100vh - var(--navbar-h));
+  background: $creme;
+
+  &__header {
+    padding: 28px 2rem 20px;
+    background: $surface;
+    border-bottom: 1px solid $borda;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    @media (max-width: 640px) { padding: 20px 1rem 16px; }
+  }
+
+  &__back {
+    background: none;
+    border: none;
+    color: $texto-suave;
+    font-family: $font-sans;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+    align-self: flex-start;
+    transition: color 0.15s;
+    &:hover { color: $brand; }
+  }
+
+  &__titulo {
+    font-family: $font-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: $texto;
+    margin: 0;
+  }
+
+  &__count {
+    color: $texto-suave;
+    font-size: 0.88rem;
+    margin: 0;
+  }
+
+  &__body {
+    padding: 24px 2rem;
+    @media (max-width: 640px) { padding: 14px 1rem; }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+
+    @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 640px) { grid-template-columns: 1fr; gap: 14px; }
+  }
+
+  &__skeleton {
+    aspect-ratio: 3/4;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #EDE8DF 25%, #F6F2EA 50%, #EDE8DF 75%);
+    background-size: 200% 100%;
+    animation: shimmer-hash 1.4s infinite;
+  }
+
+  &__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+    color: $texto-suave;
+    font-size: 1rem;
+  }
+}
+
+@keyframes shimmer-hash {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
 import { api } from "../api/api";
 import "../styles/components/Login.scss";
+import "../styles/components/VerificarEmail.scss";
 
 const FOTOS = [
   "/ChatGPT Image 22 de mai. de 2026, 14_06_46.png",
@@ -29,6 +30,9 @@ export default function Cadastro() {
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState(false);
   const [carregando, setCarregando] = useState(false);
+  const [etapa, setEtapa] = useState<"form" | "verificar">("form");
+  const [reenviando, setReenviando] = useState(false);
+  const [reenviado, setReenviado] = useState(false);
 
   const [pos, setPos] = useState({ x: -999, y: -999 });
   const [textoOffset, setTextoOffset] = useState({ left: 0, top: 0 });
@@ -57,7 +61,7 @@ export default function Cadastro() {
     try {
       const { data } = await api.post("/usuario", { nome, username, email, senha });
       if (data.success) {
-        await login(email, senha, true);
+        setEtapa("verificar");
       } else {
         setErro(true);
         setMensagem(data.message || t.signup.error);
@@ -68,6 +72,44 @@ export default function Cadastro() {
     } finally {
       setCarregando(false);
     }
+  }
+
+  async function reenviar() {
+    setReenviando(true);
+    try {
+      await api.post("/auth/reenviar-verificacao", { email });
+      setReenviado(true);
+    } catch { /* silencioso */ }
+    finally { setReenviando(false); }
+  }
+
+  if (etapa === "verificar") {
+    return (
+      <div className="auth-page auth-page--center">
+        <div className="verif">
+          <span className="verif__icon">📧</span>
+          <h1 className="verif__titulo">{t.signup.emailSentTitle}</h1>
+          <p className="verif__hint">{t.signup.emailSentSubtitle(email)}</p>
+          <p className="verif__hint" style={{ fontSize: "0.82rem" }}>{t.signup.emailSentHint}</p>
+          {reenviado
+            ? <p style={{ color: "var(--c-medio)", fontWeight: 600, fontSize: "0.9rem" }}>{t.signup.resent}</p>
+            : (
+              <button
+                className="auth-form__btn-outline"
+                style={{ marginTop: 8 }}
+                onClick={reenviar}
+                disabled={reenviando}
+              >
+                {reenviando ? t.signup.resending : t.signup.resend}
+              </button>
+            )
+          }
+          <Link to="/login" style={{ fontSize: "0.85rem", color: "var(--c-suave)", marginTop: 4 }}>
+            Ir para o login
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const veilMask = `radial-gradient(circle ${RAIO}px at ${pos.x}px ${pos.y}px, transparent 0%, transparent 25%, rgba(0,0,0,0.4) 55%, black 80%)`;

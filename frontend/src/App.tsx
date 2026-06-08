@@ -20,6 +20,8 @@ import ExplorarCatalogos from "./pages/ExplorarCatalogos";
 import Notificacoes from "./pages/Notificacoes";
 import Artistas from "./pages/Artistas";
 import Arte from "./pages/Arte";
+import VerificarEmail from "./pages/VerificarEmail";
+import HashtagPage from "./pages/HashtagPage";
 
 function PublicLayout({ children }: { children: ReactNode }) {
   return (
@@ -61,6 +63,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+          <Route path="/verificar-email" element={<VerificarEmail />} />
+          <Route path="/tag/:tag" element={<PublicLayout><HashtagPage /></PublicLayout>} />
           <Route path="/busca" element={<PublicLayout><Busca /></PublicLayout>} />
           <Route path="/sobre" element={<PublicLayout><Sobre /></PublicLayout>} />
           <Route path="/post/:id" element={<PublicLayout><PostDetalhe /></PublicLayout>} />

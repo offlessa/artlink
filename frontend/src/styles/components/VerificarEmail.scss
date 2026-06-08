@@ -1,0 +1,38 @@
+@use '../variables' as *;
+
+.auth-page--center {
+  justify-content: center;
+  align-items: center;
+}
+
+.verif {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 32px;
+  background: $surface;
+  border-radius: 16px;
+  box-shadow: $sombra;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+
+  &__icon {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  &__titulo {
+    font-family: $font-serif;
+    font-size: 1.5rem;
+    color: $texto;
+    margin: 0;
+  }
+
+  &__hint {
+    color: $texto-suave;
+    font-size: 0.92rem;
+    margin: 0;
+  }
+}

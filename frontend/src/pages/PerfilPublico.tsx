@@ -174,9 +174,10 @@ export default function PerfilPublico() {
             <button
               className="pp__btn-share"
               onClick={compartilharPerfil}
-              title="Compartilhar perfil"
+              title="Copiar link do perfil"
             >
               <ShareIcon size={14} />
+              <span>Copiar link</span>
             </button>
           </div>
         </div>
