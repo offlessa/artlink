@@ -267,6 +267,23 @@
     justify-content: center;
   }
 
+  &__excluir-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    color: #C0392B;
+    border: 1.5px solid #C0392B;
+    border-radius: 99px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    &:hover { background: #C0392B; color: #fff; }
+  }
+
   &__sair-btn {
     background: none;
     color: #8A9E7A;
