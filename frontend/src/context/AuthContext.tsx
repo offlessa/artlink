@@ -1,6 +1,15 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { api } from "../api/api";
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
 export interface Usuario {
   id: number;
   nome: string;
@@ -42,12 +51,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionStorage.getItem("@artlink:usuario");
 
     if (storedToken && storedUsuario) {
-      setToken(storedToken);
-      setUsuario(JSON.parse(storedUsuario));
-      api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
-    }
+      if (isTokenExpired(storedToken)) {
+        localStorage.removeItem("@artlink:token");
+        localStorage.removeItem("@artlink:usuario");
+        sessionStorage.removeItem("@artlink:token");
+        sessionStorage.removeItem("@artlink:usuario");
+        setLoading(false);
+        return;
+      }
 
-    setLoading(false);
+      const parsedUsuario: Usuario = JSON.parse(storedUsuario);
+      setToken(storedToken);
+      setUsuario(parsedUsuario);
+      api.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+      setLoading(false);
+
+      // Busca dados atualizados em background para sincronizar entre dispositivos
+      api.get(`/usuario/${parsedUsuario.id}`)
+        .then((res) => {
+          const fresh: Usuario = res.data;
+          if (fresh) {
+            setUsuario(fresh);
+            const storage = localStorage.getItem("@artlink:token") ? localStorage : sessionStorage;
+            storage.setItem("@artlink:usuario", JSON.stringify(fresh));
+          }
+        })
+        .catch(() => { /* silencioso — interceptor 401 já trata expiração */ });
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   async function login(email: string, senha: string, lembrar = false) {

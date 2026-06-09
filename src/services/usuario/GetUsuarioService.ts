@@ -11,6 +11,7 @@ const USER_SELECT = {
   fotoPerfil: true,
   fotoCapa: true,
   perfilConfig: true,
+  configuracoes: true,
   criadoEm: true,
 };
 

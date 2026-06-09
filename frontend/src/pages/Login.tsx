@@ -22,9 +22,9 @@ export default function Login() {
     if (isAuthenticated) navigate("/home");
   }, [isAuthenticated]);
 
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [lembrar, setLembrar] = useState(false);
+  const [email, setEmail] = useState(() => localStorage.getItem("@artlink:lembrar-email") ?? "");
+  const [senha, setSenha] = useState(() => localStorage.getItem("@artlink:lembrar-senha") ?? "");
+  const [lembrar, setLembrar] = useState(() => !!localStorage.getItem("@artlink:lembrar-email"));
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [emailNaoVerif, setEmailNaoVerif] = useState(false);
@@ -56,6 +56,13 @@ export default function Login() {
     setEmailNaoVerif(false);
     setReenviado(false);
     setCarregando(true);
+    if (lembrar) {
+      localStorage.setItem("@artlink:lembrar-email", email);
+      localStorage.setItem("@artlink:lembrar-senha", senha);
+    } else {
+      localStorage.removeItem("@artlink:lembrar-email");
+      localStorage.removeItem("@artlink:lembrar-senha");
+    }
     try {
       await login(email, senha, lembrar);
     } catch (err: any) {
