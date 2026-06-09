@@ -226,14 +226,19 @@ export default function PostCard({ id, titulo, descricao, imagem, tags, visualiz
           </div>
 
           <div className="post-card__autor">
-            <div className="post-card__avatar">
-              {autor?.fotoPerfil
-                ? <img src={autor.fotoPerfil} alt={autor.nome} />
-                : <span>{inicialAutor}</span>
-              }
+            <div
+              className="post-card__autor-link"
+              onClick={e => { e.stopPropagation(); if (autor) navigate(`/u/${autor.username}`); }}
+            >
+              <div className="post-card__avatar">
+                {autor?.fotoPerfil
+                  ? <img src={autor.fotoPerfil} alt={autor.nome} />
+                  : <span>{inicialAutor}</span>
+                }
+              </div>
+              <span>{autor?.username}</span>
+              {isVerificado(autor?.username) && <VerificadoIcon size={13} />}
             </div>
-            <span>{autor?.username}</span>
-            {isVerificado(autor?.username) && <VerificadoIcon size={13} />}
             {visualizacoes !== undefined && visualizacoes > 0 && (
               <span className="post-card__views">{visualizacoes} {visualizacoes === 1 ? "view" : "views"}</span>
             )}

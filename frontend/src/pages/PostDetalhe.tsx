@@ -244,7 +244,11 @@ export default function PostDetalhe() {
             }
           </div>
           <div className="post-detalhe__meta">
-            <div className="post-detalhe__autor-row">
+            <div
+              className="post-detalhe__autor-row"
+              onClick={() => navigate(`/u/${post.autor.username}`)}
+              style={{ cursor: "pointer" }}
+            >
               <div className="post-detalhe__avatar">
                 {post.autor.fotoPerfil
                   ? <img src={post.autor.fotoPerfil} alt={post.autor.nome} />
@@ -317,7 +321,12 @@ export default function PostDetalhe() {
               <span className="post-detalhe__collabs-label">{t.postDetail.collaboration}</span>
               <div className="post-detalhe__collabs-list">
                 {post.colaboracoes.map(col => (
-                  <div key={col.usuarioId} className="post-detalhe__collab-chip">
+                  <div
+                    key={col.usuarioId}
+                    className="post-detalhe__collab-chip"
+                    onClick={() => navigate(`/u/${col.usuario.username}`)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <div className="post-detalhe__collab-av">
                       {col.usuario.fotoPerfil
                         ? <img src={col.usuario.fotoPerfil} alt={col.usuario.nome} />
