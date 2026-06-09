@@ -1,0 +1,242 @@
+@use '../variables' as *;
+
+@keyframes onbFadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.onb {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $creme;
+  padding: 2rem 1rem;
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    background: $surface;
+    border-radius: $radius-lg;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 8px 40px rgba(42, 59, 28, 0.10);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    animation: onbFadeIn 0.5s ease both;
+
+    &--perfil {
+      max-width: 460px;
+      align-items: stretch;
+      gap: 1.4rem;
+    }
+  }
+
+  // ── Indicadores de progresso ────────────────────────────────────────────────
+  &__progress {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $borda;
+    transition: background 0.25s, transform 0.25s;
+
+    &--ativo {
+      background: $brand;
+      transform: scale(1.25);
+    }
+  }
+
+  // ── Slide tutorial ──────────────────────────────────────────────────────────
+  &__slide {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    animation: slideIn 0.35s ease both;
+  }
+
+  &__icon {
+    font-size: 3.8rem;
+    line-height: 1;
+  }
+
+  &__titulo {
+    font-family: $font-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: $texto;
+    margin: 0;
+    line-height: 1.25;
+  }
+
+  &__desc {
+    font-size: 0.95rem;
+    color: $texto-suave;
+    line-height: 1.65;
+    margin: 0;
+    max-width: 320px;
+  }
+
+  // ── Botões ──────────────────────────────────────────────────────────────────
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  &__btn {
+    width: 100%;
+    padding: 13px;
+    background: $brand;
+    color: #FAF8F3;
+    border: none;
+    border-radius: $radius;
+    font-family: $font-sans;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+
+    &:hover   { background: $brand-hover; }
+    &:active  { transform: scale(0.99); }
+    &:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  }
+
+  &__pular {
+    background: none;
+    border: none;
+    color: $borda;
+    font-size: 0.84rem;
+    font-family: $font-sans;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s;
+
+    &:hover { color: $texto-suave; }
+  }
+
+  // ── Etapa perfil ────────────────────────────────────────────────────────────
+  &__perfil-header {
+    text-align: center;
+  }
+
+  &__avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: $brand-subtle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 2.5px solid $borda;
+    transition: border-color 0.2s;
+    flex-shrink: 0;
+
+    &:hover { border-color: $brand-mid; }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__avatar-inicial {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: $brand;
+    font-family: $font-serif;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  &__avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  &__avatar:hover &__avatar-overlay { opacity: 1; }
+
+  &__avatar-hint {
+    text-align: center;
+    font-size: 0.78rem;
+    color: $texto-suave;
+    margin-top: 6px;
+  }
+
+  &__campos {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  &__campo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+
+    label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: $brand-mid;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    input, textarea {
+      padding: 11px 14px;
+      border: 1.5px solid $borda;
+      border-radius: $radius;
+      font-size: 0.93rem;
+      font-family: $font-sans;
+      color: $texto;
+      background: $surface;
+      outline: none;
+      resize: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+      &:focus {
+        border-color: $brand-mid;
+        box-shadow: 0 0 0 3px rgba(92, 122, 58, 0.10);
+      }
+
+      &::placeholder { color: $borda; }
+    }
+  }
+
+  &__char {
+    position: absolute;
+    bottom: 9px;
+    right: 12px;
+    font-size: 0.72rem;
+    color: $borda;
+    pointer-events: none;
+  }
+}

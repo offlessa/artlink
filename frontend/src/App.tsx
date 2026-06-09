@@ -22,6 +22,7 @@ import Artistas from "./pages/Artistas";
 import Arte from "./pages/Arte";
 import VerificarEmail from "./pages/VerificarEmail";
 import HashtagPage from "./pages/HashtagPage";
+import Onboarding from "./pages/Onboarding";
 
 function PublicLayout({ children }: { children: ReactNode }) {
   return (
@@ -62,6 +63,7 @@ export default function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/verificar-email" element={<VerificarEmail />} />
           <Route path="/tag/:tag" element={<PublicLayout><HashtagPage /></PublicLayout>} />

@@ -5,6 +5,7 @@ import { useI18n } from "../hooks/useI18n";
 import { api } from "../api/api";
 import "../styles/components/Login.scss";
 
+
 const FOTOS = [
   "/ChatGPT Image 22 de mai. de 2026, 14_06_46.png",
   "/12d65a66-950a-4912-885c-381d3b8aad1e.png",
@@ -19,7 +20,7 @@ export default function Cadastro() {
   const t = useI18n();
 
   useEffect(() => {
-    if (isAuthenticated) navigate("/home");
+    if (isAuthenticated && !novoUsuario.current) navigate("/home");
   }, [isAuthenticated]);
 
   const [nome, setNome] = useState("");
@@ -30,6 +31,7 @@ export default function Cadastro() {
   const [erro, setErro] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const novoUsuario = useRef(false);
 
   const [pos, setPos] = useState({ x: -999, y: -999 });
   const [textoOffset, setTextoOffset] = useState({ left: 0, top: 0 });
@@ -58,7 +60,9 @@ export default function Cadastro() {
     try {
       const { data } = await api.post("/usuario", { nome, username, email, senha });
       if (data.success) {
+        novoUsuario.current = true;
         await login(email, senha, false);
+        navigate("/onboarding");
       } else {
         setErro(true);
         setMensagem(data.message || t.signup.error);
