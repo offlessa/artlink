@@ -7,8 +7,6 @@ import {
 import prismaClient from "../../prisma";
 import bcrypt from "bcrypt";
 import { UsuarioRequest } from "../../types/Usuario";
-import { randomUUID } from "crypto";
-import { sendEmail } from "../../../utils/sendEmail";
 
 export class CreateUsuarioService {
   async execute({
@@ -112,8 +110,6 @@ export class CreateUsuarioService {
     try {
       const saltRounds = 12;
       const hashedPassword = await bcrypt.hash(senha, saltRounds);
-      const verifToken = randomUUID();
-      const verifExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       const user = await prismaClient.usuario.create({
         data: {
@@ -125,9 +121,6 @@ export class CreateUsuarioService {
           cidade: cidade?.trim() || null,
           contato: contato?.trim() || null,
           fotoPerfil: fotoPerfil?.trim() || null,
-          emailVerificado: false,
-          emailVerifToken: verifToken,
-          emailVerifExpiry: verifExpiry,
         },
         select: {
           id: true,
@@ -141,22 +134,6 @@ export class CreateUsuarioService {
           criadoEm: true,
         },
       });
-
-      const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
-      const link = `${frontendUrl}/verificar-email?token=${verifToken}`;
-      await sendEmail({
-        to: email,
-        subject: "Confirme seu e-mail — Artlink",
-        html: `
-          <div style="font-family:'Segoe UI',sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#FAF8F3;border-radius:12px;">
-            <h2 style="color:#2A3B1C;font-size:1.4rem;margin-bottom:8px;">Olá, ${nome.trim()}!</h2>
-            <p style="color:#546248;margin-bottom:24px;">Clique no botão abaixo para confirmar seu e-mail e ativar sua conta no Artlink.</p>
-            <a href="${link}" style="display:inline-block;padding:14px 28px;background:#4A7C59;color:#FAF8F3;border-radius:8px;text-decoration:none;font-weight:700;font-size:1rem;">Confirmar e-mail</a>
-            <p style="color:#8A9E7A;font-size:0.82rem;margin-top:24px;">O link expira em <strong>24 horas</strong>. Se você não criou essa conta, ignore este e-mail.</p>
-            <p style="color:#B0C4A0;font-size:0.75rem;margin-top:8px;">Ou copie e cole: ${link}</p>
-          </div>
-        `,
-      }).catch(() => { /* não bloquear o cadastro se o e-mail falhar */ });
 
       return createSuccess(user);
     } catch (error) {

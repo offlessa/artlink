@@ -53,10 +53,6 @@ export class LoginService {
       );
     }
 
-    if (!usuario.emailVerificado) {
-      return createError("E-mail não verificado.", HttpStatusCode.FORBIDDEN, "EMAIL_NAO_VERIFICADO");
-    }
-
     const secret = process.env.JWT_SECRET;
     if (!secret) {
       return createError(

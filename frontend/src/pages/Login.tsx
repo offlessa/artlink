@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
-import { api } from "../api/api";
 import "../styles/components/Login.scss";
 
 const FOTOS = [
@@ -27,9 +26,7 @@ export default function Login() {
   const [lembrar, setLembrar] = useState(() => !!localStorage.getItem("@artlink:lembrar-email"));
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
-  const [emailNaoVerif, setEmailNaoVerif] = useState(false);
-  const [reenviando, setReenviando] = useState(false);
-  const [reenviado, setReenviado] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const [pos, setPos] = useState({ x: -999, y: -999 });
   const [textoOffset, setTextoOffset] = useState({ left: 0, top: 0 });
@@ -53,8 +50,6 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
-    setEmailNaoVerif(false);
-    setReenviado(false);
     setCarregando(true);
     if (lembrar) {
       localStorage.setItem("@artlink:lembrar-email", email);
@@ -66,23 +61,10 @@ export default function Login() {
     try {
       await login(email, senha, lembrar);
     } catch (err: any) {
-      if (err?.response?.data?.code === "EMAIL_NAO_VERIFICADO") {
-        setEmailNaoVerif(true);
-      } else {
-        setErro(err?.response?.data?.message || t.login.invalidCredentials);
-      }
+      setErro(err?.response?.data?.message || t.login.invalidCredentials);
     } finally {
       setCarregando(false);
     }
-  }
-
-  async function reenviarVerificacao() {
-    setReenviando(true);
-    try {
-      await api.post("/auth/reenviar-verificacao", { email });
-      setReenviado(true);
-    } catch { /* silencioso */ }
-    finally { setReenviando(false); }
   }
 
   const veilMask = `radial-gradient(circle ${RAIO}px at ${pos.x}px ${pos.y}px, transparent 0%, transparent 25%, rgba(0,0,0,0.4) 55%, black 80%)`;
@@ -142,24 +124,6 @@ export default function Login() {
           </div>
 
           {erro && <div className="auth-box__error">{erro}</div>}
-          {emailNaoVerif && (
-            <div className="auth-box__error auth-box__error--verif">
-              <p>{t.login.emailNotVerified}</p>
-              {reenviado
-                ? <p style={{ fontWeight: 600, marginTop: 6 }}>{t.login.resendDone}</p>
-                : (
-                  <button
-                    type="button"
-                    className="auth-box__resend-btn"
-                    onClick={reenviarVerificacao}
-                    disabled={reenviando}
-                  >
-                    {reenviando ? "..." : t.login.resendVerification}
-                  </button>
-                )
-              }
-            </div>
-          )}
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="auth-form__field auth-form__field--float">
@@ -178,14 +142,34 @@ export default function Login() {
             <div className="auth-form__field auth-form__field--float">
               <input
                 className="auth-form__input"
-                type="password"
+                type={mostrarSenha ? "text" : "password"}
                 placeholder=" "
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
                 autoComplete="current-password"
+                style={{ paddingRight: 42 }}
               />
               <label className="auth-form__label">{t.login.password}</label>
+              <button
+                type="button"
+                className="auth-form__toggle-senha"
+                onClick={() => setMostrarSenha(v => !v)}
+                tabIndex={-1}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Ver senha"}
+              >
+                {mostrarSenha ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
             </div>
 
             <div className="auth-form__row">

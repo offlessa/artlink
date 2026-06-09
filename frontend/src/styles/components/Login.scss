@@ -404,6 +404,28 @@
     &:hover { color: $brand; }
   }
 
+  // ── Botão mostrar/ocultar senha ───────────────────────────────────────────
+  &__toggle-senha {
+    position: absolute;
+    right: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #B8C4AE;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    line-height: 0;
+
+    &:hover { color: $brand; }
+
+    svg { width: 18px; height: 18px; display: block; }
+  }
+
   // ── Campo código numérico ─────────────────────────────────────────────────
   &__input--code {
     letter-spacing: 8px;
