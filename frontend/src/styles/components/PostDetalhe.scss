@@ -526,6 +526,109 @@
     padding: 1.5rem 0;
   }
 
+  // ── Modal Enviar ──────────────────────────────────────────────────────────
+  &__enviar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__enviar-modal {
+    background: #FDFAF4;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 380px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+
+  &__enviar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    span { font-weight: 700; font-size: 0.95rem; color: #1C2616; }
+    button { background: none; border: none; cursor: pointer; color: #8A9E7A; display: flex; align-items: center; }
+  }
+
+  &__enviar-busca {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #E0D9CC;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    background: #FAF8F3;
+    color: #1C2616;
+    outline: none;
+    &:focus { border-color: #5C7A3A; }
+  }
+
+  &__enviar-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  &__enviar-hint {
+    font-size: 0.82rem;
+    color: #8A9E7A;
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  &__enviar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: background 0.15s;
+    &:hover { background: #EBF0E4; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__enviar-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9A8050, #C4A96A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    img { width: 100%; height: 100%; object-fit: cover; }
+    span { color: #fff; font-size: 0.78rem; font-weight: 700; }
+  }
+
+  &__enviar-nome {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1C2616;
+    margin: 0;
+  }
+
+  &__enviar-user {
+    font-size: 0.75rem;
+    color: #8A9E7A;
+    margin: 0;
+  }
+
+  // ── Formulário de comentário ────────────────────────────────────────────────
   &__form {
     display: flex;
     gap: 8px;
