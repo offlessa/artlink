@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { SearchIcon, UserIcon, LogOutIcon, PlusIcon, BellIcon, MessageIcon, SettingsIcon, VerificadoIcon, MenuIcon, XIcon } from "./Icons";
+import { UserIcon, LogOutIcon, PlusIcon, BellIcon, MessageIcon, SettingsIcon, VerificadoIcon, MenuIcon, XIcon } from "./Icons";
 import { isVerificado } from "../utils/verificado";
 import CreatePostModal from "./CreatePostModal";
 import { api } from "../api/api";
@@ -68,7 +68,6 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const t = useI18n();
-  const [busca, setBusca] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -170,15 +169,6 @@ export default function Navbar() {
     finally { setRespondendo(null); }
   }
 
-  function handleBusca(e: React.FormEvent) {
-    e.preventDefault();
-    if (busca.trim()) {
-      navigate(`/busca?q=${encodeURIComponent(busca.trim())}`);
-      setBusca("");
-      setMenuMobileAberto(false);
-    }
-  }
-
   function handleLogout() {
     logout();
     navigate("/login");
@@ -212,21 +202,6 @@ export default function Navbar() {
     <>
       <nav className="navbar">
         <Link to="/" className="navbar__logo">ARTLINK</Link>
-
-        <form className="navbar__search" onSubmit={handleBusca}>
-          <SearchIcon size={15} className="navbar__search-icon" />
-          <input
-            type="text"
-            placeholder={t.nav.search}
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
-          {busca && (
-            <button type="button" className="navbar__search-clear" onClick={() => setBusca("")}>
-              &times;
-            </button>
-          )}
-        </form>
 
         <div className="navbar__links">
           <Link to="/arte">{t.nav.art}</Link>
@@ -366,22 +341,6 @@ export default function Navbar() {
       {menuMobileAberto && (
         <div className="navbar__mobile-overlay" onClick={() => setMenuMobileAberto(false)}>
           <div className="navbar__mobile-menu" onClick={e => e.stopPropagation()}>
-            <form className="navbar__mobile-search" onSubmit={handleBusca}>
-              <SearchIcon size={15} className="navbar__search-icon" />
-              <input
-                type="text"
-                placeholder={t.nav.search}
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                autoFocus
-              />
-              {busca && (
-                <button type="button" className="navbar__search-clear" onClick={() => setBusca("")}>
-                  &times;
-                </button>
-              )}
-            </form>
-
             <nav className="navbar__mobile-links">
               <Link to="/arte">{t.nav.art}</Link>
               <Link to="/artistas">{t.nav.artists}</Link>

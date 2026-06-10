@@ -61,7 +61,7 @@ export default function CatalogoModal({ onClose }: Props) {
   }
 
   return (
-    <React.Fragment>
+    <>
       {capaEditorFile && (
         <ImageEditor
           file={capaEditorFile}
@@ -125,6 +125,6 @@ export default function CatalogoModal({ onClose }: Props) {
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 }
