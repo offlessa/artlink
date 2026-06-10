@@ -336,7 +336,7 @@ export default function CatalogoDetalhe() {
     {capaEditorFile && (
       <ImageEditor
         file={capaEditorFile}
-        aspect={16 / 9}
+        aspect={3}
         onConfirm={handleCapaEditorConfirm}
         onCancel={() => setCapaEditorFile(null)}
       />
