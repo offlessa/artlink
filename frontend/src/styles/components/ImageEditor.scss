@@ -77,6 +77,28 @@
     }
   }
 
+  &__grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &__grid-h {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.28);
+  }
+
+  &__grid-v {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.28);
+  }
+
   &__zoom {
     display: flex;
     align-items: center;

@@ -13,7 +13,7 @@ interface Props {
 export default function ImageEditor({ file, aspect = 1, circular = false, onConfirm, onCancel }: Props) {
   const [imgSrc, setImgSrc] = useState("");
   const [imgNat, setImgNat] = useState({ w: 0, h: 0 });
-  const [stageSize, setStageSize] = useState({ w: 380, h: 380 });
+  const [stageSize, setStageSize] = useState({ w: 0, h: 0 });
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [confirming, setConfirming] = useState(false);
@@ -32,66 +32,66 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     setScale(1);
     setOffset({ x: 0, y: 0 });
     setImgNat({ w: 0, h: 0 });
+    setStageSize({ w: 0, h: 0 });
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  // Register passive:false listeners so preventDefault works
+  // Non-passive listeners so preventDefault works in all browsers
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
-
-    const preventTouch = (e: TouchEvent) => e.preventDefault();
-    el.addEventListener("touchmove", preventTouch, { passive: false });
-
-    function handleWheel(e: WheelEvent) {
+    const onTouch = (e: TouchEvent) => e.preventDefault();
+    const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaMode === 2 ? e.deltaY * 300 : e.deltaY;
-      const factor = Math.pow(0.999, dy);
-      setScale(s => Math.min(Math.max(s * factor, 1), 4));
-    }
-    el.addEventListener("wheel", handleWheel, { passive: false });
-
+      setScale(s => clampScale(s * Math.pow(0.999, dy)));
+    };
+    el.addEventListener("touchmove", onTouch, { passive: false });
+    el.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      el.removeEventListener("touchmove", preventTouch);
-      el.removeEventListener("wheel", handleWheel);
+      el.removeEventListener("touchmove", onTouch);
+      el.removeEventListener("wheel", onWheel);
     };
   }, []);
 
+  function clampScale(s: number) { return Math.min(Math.max(s, 1), 3); }
+
   function onImgLoad() {
     const img = imgRef.current;
-    const el = stageRef.current;
-    if (!img || !el) return;
+    if (!img) return;
     const natW = img.naturalWidth;
     const natH = img.naturalHeight;
-    const rect = el.getBoundingClientRect();
-    const sw = rect.width;
-    const sh = rect.height;
     setImgNat({ w: natW, h: natH });
-    setStageSize({ w: sw, h: sh });
-    baseScaleRef.current = Math.max(sw / natW, sh / natH);
-    setScale(1);
-    setOffset({ x: 0, y: 0 });
+    // rAF garante que o stage já foi dimensionado pelo browser antes de medir
+    requestAnimationFrame(() => {
+      const el = stageRef.current;
+      if (!el) return;
+      const { width: sw, height: sh } = el.getBoundingClientRect();
+      if (!sw || !sh) return;
+      baseScaleRef.current = Math.max(sw / natW, sh / natH);
+      setStageSize({ w: sw, h: sh });
+      setScale(1);
+      setOffset({ x: 0, y: 0 });
+    });
   }
 
-  function clamp(o: { x: number; y: number }, sc: number, sw: number, sh: number, natW: number, natH: number) {
-    const bs = baseScaleRef.current;
-    const rw = natW * bs * sc;
-    const rh = natH * bs * sc;
-    const mx = Math.max(0, (rw - sw) / 2);
-    const my = Math.max(0, (rh - sh) / 2);
+  const ready = imgNat.w > 0 && stageSize.w > 0;
+  const bs = baseScaleRef.current;
+  const rendW = ready ? imgNat.w * bs * scale : 0;
+  const rendH = ready ? imgNat.h * bs * scale : 0;
+  const imgX = ready ? (stageSize.w - rendW) / 2 + offset.x : 0;
+  const imgY = ready ? (stageSize.h - rendH) / 2 + offset.y : 0;
+
+  function clampOffset(o: { x: number; y: number }, sc: number) {
+    const mx = Math.max(0, (imgNat.w * bs * sc - stageSize.w) / 2);
+    const my = Math.max(0, (imgNat.h * bs * sc - stageSize.h) / 2);
     return { x: Math.min(mx, Math.max(-mx, o.x)), y: Math.min(my, Math.max(-my, o.y)) };
   }
 
   useEffect(() => {
-    if (imgNat.w === 0) return;
-    setOffset(o => clamp(o, scale, stageSize.w, stageSize.h, imgNat.w, imgNat.h));
+    if (!ready) return;
+    setOffset(o => clampOffset(o, scale));
   }, [scale, stageSize.w, stageSize.h]);
-
-  const bs = baseScaleRef.current;
-  const rendW = imgNat.w * bs * scale;
-  const rendH = imgNat.h * bs * scale;
-  const imgX = (stageSize.w - rendW) / 2 + offset.x;
-  const imgY = (stageSize.h - rendH) / 2 + offset.y;
 
   function onMouseDown(e: React.MouseEvent) {
     dragging.current = true;
@@ -103,13 +103,13 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setOffset(o => clamp({ x: o.x + dx, y: o.y + dy }, scale, stageSize.w, stageSize.h, imgNat.w, imgNat.h));
+    setOffset(o => clampOffset({ x: o.x + dx, y: o.y + dy }, scale));
   }
 
   function onMouseUp() { dragging.current = false; }
 
-  function pinchDist(touches: React.TouchList) {
-    return Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY);
+  function pinchDist(t: React.TouchList) {
+    return Math.hypot(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
   }
 
   function onTouchStart(e: React.TouchEvent) {
@@ -127,12 +127,11 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
       const dx = e.touches[0].clientX - lastTouch.current.x;
       const dy = e.touches[0].clientY - lastTouch.current.y;
       lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      setOffset(o => clamp({ x: o.x + dx, y: o.y + dy }, scale, stageSize.w, stageSize.h, imgNat.w, imgNat.h));
+      setOffset(o => clampOffset({ x: o.x + dx, y: o.y + dy }, scale));
     } else if (e.touches.length === 2 && lastPinchDist.current !== null) {
       const dist = pinchDist(e.touches);
-      const ratio = dist / lastPinchDist.current;
+      setScale(s => clampScale(s * dist / lastPinchDist.current!));
       lastPinchDist.current = dist;
-      setScale(s => Math.min(Math.max(s * ratio, 1), 4));
     }
   }
 
@@ -142,27 +141,28 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
   }
 
   function confirmar() {
-    if (confirming || !imgRef.current || imgNat.w === 0) return;
+    if (confirming || !imgRef.current || !ready) return;
     setConfirming(true);
 
-    const BASE = aspect >= 3 ? 1200 : 800;
-    const outW = Math.round(BASE);
-    const outH = Math.round(BASE / aspect);
-
+    const outW = aspect >= 3 ? 1200 : 1080;
+    const outH = Math.round(outW / aspect);
     const canvas = document.createElement("canvas");
     canvas.width = outW;
     canvas.height = outH;
     const ctx = canvas.getContext("2d")!;
-    const scaleX = outW / stageSize.w;
-    const scaleY = outH / stageSize.h;
 
-    ctx.drawImage(imgRef.current, imgX * scaleX, imgY * scaleY, rendW * scaleX, rendH * scaleY);
+    // Fator único para evitar qualquer distorção
+    const sc = outW / stageSize.w;
+    ctx.drawImage(imgRef.current, imgX * sc, imgY * sc, rendW * sc, rendH * sc);
 
     canvas.toBlob(blob => {
       setConfirming(false);
       if (blob) onConfirm(blob);
-    }, "image/jpeg", 0.92);
+    }, "image/jpeg", 0.93);
   }
+
+  // Slider de 0–100 mapeado para zoom 1x–3x (linear mas sentido natural)
+  const sliderVal = ready ? Math.round((scale - 1) / 2 * 100) : 0;
 
   return (
     <div className="img-ed-overlay" onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
@@ -171,8 +171,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
           <span>Posicionar imagem</span>
           <button className="img-ed__close" onClick={onCancel}><XIcon size={18} /></button>
         </div>
-
-        <p className="img-ed__hint">Arraste para reposicionar · scroll ou pinça para zoom</p>
 
         <div
           ref={stageRef}
@@ -195,28 +193,38 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
               onLoad={onImgLoad}
               style={{
                 position: "absolute",
-                left: imgX,
-                top: imgY,
-                width: rendW || undefined,
-                height: rendH || undefined,
+                left: ready ? imgX : undefined,
+                top: ready ? imgY : undefined,
+                width: ready ? rendW : undefined,
+                height: ready ? rendH : undefined,
+                visibility: ready ? "visible" : "hidden",
                 pointerEvents: "none",
                 userSelect: "none",
               }}
             />
           )}
+
+          {ready && !circular && (
+            <div className="img-ed__grid" aria-hidden="true">
+              <span className="img-ed__grid-h" style={{ top: "33.33%" }} />
+              <span className="img-ed__grid-h" style={{ top: "66.66%" }} />
+              <span className="img-ed__grid-v" style={{ left: "33.33%" }} />
+              <span className="img-ed__grid-v" style={{ left: "66.66%" }} />
+            </div>
+          )}
         </div>
 
         <div className="img-ed__zoom">
-          <button type="button" onClick={() => setScale(s => Math.max(s - 0.1, 1))}>−</button>
+          <button type="button" onClick={() => setScale(s => clampScale(s - 0.15))}>−</button>
           <input
             type="range"
-            min={100}
-            max={400}
-            step={5}
-            value={Math.round(scale * 100)}
-            onChange={e => setScale(Number(e.target.value) / 100)}
+            min={0}
+            max={100}
+            step={1}
+            value={sliderVal}
+            onChange={e => setScale(1 + (Number(e.target.value) / 100) * 2)}
           />
-          <button type="button" onClick={() => setScale(s => Math.min(s + 0.1, 4))}>+</button>
+          <button type="button" onClick={() => setScale(s => clampScale(s + 0.15))}>+</button>
         </div>
 
         <div className="img-ed__actions">
@@ -225,7 +233,7 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
             type="button"
             className="img-ed__btn img-ed__btn--confirm"
             onClick={confirmar}
-            disabled={confirming || imgNat.w === 0}
+            disabled={confirming || !ready}
           >
             {confirming ? "Processando..." : "Confirmar"}
           </button>
