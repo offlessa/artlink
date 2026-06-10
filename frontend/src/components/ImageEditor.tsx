@@ -163,7 +163,7 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
   }
 
   return (
-    <div className="img-ed-overlay" onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
+    <div className="img-ed-overlay">
       <div className="img-ed">
         <div className="img-ed__header">
           <span>Ajustar foto</span>
