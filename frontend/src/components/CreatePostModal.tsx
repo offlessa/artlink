@@ -252,7 +252,7 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
 
               <textarea
                 className="cpm__area"
-                placeholder="Título da obra *"
+                placeholder="Título do post *"
                 value={titulo}
                 onChange={e => setTitulo(e.target.value)}
                 maxLength={150}
@@ -260,7 +260,7 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
               />
               <textarea
                 className="cpm__area cpm__area--sm"
-                placeholder="Descrição (opcional)"
+                placeholder="Legenda (opcional)"
                 value={descricao}
                 onChange={e => setDescricao(e.target.value)}
                 maxLength={1000}
