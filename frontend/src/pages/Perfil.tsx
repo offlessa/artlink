@@ -167,16 +167,21 @@ export default function Perfil() {
 
   async function handleEditorConfirm(blob: Blob) {
     if (!usuario || !editorState) return;
+    const mode = editorState.mode;
     const file = new File([blob], "image.jpg", { type: "image/jpeg" });
-    const url = await uploadImagem(file);
-    if (editorState.mode === "capa") {
-      await api.put(`/usuario/${usuario.id}`, { fotoCapa: url });
-      updateUsuario({ fotoCapa: url });
-    } else {
-      await api.put(`/usuario/${usuario.id}`, { fotoPerfil: url });
-      updateUsuario({ fotoPerfil: url });
-    }
     setEditorState(null);
+    try {
+      const url = await uploadImagem(file);
+      if (mode === "capa") {
+        await api.put(`/usuario/${usuario.id}`, { fotoCapa: url });
+        updateUsuario({ fotoCapa: url });
+      } else {
+        await api.put(`/usuario/${usuario.id}`, { fotoPerfil: url });
+        updateUsuario({ fotoPerfil: url });
+      }
+    } catch {
+      alert("Erro ao salvar a foto. Tente novamente.");
+    }
   }
 
   async function removerBanner() {

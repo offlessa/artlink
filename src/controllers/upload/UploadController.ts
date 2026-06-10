@@ -19,12 +19,16 @@ export class UploadController {
 
     const isVideo = file.mimetype.startsWith("video/");
 
+    const uploadOptions: Record<string, unknown> = {
+      folder: "artlink",
+      resource_type: "auto",
+    };
+    if (!isVideo) {
+      uploadOptions.transformation = [{ quality: "auto", fetch_format: "auto" }];
+    }
+
     try {
-      const result = await cloudinary.uploader.upload(dataUrl, {
-        folder: "artlink",
-        resource_type: isVideo ? "video" : "image",
-        ...(isVideo ? {} : { transformation: [{ quality: "auto", fetch_format: "auto" }] }),
-      });
+      const result = await cloudinary.uploader.upload(dataUrl, uploadOptions as any);
       return res.json({ url: result.secure_url });
     } catch (err: any) {
       console.error("Cloudinary error:", err);

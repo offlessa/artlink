@@ -245,6 +245,7 @@ export default function CatalogoDetalhe() {
   async function handleCapaEditorConfirm(blob: Blob) {
     if (!catalogo) return;
     const file = new File([blob], "capa.jpg", { type: "image/jpeg" });
+    setCapaEditorFile(null);
     setSalvandoCapa(true);
     try {
       const url = await uploadImagem(file);
@@ -255,7 +256,6 @@ export default function CatalogoDetalhe() {
     } finally {
       setSalvandoCapa(false);
     }
-    setCapaEditorFile(null);
   }
 
   async function removerCapa() {

@@ -95,8 +95,7 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
 
   function clampScale(s: number) {
     const bs = baseScaleRef.current;
-    // Limite superior: nunca renderizar além da resolução natural da imagem (evita pixelação)
-    const maxS = bs > 0 ? Math.max(2, 1 / bs) : 4;
+    const maxS = bs > 0 ? Math.max(1, 1 / bs) : 4;
     return Math.min(Math.max(s, 1), maxS);
   }
 
@@ -194,13 +193,18 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     const ctx = canvas.getContext("2d")!;
     ctx.drawImage(imgRef.current, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
     canvas.toBlob(blob => {
-      setConfirming(false);
-      if (blob) onConfirm(blob);
+      if (blob) {
+        onConfirm(blob);
+      } else {
+        setConfirming(false);
+      }
     }, "image/jpeg", 0.93);
   }
 
-  const maxScaleVal = (ready && bs > 0) ? Math.max(2, 1 / bs) : 4;
-  const sliderVal = ready ? Math.round((scale - 1) / (maxScaleVal - 1) * 100) : 0;
+  const maxScaleVal = (ready && bs > 0) ? Math.max(1, 1 / bs) : 4;
+  const canZoom = maxScaleVal > 1.001;
+  const sliderRange = canZoom ? maxScaleVal - 1 : 1;
+  const sliderVal = ready && canZoom ? Math.round((scale - 1) / sliderRange * 100) : 0;
 
   return (
     <div className="img-ed-overlay" onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
@@ -259,16 +263,17 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
         </div>
 
         <div className="img-ed__zoom">
-          <button type="button" onClick={() => setScale(s => clampScale(s - 0.15))}>−</button>
+          <button type="button" disabled={!canZoom} onClick={() => setScale(s => clampScale(s - 0.15))}>−</button>
           <input
             type="range"
             min={0}
             max={100}
             step={1}
             value={sliderVal}
-            onChange={e => setScale(1 + (Number(e.target.value) / 100) * (maxScaleVal - 1))}
+            disabled={!canZoom}
+            onChange={e => { if (canZoom) setScale(1 + (Number(e.target.value) / 100) * sliderRange); }}
           />
-          <button type="button" onClick={() => setScale(s => clampScale(s + 0.15))}>+</button>
+          <button type="button" disabled={!canZoom} onClick={() => setScale(s => clampScale(s + 0.15))}>+</button>
         </div>
 
         <div className="img-ed__actions">
