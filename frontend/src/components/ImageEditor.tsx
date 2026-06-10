@@ -35,13 +35,26 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  // Register passive:false touchmove on the stage to allow preventDefault
+  // Register passive:false listeners so preventDefault works
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
-    const prevent = (e: TouchEvent) => e.preventDefault();
-    el.addEventListener("touchmove", prevent, { passive: false });
-    return () => el.removeEventListener("touchmove", prevent);
+
+    const preventTouch = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchmove", preventTouch, { passive: false });
+
+    function handleWheel(e: WheelEvent) {
+      e.preventDefault();
+      const dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaMode === 2 ? e.deltaY * 300 : e.deltaY;
+      const factor = Math.pow(0.999, dy);
+      setScale(s => Math.min(Math.max(s * factor, 1), 4));
+    }
+    el.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      el.removeEventListener("touchmove", preventTouch);
+      el.removeEventListener("wheel", handleWheel);
+    };
   }, []);
 
   function onImgLoad() {
@@ -94,12 +107,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
   }
 
   function onMouseUp() { dragging.current = false; }
-
-  function onWheel(e: React.WheelEvent) {
-    e.preventDefault();
-    const delta = -e.deltaY * 0.001;
-    setScale(s => Math.min(Math.max(s + delta, 1), 4));
-  }
 
   function pinchDist(touches: React.TouchList) {
     return Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY);
@@ -175,7 +182,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}
           onMouseLeave={onMouseUp}
-          onWheel={onWheel}
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}

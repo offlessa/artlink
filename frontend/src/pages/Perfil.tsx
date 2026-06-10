@@ -80,6 +80,9 @@ export default function Perfil() {
 
   const bannerRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
+  const menuCapaRef = useRef<HTMLDivElement>(null);
+  const menuAvatarRef = useRef<HTMLDivElement>(null);
+  const [menuFotoAberto, setMenuFotoAberto] = useState<"capa" | "avatar" | null>(null);
 
   const [editorState, setEditorState] = useState<{ file: File; mode: "avatar" | "capa" } | null>(null);
 
@@ -119,6 +122,17 @@ export default function Perfil() {
       setCarregando(false);
     }
   }
+
+  useEffect(() => {
+    function fecharMenus(e: MouseEvent) {
+      const alvo = e.target as Node;
+      const dentroCapa = menuCapaRef.current?.contains(alvo);
+      const dentroAvatar = menuAvatarRef.current?.contains(alvo);
+      if (!dentroCapa && !dentroAvatar) setMenuFotoAberto(null);
+    }
+    document.addEventListener("mousedown", fecharMenus);
+    return () => document.removeEventListener("mousedown", fecharMenus);
+  }, []);
 
   useEffect(() => {
     carregarDados();
@@ -242,15 +256,25 @@ export default function Perfil() {
         {usuario?.fotoCapa
           ? <img src={usuario.fotoCapa} alt="capa" />
           : <div className="perfil__banner-placeholder" />}
-        <div className="perfil__banner-actions">
-          {usuario?.fotoCapa && (
-            <button className="perfil__banner-btn perfil__banner-btn--remove" onClick={removerBanner}>
-              <TrashIcon size={15} /> {t.profile.removeCover}
-            </button>
-          )}
-          <button className="perfil__banner-btn" onClick={() => bannerRef.current?.click()}>
-            <CameraIcon size={15} /> {t.profile.changeCover}
+        <div className="perfil__banner-cam-wrap" ref={menuCapaRef}>
+          <button
+            className="perfil__banner-cam-btn"
+            onClick={() => setMenuFotoAberto(v => v === "capa" ? null : "capa")}
+          >
+            <CameraIcon size={16} />
           </button>
+          {menuFotoAberto === "capa" && (
+            <div className="perfil__foto-menu">
+              <button onClick={() => { setMenuFotoAberto(null); bannerRef.current?.click(); }}>
+                Mudar capa
+              </button>
+              {usuario?.fotoCapa && (
+                <button className="perfil__foto-menu--del" onClick={() => { setMenuFotoAberto(null); removerBanner(); }}>
+                  Remover capa
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <input ref={bannerRef} type="file" accept="image/*" hidden onChange={uploadBanner} />
       </div>
@@ -263,14 +287,26 @@ export default function Perfil() {
               ? <img src={usuario.fotoPerfil} alt={usuario.nome} />
               : <span>{inicial}</span>}
           </div>
-          <button className="perfil__avatar-btn" title={t.profile.changeCover} onClick={() => avatarRef.current?.click()}>
-            <CameraIcon size={12} />
-          </button>
-          {usuario?.fotoPerfil && (
-            <button className="perfil__avatar-remove-btn" title={t.profile.removePhoto} onClick={removerAvatar}>
-              <TrashIcon size={10} />
+          <div className="perfil__avatar-cam-wrap" ref={menuAvatarRef}>
+            <button
+              className="perfil__avatar-btn"
+              onClick={() => setMenuFotoAberto(v => v === "avatar" ? null : "avatar")}
+            >
+              <CameraIcon size={12} />
             </button>
-          )}
+            {menuFotoAberto === "avatar" && (
+              <div className="perfil__foto-menu perfil__foto-menu--avatar">
+                <button onClick={() => { setMenuFotoAberto(null); avatarRef.current?.click(); }}>
+                  Mudar foto
+                </button>
+                {usuario?.fotoPerfil && (
+                  <button className="perfil__foto-menu--del" onClick={() => { setMenuFotoAberto(null); removerAvatar(); }}>
+                    Remover foto
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <input ref={avatarRef} type="file" accept="image/*" hidden onChange={uploadAvatar} />
         </div>
 
