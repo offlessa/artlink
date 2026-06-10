@@ -34,12 +34,25 @@
     @media (max-width: 700px) { padding: 16px 14px; }
   }
 
-  // ── Filtros de categoria ────────────────────────────────────────────────────
+  // ── Filtros / navbar de hashtags ───────────────────────────────────────────
   &__filters {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
     margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  &__tags-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    cursor: grab;
+    user-select: none;
+    flex: 1;
+    &::-webkit-scrollbar { display: none; }
+    &:active { cursor: grabbing; }
   }
 
   &__pill {
@@ -51,11 +64,17 @@
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
 
     &:hover {
       border-color: $brand-mid;
       color: $brand-mid;
+    }
+
+    &--fixed {
+      flex-shrink: 0;
     }
 
     &--ativo {

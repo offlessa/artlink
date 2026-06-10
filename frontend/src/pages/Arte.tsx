@@ -1,6 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { api } from "../api/api";
-import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
 import PostCard from "../components/PostCard";
 import Footer from "../components/Footer";
@@ -12,19 +11,25 @@ interface Post {
   descricao?: string;
   imagem?: string;
   imagens?: string[];
+  tags?: string[];
   curtidas: { id: number; usuarioId: number }[];
   comentarios: { id: number }[];
   autor: { id: number; nome: string; username: string; fotoPerfil?: string };
 }
 
-const CATEGORIAS = ["Metal", "Crochê", "Plumária", "Cerâmica", "Madeira", "Bordado", "Macramê"];
-
 export default function Arte() {
-  const { usuario } = useAuth();
   const t = useI18n();
   const [posts, setPosts] = useState<Post[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [categoria, setCategoria] = useState<string | null>(null);
+
+  const tagsRef = useRef<HTMLDivElement>(null);
+  const autoScrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const scrollPaused = useRef(false);
+  const isDraggingTag = useRef(false);
+  const tagDragStartX = useRef(0);
+  const tagDragScrollLeft = useRef(0);
+  const hasDraggedTag = useRef(false);
 
   async function carregarPosts() {
     setCarregando(true);
@@ -39,16 +44,54 @@ export default function Arte() {
     }
   }
 
+  useEffect(() => { carregarPosts(); }, []);
+
+  const todasTags = useMemo(() => {
+    const set = new Set<string>();
+    posts.forEach(p => p.tags?.forEach(tag => set.add(tag)));
+    return Array.from(set).slice(0, 10);
+  }, [posts]);
+
+  function stopTagScroll() {
+    if (autoScrollTimer.current) { clearInterval(autoScrollTimer.current); autoScrollTimer.current = null; }
+  }
+  function startTagScroll() {
+    stopTagScroll();
+    autoScrollTimer.current = setInterval(() => {
+      const el = tagsRef.current;
+      if (!el || scrollPaused.current) return;
+      el.scrollLeft += 1;
+      if (el.scrollLeft >= el.scrollWidth / 2) el.scrollLeft = 0;
+    }, 18);
+  }
   useEffect(() => {
-    carregarPosts();
-  }, []);
+    if (todasTags.length > 0) startTagScroll();
+    return stopTagScroll;
+  }, [todasTags.length]);
+
+  function onTagStripMouseEnter() { scrollPaused.current = true; }
+  function onTagStripMouseLeave() { scrollPaused.current = false; isDraggingTag.current = false; }
+  function onTagStripMouseDown(e: React.MouseEvent) {
+    const el = tagsRef.current; if (!el) return;
+    isDraggingTag.current = true; hasDraggedTag.current = false;
+    tagDragStartX.current = e.pageX - el.getBoundingClientRect().left;
+    tagDragScrollLeft.current = el.scrollLeft;
+  }
+  function onTagStripMouseMove(e: React.MouseEvent) {
+    if (!isDraggingTag.current || !tagsRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - tagsRef.current.getBoundingClientRect().left;
+    const walk = x - tagDragStartX.current;
+    if (Math.abs(walk) > 4) hasDraggedTag.current = true;
+    tagsRef.current.scrollLeft = tagDragScrollLeft.current - walk;
+  }
+  function onTagStripMouseUp() { isDraggingTag.current = false; }
+  function onTagStripTouchStart() { scrollPaused.current = true; }
+  function onTagStripTouchEnd() { scrollPaused.current = false; }
 
   const filtrados = useMemo(() => {
     const lista = categoria
-      ? posts.filter(p =>
-          p.titulo.toLowerCase().includes(categoria.toLowerCase()) ||
-          (p.descricao ?? "").toLowerCase().includes(categoria.toLowerCase())
-        )
+      ? posts.filter(p => p.tags?.includes(categoria))
       : posts;
     return [...lista].sort((a, b) => b.curtidas.length - a.curtidas.length);
   }, [posts, categoria]);
@@ -64,20 +107,35 @@ export default function Arte() {
         {/* Filtros */}
         <div className="arte__filters">
           <button
-            className={`arte__pill ${!categoria ? "arte__pill--ativo" : ""}`}
+            className={`arte__pill arte__pill--fixed ${!categoria ? "arte__pill--ativo" : ""}`}
             onClick={() => setCategoria(null)}
           >
             {t.art.all}
           </button>
-          {CATEGORIAS.map(cat => (
-            <button
-              key={cat}
-              className={`arte__pill ${categoria === cat ? "arte__pill--ativo" : ""}`}
-              onClick={() => setCategoria(categoria === cat ? null : cat)}
+          {todasTags.length > 0 && (
+            <div
+              className="arte__tags-strip"
+              ref={tagsRef}
+              onMouseEnter={onTagStripMouseEnter}
+              onMouseLeave={onTagStripMouseLeave}
+              onMouseDown={onTagStripMouseDown}
+              onMouseMove={onTagStripMouseMove}
+              onMouseUp={onTagStripMouseUp}
+              onTouchStart={onTagStripTouchStart}
+              onTouchEnd={onTagStripTouchEnd}
             >
-              {cat}
-            </button>
-          ))}
+              {[...todasTags, ...todasTags].map((tag, i) => (
+                <button
+                  key={i}
+                  className={`arte__pill ${categoria === tag ? "arte__pill--ativo" : ""}`}
+                  onClick={() => { if (!hasDraggedTag.current) setCategoria(c => c === tag ? null : tag); }}
+                  onDragStart={e => e.preventDefault()}
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {carregando ? (
