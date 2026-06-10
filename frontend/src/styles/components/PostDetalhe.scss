@@ -84,6 +84,14 @@
     }
   }
 
+  &__video {
+    width: 100%;
+    display: block;
+    max-height: 540px;
+    background: #000;
+    border-radius: 14px;
+  }
+
   &__sem-imagem {
     height: 360px;
     display: flex;

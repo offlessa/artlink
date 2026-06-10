@@ -93,7 +93,12 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     };
   }, []);
 
-  function clampScale(s: number) { return Math.min(Math.max(s, 1), 4); }
+  function clampScale(s: number) {
+    const bs = baseScaleRef.current;
+    // Limite superior: nunca renderizar além da resolução natural da imagem (evita pixelação)
+    const maxS = bs > 0 ? Math.max(2, 1 / bs) : 4;
+    return Math.min(Math.max(s, 1), maxS);
+  }
 
   // Garante que a imagem sempre cobre o frame de corte ao arrastar/zoom
   function clampOffset(o: { x: number; y: number }, sc: number) {
@@ -194,7 +199,8 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     }, "image/jpeg", 0.93);
   }
 
-  const sliderVal = ready ? Math.round((scale - 1) / 3 * 100) : 0;
+  const maxScaleVal = (ready && bs > 0) ? Math.max(2, 1 / bs) : 4;
+  const sliderVal = ready ? Math.round((scale - 1) / (maxScaleVal - 1) * 100) : 0;
 
   return (
     <div className="img-ed-overlay" onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
@@ -260,7 +266,7 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
             max={100}
             step={1}
             value={sliderVal}
-            onChange={e => setScale(1 + (Number(e.target.value) / 100) * 3)}
+            onChange={e => setScale(1 + (Number(e.target.value) / 100) * (maxScaleVal - 1))}
           />
           <button type="button" onClick={() => setScale(s => clampScale(s + 0.15))}>+</button>
         </div>

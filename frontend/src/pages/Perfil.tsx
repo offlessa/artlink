@@ -211,6 +211,7 @@ export default function Perfil() {
       await api.put(`/usuario/${usuario.id}`, { perfilConfig: json });
       updateUsuario({ perfilConfig: json });
       setConfig(newCfg);
+      setShowCustomize(false);
     } finally {
       setSalvandoConfig(false);
     }

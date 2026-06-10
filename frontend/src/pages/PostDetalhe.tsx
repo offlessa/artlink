@@ -6,6 +6,7 @@ import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import Toast from "../components/Toast";
 import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon, BookmarkIcon, ShareIcon } from "../components/Icons";
+import { isVideo } from "../utils/midia";
 import EditPostModal from "../components/EditPostModal";
 import ShareModal from "../components/ShareModal";
 import "../styles/components/PostDetalhe.scss";
@@ -244,7 +245,16 @@ export default function PostDetalhe() {
                     <span>{t.postDetail.noImage}</span>
                   </div>
                 ) : allImages.length === 1 ? (
-                  <img src={allImages[0]} alt={post.titulo} />
+                  isVideo(allImages[0]) ? (
+                    <video
+                      src={allImages[0]}
+                      controls
+                      playsInline
+                      className="post-detalhe__video"
+                    />
+                  ) : (
+                    <img src={allImages[0]} alt={post.titulo} />
+                  )
                 ) : (
                   <div
                     className="post-detalhe__carousel"
@@ -256,7 +266,17 @@ export default function PostDetalhe() {
                       }
                     }}
                   >
-                    <img src={allImages[slideIdx]} alt={post.titulo} />
+                    {isVideo(allImages[slideIdx]) ? (
+                      <video
+                        key={allImages[slideIdx]}
+                        src={allImages[slideIdx]}
+                        controls
+                        playsInline
+                        className="post-detalhe__video"
+                      />
+                    ) : (
+                      <img src={allImages[slideIdx]} alt={post.titulo} />
+                    )}
                     <button
                       className="post-detalhe__carousel-arrow post-detalhe__carousel-arrow--prev"
                       onClick={() => setSlideIdx(i => (i - 1 + allImages.length) % allImages.length)}

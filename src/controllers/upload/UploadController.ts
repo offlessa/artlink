@@ -17,10 +17,13 @@ export class UploadController {
     const b64 = file.buffer.toString("base64");
     const dataUrl = `data:${file.mimetype};base64,${b64}`;
 
+    const isVideo = file.mimetype.startsWith("video/");
+
     try {
       const result = await cloudinary.uploader.upload(dataUrl, {
         folder: "artlink",
-        transformation: [{ quality: "auto", fetch_format: "auto" }],
+        resource_type: isVideo ? "video" : "image",
+        ...(isVideo ? {} : { transformation: [{ quality: "auto", fetch_format: "auto" }] }),
       });
       return res.json({ url: result.secure_url });
     } catch (err: any) {

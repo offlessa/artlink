@@ -330,3 +330,20 @@ export function LinkIcon({ size = 18, className }: IconProps) {
     </svg>
   );
 }
+
+export function PlayIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <polygon points="5,3 19,12 5,21" />
+    </svg>
+  );
+}
+
+export function VideoIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="23 7 16 12 23 17 23 7" />
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+  );
+}

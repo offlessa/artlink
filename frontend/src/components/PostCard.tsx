@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
-import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon } from "./Icons";
+import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon, PlayIcon } from "./Icons";
 import Toast from "./Toast";
 import EditPostModal from "./EditPostModal";
 import ShareModal from "./ShareModal";
 import { isVerificado } from "../utils/verificado";
+import { isVideo } from "../utils/midia";
 import "../styles/components/PostCard.scss";
 
 interface PostCardProps {
@@ -132,10 +133,24 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
           {allImages.length === 0 ? (
             <div className="post-card__no-image"><ImageOffIcon size={36} /></div>
           ) : allImages.length === 1 ? (
-            <img src={allImages[0]} alt={titulo} loading="lazy" />
+            isVideo(allImages[0]) ? (
+              <div className="post-card__video-thumb">
+                <video src={allImages[0]} preload="metadata" muted playsInline />
+                <span className="post-card__play-badge"><PlayIcon size={20} /></span>
+              </div>
+            ) : (
+              <img src={allImages[0]} alt={titulo} loading="lazy" />
+            )
           ) : (
             <div className="post-card__carousel" onClick={e => e.stopPropagation()}>
-              <img src={allImages[slideIdx]} alt={titulo} loading="lazy" />
+              {isVideo(allImages[slideIdx]) ? (
+                <div className="post-card__video-thumb">
+                  <video src={allImages[slideIdx]} preload="metadata" muted playsInline />
+                  <span className="post-card__play-badge"><PlayIcon size={20} /></span>
+                </div>
+              ) : (
+                <img src={allImages[slideIdx]} alt={titulo} loading="lazy" />
+              )}
               <button
                 className="post-card__arrow post-card__arrow--prev"
                 onClick={e => { e.stopPropagation(); setSlideIdx(i => (i - 1 + allImages.length) % allImages.length); }}

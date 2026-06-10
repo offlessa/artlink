@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
-import { XIcon, ImageIcon, ChevronRightIcon, PlusIcon } from "./Icons";
+import { XIcon, ImageIcon, ChevronRightIcon, PlusIcon, PlayIcon } from "./Icons";
 import ImageEditor from "./ImageEditor";
 import "../styles/components/CreatePostModal.scss";
 
@@ -10,11 +10,14 @@ interface Colaborador { id: number; nome: string; username: string; fotoPerfil?:
 
 interface Props { onClose: () => void; onSuccess: () => void; catalogoId?: number }
 
+type TipoMidia = "image" | "video";
+
 export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Props) {
   const { usuario } = useAuth();
   const [step, setStep] = useState<"upload" | "form">("upload");
   const [arquivos, setArquivos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [tipos, setTipos] = useState<TipoMidia[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -34,15 +37,33 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   interface EditItem { file: File; mode: "new" | number }
   const [editQueue, setEditQueue] = useState<EditItem[]>([]);
 
-  function adicionarArquivos(files: File[]) {
-    const validos = files.filter(f => f.type.startsWith("image/"));
+  function adicionarMidias(files: File[]) {
+    const validos = files.filter(f => f.type.startsWith("image/") || f.type.startsWith("video/"));
     if (!validos.length) return;
-    setEditQueue(prev => [...prev, ...validos.map(f => ({ file: f, mode: "new" as const }))]);
+
+    for (const f of validos) {
+      if (f.type.startsWith("video/")) {
+        // Vídeos ignoram o ImageEditor
+        const preview = URL.createObjectURL(f);
+        setArquivos(prev => [...prev, f]);
+        setPreviews(prev => { const n = [...prev, preview]; setActiveIdx(n.length - 1); return n; });
+        setTipos(prev => [...prev, "video"]);
+        setStep("form");
+      } else {
+        setEditQueue(prev => [...prev, { file: f, mode: "new" as const }]);
+      }
+    }
   }
 
-  function trocarFoto(file: File) {
-    if (!file.type.startsWith("image/")) return;
-    setEditQueue([{ file, mode: activeIdx }]);
+  function trocarMidia(file: File) {
+    if (file.type.startsWith("video/")) {
+      const preview = URL.createObjectURL(file);
+      setArquivos(prev => { const a = [...prev]; a[activeIdx] = file; return a; });
+      setPreviews(prev => { const p = [...prev]; p[activeIdx] = preview; return p; });
+      setTipos(prev => { const t = [...prev]; t[activeIdx] = "video"; return t; });
+    } else {
+      setEditQueue([{ file, mode: activeIdx }]);
+    }
   }
 
   function handleEditorConfirm(blob: Blob) {
@@ -52,25 +73,25 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
     const preview = URL.createObjectURL(file);
     if (item.mode === "new") {
       setArquivos(prev => [...prev, file]);
-      setPreviews(prev => {
-        const novos = [...prev, preview];
-        setActiveIdx(novos.length - 1);
-        return novos;
-      });
+      setPreviews(prev => { const n = [...prev, preview]; setActiveIdx(n.length - 1); return n; });
+      setTipos(prev => [...prev, "image"]);
       setStep("form");
     } else {
       const idx = item.mode as number;
       setArquivos(prev => { const a = [...prev]; a[idx] = file; return a; });
       setPreviews(prev => { const p = [...prev]; p[idx] = preview; return p; });
+      setTipos(prev => { const t = [...prev]; t[idx] = "image"; return t; });
     }
     setEditQueue(prev => prev.slice(1));
   }
 
-  function removerFoto(idx: number) {
+  function removerMidia(idx: number) {
     const novosArqs = arquivos.filter((_, i) => i !== idx);
     const novosPrevs = previews.filter((_, i) => i !== idx);
+    const novosTipos = tipos.filter((_, i) => i !== idx);
     setArquivos(novosArqs);
     setPreviews(novosPrevs);
+    setTipos(novosTipos);
     if (novosArqs.length === 0) {
       setStep("upload");
       setActiveIdx(0);
@@ -82,15 +103,11 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragging(false);
-    const files = Array.from(e.dataTransfer.files ?? []);
-    adicionarArquivos(files);
+    adicionarMidias(Array.from(e.dataTransfer.files ?? []));
   }
 
   function voltarParaUpload() {
-    setArquivos([]);
-    setPreviews([]);
-    setActiveIdx(0);
-    setStep("upload");
+    setArquivos([]); setPreviews([]); setTipos([]); setActiveIdx(0); setStep("upload");
   }
 
   async function buscarColab(query: string) {
@@ -126,7 +143,7 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
         } catch (uploadErr: any) {
           const status = uploadErr?.response?.status;
           const msg = uploadErr?.response?.data?.message ?? uploadErr?.response?.data?.error ?? uploadErr?.message;
-          setErro(`Erro no upload (${status ?? "sem conexão"}): ${msg ?? "verifique se o servidor está rodando."}`);
+          setErro(`Erro no upload (${status ?? "sem conexão"}): ${msg ?? "verifique o servidor."}`);
           setCriando(false);
           return;
         }
@@ -150,13 +167,13 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
       onSuccess();
       onClose();
     } catch (e: any) {
-      const msg = e?.response?.data?.message ?? e?.message ?? "Erro ao publicar. Tente novamente.";
-      setErro(msg);
+      setErro(e?.response?.data?.message ?? e?.message ?? "Erro ao publicar. Tente novamente.");
       setCriando(false);
     }
   }
 
   const inicial = usuario?.nome?.charAt(0).toUpperCase() ?? "?";
+  const tipoAtivo = tipos[activeIdx] ?? "image";
 
   return (
     <>
@@ -187,27 +204,37 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
             onDragLeave={() => setDragging(false)}
           >
             <div className="cpm__drop-icon"><ImageIcon size={52} /></div>
-            <p className="cpm__drop-title">Arraste suas fotos aqui</p>
-            <p className="cpm__drop-sub">PNG, JPG, WEBP · múltiplas imagens suportadas</p>
-            <button className="cpm__drop-btn" type="button">Selecionar do computador</button>
-            <input ref={fileRef} type="file" accept="image/*" multiple hidden
-              onChange={e => adicionarArquivos(Array.from(e.target.files ?? []))} />
+            <p className="cpm__drop-title">Arraste suas fotos e vídeos aqui</p>
+            <p className="cpm__drop-sub">PNG, JPG, MP4, MOV · múltiplas mídias suportadas</p>
+            <button className="cpm__drop-btn" type="button">Selecionar do dispositivo</button>
+            <input ref={fileRef} type="file" accept="image/*,video/*" multiple hidden
+              onChange={e => adicionarMidias(Array.from(e.target.files ?? []))} />
           </div>
         ) : (
           <div className="cpm__form">
             <div className="cpm__preview-col">
               <div className="cpm__preview">
-                <img src={previews[activeIdx]} alt="preview" />
+                {tipoAtivo === "video" ? (
+                  <video
+                    src={previews[activeIdx]}
+                    className="cpm__preview-video"
+                    controls
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <img src={previews[activeIdx]} alt="preview" />
+                )}
                 <button
                   className="cpm__trocar-btn"
                   type="button"
                   onClick={() => trocarRef.current?.click()}
-                  title="Trocar esta foto"
+                  title="Trocar mídia"
                 >
-                  Trocar foto
+                  Trocar
                 </button>
-                <input ref={trocarRef} type="file" accept="image/*" hidden
-                  onChange={e => { const f = e.target.files?.[0]; if (f) trocarFoto(f); e.target.value = ""; }} />
+                <input ref={trocarRef} type="file" accept="image/*,video/*" hidden
+                  onChange={e => { const f = e.target.files?.[0]; if (f) trocarMidia(f); e.target.value = ""; }} />
               </div>
 
               {/* Thumbnail strip */}
@@ -218,12 +245,19 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
                     className={`cpm__thumb ${i === activeIdx ? "cpm__thumb--active" : ""}`}
                     onClick={() => setActiveIdx(i)}
                   >
-                    <img src={p} alt={`foto ${i + 1}`} />
+                    {tipos[i] === "video" ? (
+                      <div className="cpm__thumb-video">
+                        <video src={p} preload="metadata" />
+                        <span className="cpm__thumb-play"><PlayIcon size={12} /></span>
+                      </div>
+                    ) : (
+                      <img src={p} alt={`mídia ${i + 1}`} />
+                    )}
                     <button
                       type="button"
                       className="cpm__thumb-del"
-                      onClick={e => { e.stopPropagation(); removerFoto(i); }}
-                      title="Remover foto"
+                      onClick={e => { e.stopPropagation(); removerMidia(i); }}
+                      title="Remover"
                     >×</button>
                   </div>
                 ))}
@@ -232,13 +266,13 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
                     type="button"
                     className="cpm__add-thumb"
                     onClick={() => adicionarRef.current?.click()}
-                    title="Adicionar mais fotos"
+                    title="Adicionar mais"
                   >
                     <PlusIcon size={18} />
                   </button>
                 )}
-                <input ref={adicionarRef} type="file" accept="image/*" multiple hidden
-                  onChange={e => { adicionarArquivos(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
+                <input ref={adicionarRef} type="file" accept="image/*,video/*" multiple hidden
+                  onChange={e => { adicionarMidias(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
               </div>
             </div>
 
@@ -266,7 +300,6 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
                 maxLength={1000}
               />
 
-              {/* Tags */}
               <div className="cpm__tags-wrap">
                 <div className="cpm__tags-list">
                   {tags.map(t => (

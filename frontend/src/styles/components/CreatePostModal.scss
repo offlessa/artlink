@@ -152,7 +152,7 @@
 
     &:hover &-trocar { opacity: 1; }
 
-    img {
+    img, video {
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -161,6 +161,11 @@
     @media (max-width: 680px) {
       height: 220px;
     }
+  }
+
+  &__preview-video {
+    display: block;
+    background: #000;
   }
 
   &__trocar-btn {
@@ -215,6 +220,26 @@
     &--active { border-color: #fff; }
 
     &:hover &-del { opacity: 1; }
+  }
+
+  &__thumb-video {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #000;
+
+    video { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__thumb-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: rgba(0,0,0,0.35);
+    pointer-events: none;
   }
 
   &__thumb-del {

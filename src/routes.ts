@@ -4,7 +4,7 @@ import multer from "multer";
 import { authMiddleware } from "./middleware/authMiddleware";
 import { UploadController } from "./controllers/upload/UploadController";
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
 
 // ====== AUTH ======
 import { LoginController } from "./controllers/auth/LoginController";
