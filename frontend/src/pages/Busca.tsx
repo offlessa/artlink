@@ -8,7 +8,7 @@ import { SearchIcon } from "../components/Icons";
 import "../styles/components/Busca.scss";
 
 interface Post {
-  id: number; titulo: string; descricao?: string; imagem?: string; imagens?: string[];
+  id: number; titulo: string; descricao?: string; imagem?: string; imagens?: string[]; thumbnails?: string[];
   curtidas: { id: number; usuarioId: number }[]; comentarios: { id: number }[];
   autor: { id: number; nome: string; username: string; fotoPerfil?: string };
 }
@@ -116,6 +116,7 @@ export default function Busca() {
                   titulo={post.titulo}
                   imagem={post.imagem}
                   imagens={post.imagens}
+                  thumbnails={post.thumbnails}
                   curtidas={post.curtidas}
                   autor={post.autor}
                   onCurtidaChange={recarregar}

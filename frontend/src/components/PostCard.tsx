@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { api } from "../api/api";
+import { api, uploadImagem } from "../api/api";
 import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon, PlayIcon } from "./Icons";
 import Toast from "./Toast";
 import EditPostModal from "./EditPostModal";
 import ShareModal from "./ShareModal";
 import { isVerificado } from "../utils/verificado";
-import { isVideo } from "../utils/midia";
+import { isVideo, videoThumbnail } from "../utils/midia";
 import "../styles/components/PostCard.scss";
 
 interface PostCardProps {
@@ -16,6 +16,7 @@ interface PostCardProps {
   descricao?: string;
   imagem?: string;
   imagens?: string[];
+  thumbnails?: string[];
   tags?: string[];
   visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
@@ -25,22 +26,28 @@ interface PostCardProps {
   onEdit?: () => void;
 }
 
-export default function PostCard({ id, titulo, descricao, imagem, imagens, tags, visualizacoes, curtidas, autor, onCurtidaChange, onDelete, onEdit }: PostCardProps) {
+export default function PostCard({ id, titulo, descricao, imagem, imagens, thumbnails: thumbsProp, tags, visualizacoes, curtidas, autor, onCurtidaChange, onDelete, onEdit }: PostCardProps) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const allImages = (imagens?.length ?? 0) > 0 ? imagens! : (imagem ? [imagem] : []);
   const [slideIdx, setSlideIdx] = useState(0);
+  const [thumbs, setThumbs] = useState<string[]>(thumbsProp ?? []);
 
   const jaCurtiu = curtidas.some((c) => c.usuarioId === usuario?.id);
   const totalCurtidas = curtidas.length;
   const ehDono = usuario?.id === autor?.id;
+  const temVideo = allImages.some(u => isVideo(u));
 
   const [salvo, setSalvo] = useState(false);
   const [toast, setToast] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
   const [shareAberto, setShareAberto] = useState(false);
+  const [alterandoCapa, setAlterandoCapa] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const capaInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setThumbs(thumbsProp ?? []); }, [thumbsProp]);
 
   useEffect(() => {
     if (!usuario) return;
@@ -97,6 +104,41 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
     } catch { mostrarToast("Erro ao excluir post."); }
   }
 
+  async function handleCapaFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setAlterandoCapa(true);
+    try {
+      const url = await uploadImagem(file);
+      // Encontra o índice do primeiro vídeo para associar a thumbnail
+      const idx = allImages.findIndex(u => isVideo(u));
+      const novosThumbs = [...thumbs];
+      if (idx >= 0) novosThumbs[idx] = url;
+      await api.put(`/post/${id}`, { thumbnails: novosThumbs });
+      setThumbs(novosThumbs);
+      mostrarToast("Capa atualizada!");
+      onEdit?.();
+    } catch {
+      mostrarToast("Erro ao alterar capa.");
+    } finally {
+      setAlterandoCapa(false);
+    }
+  }
+
+  function renderMedia(url: string, idx: number) {
+    if (isVideo(url)) {
+      const thumb = videoThumbnail(url, thumbs[idx]);
+      return (
+        <div className="post-card__video-thumb">
+          <img src={thumb} alt={titulo} loading="lazy" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+          <span className="post-card__play-badge"><PlayIcon size={20} /></span>
+        </div>
+      );
+    }
+    return <img src={url} alt={titulo} loading="lazy" />;
+  }
+
   function mostrarToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(""), 2500);
@@ -118,11 +160,28 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
             {menuAberto && (
               <div className="post-card__menu-dropdown">
                 <button onClick={e => { e.stopPropagation(); setMenuAberto(false); setModalEditar(true); }}>Editar post</button>
+                {temVideo && (
+                  <button
+                    onClick={e => { e.stopPropagation(); setMenuAberto(false); capaInputRef.current?.click(); }}
+                    disabled={alterandoCapa}
+                  >
+                    {alterandoCapa ? "Alterando..." : "Alterar capa do vídeo"}
+                  </button>
+                )}
                 <button className="post-card__menu-excluir" onClick={excluir}>Excluir post</button>
               </div>
             )}
           </div>
         )}
+
+        {/* Input oculto para seleção de capa */}
+        <input
+          ref={capaInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={handleCapaFile}
+        />
 
         <div className="post-card__top">
           <h2 className="post-card__titulo">{titulo}</h2>
@@ -133,24 +192,10 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
           {allImages.length === 0 ? (
             <div className="post-card__no-image"><ImageOffIcon size={36} /></div>
           ) : allImages.length === 1 ? (
-            isVideo(allImages[0]) ? (
-              <div className="post-card__video-thumb">
-                <video src={allImages[0]} preload="metadata" muted playsInline />
-                <span className="post-card__play-badge"><PlayIcon size={20} /></span>
-              </div>
-            ) : (
-              <img src={allImages[0]} alt={titulo} loading="lazy" />
-            )
+            renderMedia(allImages[0], 0)
           ) : (
             <div className="post-card__carousel" onClick={e => e.stopPropagation()}>
-              {isVideo(allImages[slideIdx]) ? (
-                <div className="post-card__video-thumb">
-                  <video src={allImages[slideIdx]} preload="metadata" muted playsInline />
-                  <span className="post-card__play-badge"><PlayIcon size={20} /></span>
-                </div>
-              ) : (
-                <img src={allImages[slideIdx]} alt={titulo} loading="lazy" />
-              )}
+              {renderMedia(allImages[slideIdx], slideIdx)}
               <button
                 className="post-card__arrow post-card__arrow--prev"
                 onClick={e => { e.stopPropagation(); setSlideIdx(i => (i - 1 + allImages.length) % allImages.length); }}

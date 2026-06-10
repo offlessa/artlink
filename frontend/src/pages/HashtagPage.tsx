@@ -12,6 +12,7 @@ interface Post {
   descricao?: string;
   imagem?: string;
   imagens?: string[];
+  thumbnails?: string[];
   tags?: string[];
   visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
@@ -75,6 +76,7 @@ export default function HashtagPage() {
                 descricao={post.descricao}
                 imagem={post.imagem}
                 imagens={post.imagens}
+                thumbnails={post.thumbnails}
                 tags={post.tags}
                 visualizacoes={post.visualizacoes}
                 curtidas={post.curtidas}

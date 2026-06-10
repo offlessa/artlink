@@ -11,17 +11,18 @@ import EditPostModal from "../components/EditPostModal";
 import {
   HeartIcon, CommentIcon, ImageOffIcon,
   PlusIcon, PaletteIcon, CameraIcon, TrashIcon,
-  GridIcon, ListIcon, ShareIcon, VerificadoIcon,
+  GridIcon, ListIcon, ShareIcon, VerificadoIcon, PlayIcon,
 } from "../components/Icons";
+import { isVideo, videoThumbnail } from "../utils/midia";
 import Toast from "../components/Toast";
 import ImageEditor from "../components/ImageEditor";
 import ShareModal from "../components/ShareModal";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/Perfil.scss";
 
-interface Post { id: number; titulo: string; descricao?: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
+interface Post { id: number; titulo: string; descricao?: string; imagem?: string; imagens?: string[]; thumbnails?: string[]; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
 interface Catalogo { id: number; nome: string; capa?: string; capaDinamica?: string; ehColaborador?: boolean; posts: { postId: number }[] }
-interface PostSalvo { id: number; titulo: string; imagem?: string; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
+interface PostSalvo { id: number; titulo: string; imagem?: string; imagens?: string[]; thumbnails?: string[]; curtidas: { id: number }[]; comentarios: { id: number }[]; autor?: { id: number; username: string } }
 interface CatalogoSalvo { id: number; nome: string; capaDinamica?: string; dono?: { username: string }; posts: { postId?: number }[] }
 
 interface ProfileConfig {
@@ -398,9 +399,17 @@ export default function Perfil() {
             {posts.map(post => (
               <div key={post.id} className="perfil__post-card" onClick={() => navigate(`/post/${post.id}`)}>
                 <div className="perfil__post-img">
-                  {post.imagem
-                    ? <img src={post.imagem} alt={post.titulo} />
-                    : <div className="perfil__post-no-img"><ImageOffIcon size={26} /></div>}
+                  {(() => {
+                    const url = post.imagens?.[0] ?? post.imagem;
+                    if (!url) return <div className="perfil__post-no-img"><ImageOffIcon size={26} /></div>;
+                    if (isVideo(url)) return (
+                      <>
+                        <img src={videoThumbnail(url, post.thumbnails?.[0])} alt={post.titulo} />
+                        <span className="perfil__post-play"><PlayIcon size={18} /></span>
+                      </>
+                    );
+                    return <img src={url} alt={post.titulo} />;
+                  })()}
                 </div>
                 <div className="perfil__post-info">
                   <span className="perfil__post-titulo">{post.titulo}</span>
@@ -496,9 +505,17 @@ export default function Perfil() {
                     {postsSalvos.map(post => (
                       <div key={post.id} className="perfil__post-card" onClick={() => navigate(`/post/${post.id}`)}>
                         <div className="perfil__post-img">
-                          {post.imagem
-                            ? <img src={post.imagem} alt={post.titulo} />
-                            : <div className="perfil__post-no-img"><ImageOffIcon size={26} /></div>}
+                          {(() => {
+                            const url = post.imagens?.[0] ?? post.imagem;
+                            if (!url) return <div className="perfil__post-no-img"><ImageOffIcon size={26} /></div>;
+                            if (isVideo(url)) return (
+                              <>
+                                <img src={videoThumbnail(url, post.thumbnails?.[0])} alt={post.titulo} />
+                                <span className="perfil__post-play"><PlayIcon size={18} /></span>
+                              </>
+                            );
+                            return <img src={url} alt={post.titulo} />;
+                          })()}
                         </div>
                         <div className="perfil__post-info">
                           <span className="perfil__post-titulo">{post.titulo}</span>
