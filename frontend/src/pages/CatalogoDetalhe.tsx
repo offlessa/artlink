@@ -57,6 +57,7 @@ export default function CatalogoDetalhe() {
   const { usuario } = useAuth();
   const capaRef = useRef<HTMLInputElement>(null);
   const fotosRef = useRef<HTMLInputElement>(null);
+  const addMenuRef = useRef<HTMLDivElement>(null);
 
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -68,6 +69,16 @@ export default function CatalogoDetalhe() {
   const [showPicker, setShowPicker] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [showColabPanel, setShowColabPanel] = useState(false);
+
+  useEffect(() => {
+    function fechar(e: MouseEvent) {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
+        setShowAddMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", fechar);
+    return () => document.removeEventListener("mousedown", fechar);
+  }, []);
 
   const [todosPosts, setTodosPosts] = useState<Post[]>([]);
   const [buscaPicker, setBuscaPicker] = useState("");
@@ -476,7 +487,7 @@ export default function CatalogoDetalhe() {
 
             {/* Adicionar conteúdo (dono ou colaborador aceito) */}
             {podeEditar && (
-              <div className="cat-det__add-wrap">
+              <div className="cat-det__add-wrap" ref={addMenuRef}>
                 <button
                   className="cat-det__add-btn"
                   onClick={() => setShowAddMenu(v => !v)}
@@ -484,22 +495,19 @@ export default function CatalogoDetalhe() {
                   <PlusIcon size={14} /> Adicionar
                 </button>
                 {showAddMenu && (
-                  <>
-                    <div className="cat-det__add-backdrop" onClick={() => setShowAddMenu(false)} />
-                    <div className="cat-det__add-menu">
-                      {isDono && (
-                        <button onClick={() => { setShowAddMenu(false); fotosRef.current?.click(); }}>
-                          Fotos diretas
-                        </button>
-                      )}
-                      <button onClick={() => { setShowAddMenu(false); setShowNewPost(true); }}>
-                        Nova publicação
+                  <div className="cat-det__add-menu">
+                    {isDono && (
+                      <button onClick={() => { setShowAddMenu(false); fotosRef.current?.click(); }}>
+                        Fotos diretas
                       </button>
-                      <button onClick={abrirPicker}>
-                        Buscar publicações
-                      </button>
-                    </div>
-                  </>
+                    )}
+                    <button onClick={() => { setShowAddMenu(false); setShowNewPost(true); }}>
+                      Nova publicação
+                    </button>
+                    <button onClick={() => { setShowAddMenu(false); abrirPicker(); }}>
+                      Buscar publicações
+                    </button>
+                  </div>
                 )}
                 {isDono && (
                   <input
