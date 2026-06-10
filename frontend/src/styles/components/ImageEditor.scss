@@ -49,38 +49,33 @@
     &:hover { background: $brand-subtle; color: $texto; }
   }
 
-  &__hint {
-    font-size: 0.75rem;
-    color: $texto-suave;
-    text-align: center;
-    padding: 10px 18px 0;
-    margin: 0;
-  }
-
-  &__stage {
+  // Container maior que o frame — mostra a imagem além da área de corte (escurecida)
+  &__container {
     position: relative;
+    width: 100%;
+    height: 360px;
     overflow: hidden;
     cursor: grab;
-    background: #1a1a1a;
-    margin: 12px 18px;
-    border-radius: 8px;
+    background: #111;
     touch-action: none;
     user-select: none;
 
     &:active { cursor: grabbing; }
 
-    &--circular {
-      border-radius: 50%;
-      align-self: center;
-      width: calc(100% - 36px);
-      max-width: 340px;
+    @media (max-height: 680px), (max-width: 400px) {
+      height: 260px;
     }
   }
 
-  &__grid {
+  // Frame de corte: bordas brancas + box-shadow escurece tudo fora dele
+  &__crop-frame {
     position: absolute;
-    inset: 0;
     pointer-events: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+    z-index: 2;
+
+    &--circular { border-radius: 50%; }
   }
 
   &__grid-h {
@@ -103,7 +98,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 0 18px 8px;
+    padding: 12px 18px 8px;
 
     button {
       background: none;
