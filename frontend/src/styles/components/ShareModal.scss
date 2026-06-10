@@ -1,0 +1,221 @@
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  @media (min-width: 600px) {
+    align-items: center;
+  }
+}
+
+.share-modal {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 480px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.18);
+  animation: share-slide-up 0.22s ease;
+
+  @media (min-width: 600px) {
+    border-radius: 16px;
+    animation: share-fade-in 0.18s ease;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #f0ede8;
+
+    span {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #2C2C2C;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    transition: background 0.15s;
+
+    &:hover { background: #f5f5f5; }
+  }
+
+  &__search-wrap {
+    padding: 12px 16px 8px;
+  }
+
+  &__search {
+    width: 100%;
+    background: #f5f3ef;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 0.9rem;
+    outline: none;
+    color: #2C2C2C;
+    box-sizing: border-box;
+
+    &::placeholder { color: #aaa; }
+    &:focus { background: #eeeae4; }
+  }
+
+  &__section-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0 16px 4px;
+    margin: 0;
+  }
+
+  &__users {
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 0 0 4px;
+  }
+
+  &__hint {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.85rem;
+    padding: 16px;
+    margin: 0;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    transition: background 0.12s;
+
+    &:hover { background: #faf8f3; }
+  }
+
+  &__avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e8ede4;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #5c7a3a;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__user-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  &__user-nome {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #2C2C2C;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__user-username {
+    font-size: 0.78rem;
+    color: #888;
+  }
+
+  &__send-btn {
+    background: #5c7a3a;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, opacity 0.15s;
+
+    &:hover:not(:disabled) { background: #4a6430; }
+
+    &--sent {
+      background: #a8c48a;
+      cursor: default;
+    }
+  }
+
+  &__divider {
+    height: 1px;
+    background: #f0ede8;
+    margin: 8px 0 4px;
+  }
+
+  &__options {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 20px;
+  }
+
+  &__opt {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: #f5f3ef;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #2C2C2C;
+    transition: background 0.15s;
+
+    &:hover { background: #eeeae4; }
+
+    &--whatsapp {
+      color: #25d366;
+
+      &:hover { background: #e8f8ee; }
+    }
+
+    svg { flex-shrink: 0; }
+  }
+}
+
+@keyframes share-slide-up {
+  from { transform: translateY(60px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes share-fade-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1);    }
+}

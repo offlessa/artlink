@@ -5,9 +5,9 @@ import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import Toast from "../components/Toast";
-import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon, BookmarkIcon, ShareIcon, SendIcon, XIcon } from "../components/Icons";
+import { HeartIcon, ImageOffIcon, TrashIcon, EyeOffIcon, EyeIcon, BookmarkIcon, ShareIcon } from "../components/Icons";
 import EditPostModal from "../components/EditPostModal";
-import { copiarLink } from "../utils/compartilhar";
+import ShareModal from "../components/ShareModal";
 import "../styles/components/PostDetalhe.scss";
 
 interface Comentario {
@@ -56,11 +56,7 @@ export default function PostDetalhe() {
   const [toast, setToast] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
   const [editando, setEditando] = useState(false);
-  const [modalEnviar, setModalEnviar] = useState(false);
-  const [busca, setBusca] = useState("");
-  const [resultados, setResultados] = useState<{ id: number; nome: string; username: string; fotoPerfil?: string }[]>([]);
-  const [buscando, setBuscando] = useState(false);
-  const [enviandoMsg, setEnviandoMsg] = useState(false);
+  const [shareAberto, setShareAberto] = useState(false);
 
   async function carregarPost() {
     try {
@@ -135,35 +131,6 @@ export default function PostDetalhe() {
         mostrarToast(t.postDetail.postSaved);
       }
     } catch {}
-  }
-
-  function compartilhar() {
-    copiarLink(`/post/${id}`, mostrarToast);
-  }
-
-  async function buscarUsuarios(q: string) {
-    setBusca(q);
-    if (!q.trim()) { setResultados([]); return; }
-    setBuscando(true);
-    try {
-      const res = await api.get(`/usuario?busca=${encodeURIComponent(q)}`);
-      setResultados((res.data as any[]).filter((u: any) => u.id !== usuario?.id).slice(0, 8));
-    } catch { setResultados([]); }
-    finally { setBuscando(false); }
-  }
-
-  async function enviarParaUsuario(dest: { id: number; username: string }) {
-    if (!usuario || enviandoMsg || !post) return;
-    setEnviandoMsg(true);
-    try {
-      const url = `${import.meta.env.VITE_APP_URL}/post/${post.id}`;
-      await api.post("/mensagem", { remetenteId: usuario.id, destinatarioId: dest.id, conteudo: `Olha esse post: ${url}` });
-      mostrarToast(`Post enviado para @${dest.username}!`);
-      setModalEnviar(false);
-      setBusca("");
-      setResultados([]);
-    } catch { mostrarToast("Erro ao enviar."); }
-    finally { setEnviandoMsg(false); }
   }
 
   async function enviarComentario(e: React.FormEvent) {
@@ -346,14 +313,7 @@ export default function PostDetalhe() {
               </button>
               <button
                 className="post-detalhe__icon-btn"
-                onClick={() => { if (!usuario) { navigate("/login"); return; } setModalEnviar(true); }}
-                title="Enviar para alguém"
-              >
-                <SendIcon size={16} />
-              </button>
-              <button
-                className="post-detalhe__icon-btn"
-                onClick={compartilhar}
+                onClick={() => setShareAberto(true)}
                 title={t.postDetail.share}
               >
                 <ShareIcon size={16} />
@@ -471,41 +431,15 @@ export default function PostDetalhe() {
 
       </div>
       <Footer />
-      {modalEnviar && (
-        <div className="post-detalhe__enviar-overlay" onClick={() => setModalEnviar(false)}>
-          <div className="post-detalhe__enviar-modal" onClick={e => e.stopPropagation()}>
-            <div className="post-detalhe__enviar-header">
-              <span>Enviar post</span>
-              <button onClick={() => setModalEnviar(false)}><XIcon size={16} /></button>
-            </div>
-            <input
-              className="post-detalhe__enviar-busca"
-              type="text"
-              placeholder="Buscar pessoa..."
-              value={busca}
-              onChange={e => buscarUsuarios(e.target.value)}
-              autoFocus
-            />
-            <div className="post-detalhe__enviar-lista">
-              {buscando && <p className="post-detalhe__enviar-hint">Buscando...</p>}
-              {!buscando && busca && resultados.length === 0 && <p className="post-detalhe__enviar-hint">Nenhum usuário encontrado.</p>}
-              {!busca && <p className="post-detalhe__enviar-hint">Digite o nome ou @ de alguém.</p>}
-              {resultados.map(u => (
-                <button key={u.id} className="post-detalhe__enviar-item" onClick={() => enviarParaUsuario(u)} disabled={enviandoMsg}>
-                  <div className="post-detalhe__enviar-avatar">
-                    {u.fotoPerfil ? <img src={u.fotoPerfil} alt={u.nome} /> : <span>{u.nome.charAt(0).toUpperCase()}</span>}
-                  </div>
-                  <div>
-                    <p className="post-detalhe__enviar-nome">{u.nome}</p>
-                    <p className="post-detalhe__enviar-user">@{u.username}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      {shareAberto && post && (
+        <ShareModal
+          tipo="post"
+          id={post.id}
+          titulo={post.titulo}
+          subtitulo={`por ${post.autor.nome}`}
+          onClose={() => setShareAberto(false)}
+        />
       )}
-
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
       {editando && post && (
         <EditPostModal

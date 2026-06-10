@@ -15,7 +15,7 @@ import {
 } from "../components/Icons";
 import Toast from "../components/Toast";
 import ImageEditor from "../components/ImageEditor";
-import { copiarLink } from "../utils/compartilhar";
+import ShareModal from "../components/ShareModal";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/Perfil.scss";
 
@@ -65,6 +65,7 @@ export default function Perfil() {
   const [toast, setToast] = useState("");
 
   const [showModal, setShowModal] = useState(false);
+  const [shareAberto, setShareAberto] = useState(false);
   const [showCatalogoModal, setShowCatalogoModal] = useState(false);
   const [showCustomize, setShowCustomize] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -117,13 +118,6 @@ export default function Perfil() {
     } finally {
       setCarregando(false);
     }
-  }
-
-  function compartilharPerfil() {
-    copiarLink(`/u/${usuario?.username}`, msg => {
-      setToast(msg);
-      setTimeout(() => setToast(""), 2500);
-    }, t.common.linkCopied);
   }
 
   useEffect(() => {
@@ -316,7 +310,7 @@ export default function Perfil() {
               <button className="perfil__btn-custom" onClick={() => setShowCustomize(true)}>
                 <PaletteIcon size={15} />
               </button>
-              <button className="perfil__btn-share" onClick={compartilharPerfil} title={t.profile.shareProfile}>
+              <button className="perfil__btn-share" onClick={() => setShareAberto(true)} title={t.profile.shareProfile}>
                 <ShareIcon size={15} />
               </button>
             </>
@@ -607,6 +601,15 @@ export default function Perfil() {
         </div>
       )}
 
+      {shareAberto && usuario && (
+        <ShareModal
+          tipo="perfil"
+          id={usuario.username}
+          titulo={usuario.nome}
+          subtitulo={usuario.bio}
+          onClose={() => setShareAberto(false)}
+        />
+      )}
       {showModal && <CreatePostModal onClose={() => setShowModal(false)} onSuccess={carregarDados} />}
       {showCatalogoModal && <CatalogoModal onClose={() => setShowCatalogoModal(false)} />}
       {editandoPost && (

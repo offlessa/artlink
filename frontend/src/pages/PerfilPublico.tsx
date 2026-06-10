@@ -6,7 +6,7 @@ import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon, VerificadoIcon } from "../components/Icons";
 import Toast from "../components/Toast";
-import { copiarLink } from "../utils/compartilhar";
+import ShareModal from "../components/ShareModal";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/PerfilPublico.scss";
 
@@ -40,6 +40,7 @@ export default function PerfilPublico() {
   const [seguindo, setSeguindo] = useState(false);
   const [contadores, setContadores] = useState<Contadores>({ seguidores: 0, seguindo: 0 });
   const [loadingFollow, setLoadingFollow] = useState(false);
+  const [shareAberto, setShareAberto] = useState(false);
   const [toast, setToast] = useState("");
 
   useEffect(() => {
@@ -82,13 +83,6 @@ export default function PerfilPublico() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [username, eu?.id]);
-
-  function compartilharPerfil() {
-    copiarLink(`/u/${perfil?.username}`, msg => {
-      setToast(msg);
-      setTimeout(() => setToast(""), 2500);
-    });
-  }
 
   async function toggleSeguir() {
     if (!eu || !perfil || loadingFollow) return;
@@ -173,11 +167,11 @@ export default function PerfilPublico() {
             )}
             <button
               className="pp__btn-share"
-              onClick={compartilharPerfil}
-              title="Copiar link do perfil"
+              onClick={() => setShareAberto(true)}
+              title="Compartilhar perfil"
             >
               <ShareIcon size={14} />
-              <span>Copiar link</span>
+              <span>Compartilhar</span>
             </button>
           </div>
         </div>
@@ -242,6 +236,15 @@ export default function PerfilPublico() {
       )}
 
       <Footer />
+      {shareAberto && (
+        <ShareModal
+          tipo="perfil"
+          id={perfil.username}
+          titulo={perfil.nome}
+          subtitulo={perfil.bio}
+          onClose={() => setShareAberto(false)}
+        />
+      )}
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
     </div>
   );

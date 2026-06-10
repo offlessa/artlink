@@ -12,7 +12,7 @@ import {
 } from "../components/Icons";
 import Toast from "../components/Toast";
 import ImageEditor from "../components/ImageEditor";
-import { copiarLink } from "../utils/compartilhar";
+import ShareModal from "../components/ShareModal";
 import "../styles/components/CatalogoDetalhe.scss";
 
 interface Post {
@@ -97,6 +97,7 @@ export default function CatalogoDetalhe() {
   const [removendoColab, setRemovendoColab] = useState<number | null>(null);
   const [respondendoConvite, setRespondendoConvite] = useState(false);
   const [salvo, setSalvo] = useState(false);
+  const [shareAberto, setShareAberto] = useState(false);
   const [toast, setToast] = useState("");
 
   async function carregar() {
@@ -152,10 +153,6 @@ export default function CatalogoDetalhe() {
         mostrarToast("Catálogo salvo!");
       }
     } catch {}
-  }
-
-  function compartilhar() {
-    copiarLink(`/catalogo/${id}`, mostrarToast);
   }
 
   // Busca colaboradores com debounce
@@ -446,7 +443,7 @@ export default function CatalogoDetalhe() {
             </button>
             <button
               className="cat-det__icon-btn"
-              onClick={compartilhar}
+              onClick={() => setShareAberto(true)}
               title="Compartilhar"
             >
               <ShareIcon size={15} />
@@ -762,6 +759,15 @@ export default function CatalogoDetalhe() {
         </div>
       )}
 
+      {shareAberto && catalogo && (
+        <ShareModal
+          tipo="catalogo"
+          id={catalogo.id}
+          titulo={catalogo.nome}
+          subtitulo={catalogo.descricao}
+          onClose={() => setShareAberto(false)}
+        />
+      )}
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
 
       {showNewPost && (

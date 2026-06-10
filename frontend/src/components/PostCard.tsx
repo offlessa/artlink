@@ -2,14 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
-import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon, SendIcon, XIcon } from "./Icons";
+import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon } from "./Icons";
 import Toast from "./Toast";
 import EditPostModal from "./EditPostModal";
-import { copiarLink } from "../utils/compartilhar";
+import ShareModal from "./ShareModal";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/PostCard.scss";
-
-interface Usuario { id: number; nome: string; username: string; fotoPerfil?: string }
 
 interface PostCardProps {
   id: number;
@@ -40,11 +38,7 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
   const [toast, setToast] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
-  const [modalEnviar, setModalEnviar] = useState(false);
-  const [busca, setBusca] = useState("");
-  const [resultados, setResultados] = useState<Usuario[]>([]);
-  const [buscando, setBuscando] = useState(false);
-  const [enviando, setEnviando] = useState(false);
+  const [shareAberto, setShareAberto] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,11 +86,6 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
     } catch {}
   }
 
-  function compartilhar(e: React.MouseEvent) {
-    e.stopPropagation();
-    copiarLink(`/post/${id}`, mostrarToast);
-  }
-
   async function excluir(e: React.MouseEvent) {
     e.stopPropagation();
     setMenuAberto(false);
@@ -105,40 +94,6 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
       await api.delete(`/post/${id}`);
       onDelete?.();
     } catch { mostrarToast("Erro ao excluir post."); }
-  }
-
-  async function buscarUsuarios(q: string) {
-    setBusca(q);
-    if (!q.trim()) { setResultados([]); return; }
-    setBuscando(true);
-    try {
-      const res = await api.get("/usuario");
-      const todos: Usuario[] = res.data?.data ?? res.data ?? [];
-      setResultados(
-        todos.filter(u => u.id !== usuario?.id &&
-          (u.nome.toLowerCase().includes(q.toLowerCase()) || u.username.toLowerCase().includes(q.toLowerCase()))
-        ).slice(0, 6)
-      );
-    } catch { setResultados([]); }
-    finally { setBuscando(false); }
-  }
-
-  async function enviarPara(dest: Usuario) {
-    if (!usuario || enviando) return;
-    setEnviando(true);
-    const url = `${import.meta.env.VITE_APP_URL}/post/${id}`;
-    try {
-      await api.post("/mensagem", {
-        remetenteId: usuario.id,
-        destinatarioId: dest.id,
-        conteudo: `Olha esse post: ${url}`,
-      });
-      mostrarToast(`Post enviado para @${dest.username}!`);
-      setModalEnviar(false);
-      setBusca("");
-      setResultados([]);
-    } catch { mostrarToast("Erro ao enviar."); }
-    finally { setEnviando(false); }
   }
 
   function mostrarToast(msg: string) {
@@ -236,15 +191,8 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
             </button>
             <button
               className="post-card__icon-btn"
-              onClick={e => { e.stopPropagation(); if (!usuario) { navigate("/login"); return; } setModalEnviar(true); }}
-              title="Enviar para alguém"
-            >
-              <SendIcon size={13} />
-            </button>
-            <button
-              className="post-card__icon-btn"
-              onClick={compartilhar}
-              title="Copiar link"
+              onClick={e => { e.stopPropagation(); setShareAberto(true); }}
+              title="Compartilhar"
             >
               <ShareIcon size={13} />
             </button>
@@ -282,44 +230,15 @@ export default function PostCard({ id, titulo, descricao, imagem, imagens, tags,
         />
       )}
 
-      {/* Modal enviar */}
-      {modalEnviar && (
-        <div className="post-card__enviar-overlay" onClick={() => setModalEnviar(false)}>
-          <div className="post-card__enviar-modal" onClick={e => e.stopPropagation()}>
-            <div className="post-card__enviar-header">
-              <span>Enviar post</span>
-              <button onClick={() => setModalEnviar(false)}><XIcon size={16} /></button>
-            </div>
-            <input
-              className="post-card__enviar-busca"
-              type="text"
-              placeholder="Buscar pessoa..."
-              value={busca}
-              onChange={e => buscarUsuarios(e.target.value)}
-              autoFocus
-            />
-            <div className="post-card__enviar-lista">
-              {buscando && <p className="post-card__enviar-hint">Buscando...</p>}
-              {!buscando && busca && resultados.length === 0 && (
-                <p className="post-card__enviar-hint">Nenhum usuário encontrado.</p>
-              )}
-              {!busca && <p className="post-card__enviar-hint">Digite o nome ou @ de alguém.</p>}
-              {resultados.map(u => (
-                <button key={u.id} className="post-card__enviar-item" onClick={() => enviarPara(u)} disabled={enviando}>
-                  <div className="post-card__enviar-avatar">
-                    {u.fotoPerfil ? <img src={u.fotoPerfil} alt={u.nome} /> : <span>{u.nome.charAt(0).toUpperCase()}</span>}
-                  </div>
-                  <div>
-                    <p className="post-card__enviar-nome">{u.nome}</p>
-                    <p className="post-card__enviar-user">@{u.username}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      {shareAberto && (
+        <ShareModal
+          tipo="post"
+          id={id}
+          titulo={titulo}
+          subtitulo={autor ? `por ${autor.nome}` : undefined}
+          onClose={() => setShareAberto(false)}
+        />
       )}
-
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
     </>
   );
