@@ -57,8 +57,8 @@ export default function CatalogoDetalhe() {
   const navigate = useNavigate();
   const { usuario } = useAuth();
   const capaRef = useRef<HTMLInputElement>(null);
-  const fotosRef = useRef<HTMLInputElement>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
+  const menuCapaRef = useRef<HTMLDivElement>(null);
 
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -74,9 +74,9 @@ export default function CatalogoDetalhe() {
 
   useEffect(() => {
     function fechar(e: MouseEvent) {
-      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
-        setShowAddMenu(false);
-      }
+      const alvo = e.target as Node;
+      if (addMenuRef.current && !addMenuRef.current.contains(alvo)) setShowAddMenu(false);
+      if (menuCapaRef.current && !menuCapaRef.current.contains(alvo)) setMenuCapaAberto(false);
     }
     document.addEventListener("mousedown", fechar);
     return () => document.removeEventListener("mousedown", fechar);
@@ -88,7 +88,7 @@ export default function CatalogoDetalhe() {
   const [removendo, setRemovendo] = useState<number | null>(null);
   const [removendoImagem, setRemovendoImagem] = useState<number | null>(null);
   const [salvandoCapa, setSalvandoCapa] = useState(false);
-  const [uploadandoFotos, setUploadandoFotos] = useState(false);
+  const [menuCapaAberto, setMenuCapaAberto] = useState(false);
 
   const [buscaColab, setBuscaColab] = useState("");
   const [resultadosColab, setResultadosColab] = useState<UsuarioBusca[]>([]);
@@ -258,24 +258,12 @@ export default function CatalogoDetalhe() {
     setCapaEditorFile(null);
   }
 
-  async function uploadFotos(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    if (!files.length || !catalogo) return;
-    e.target.value = "";
-    setUploadandoFotos(true);
+  async function removerCapa() {
+    if (!catalogo) return;
     try {
-      const novas: Imagem[] = [];
-      for (const file of files) {
-        try {
-          const url = await uploadImagem(file);
-          const res = await api.post("/catalogo/imagem", { catalogoId: catalogo.id, imagem: url });
-          novas.push(res.data);
-        } catch { /* pula foto com erro */ }
-      }
-      if (novas.length) setImagens(imgs => [...imgs, ...novas]);
-    } finally {
-      setUploadandoFotos(false);
-    }
+      await api.put(`/catalogo/${catalogo.id}`, { capa: null });
+      setCatalogo(c => c ? { ...c, capa: undefined } : c);
+    } catch { /* silencioso */ }
   }
 
   async function convidarColaborador(userId: number) {
@@ -362,14 +350,27 @@ export default function CatalogoDetalhe() {
           : <div className="cat-det__capa-placeholder" />}
         {isDono && (
           <>
-            <button
-              className="cat-det__capa-btn"
-              onClick={() => capaRef.current?.click()}
-              disabled={salvandoCapa}
-            >
-              <CameraIcon size={14} />
-              {salvandoCapa ? "Salvando..." : catalogo.capa ? "Mudar capa" : "Adicionar capa"}
-            </button>
+            <div className="cat-det__capa-cam-wrap" ref={menuCapaRef}>
+              <button
+                className="cat-det__capa-cam-btn"
+                onClick={() => setMenuCapaAberto(v => !v)}
+                disabled={salvandoCapa}
+              >
+                <CameraIcon size={15} />
+              </button>
+              {menuCapaAberto && (
+                <div className="cat-det__capa-menu">
+                  <button onClick={() => { setMenuCapaAberto(false); capaRef.current?.click(); }}>
+                    Mudar capa
+                  </button>
+                  {catalogo.capa && (
+                    <button className="cat-det__capa-menu--del" onClick={() => { setMenuCapaAberto(false); removerCapa(); }}>
+                      Remover capa
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
             <input ref={capaRef} type="file" accept="image/*" hidden onChange={uploadCapa} />
           </>
         )}
@@ -511,11 +512,6 @@ export default function CatalogoDetalhe() {
                 </button>
                 {showAddMenu && (
                   <div className="cat-det__add-menu">
-                    {isDono && (
-                      <button onClick={() => { setShowAddMenu(false); fotosRef.current?.click(); }}>
-                        Fotos diretas
-                      </button>
-                    )}
                     <button onClick={() => { setShowAddMenu(false); setShowNewPost(true); }}>
                       Nova publicação
                     </button>
@@ -523,16 +519,6 @@ export default function CatalogoDetalhe() {
                       Buscar publicações
                     </button>
                   </div>
-                )}
-                {isDono && (
-                  <input
-                    ref={fotosRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    hidden
-                    onChange={uploadFotos}
-                  />
                 )}
               </div>
             )}
@@ -620,12 +606,9 @@ export default function CatalogoDetalhe() {
         )}
 
         {/* ── GALERIA DE FOTOS DIRETAS ───────────────────────── */}
-        {(imagens.length > 0 || uploadandoFotos) && (
+        {imagens.length > 0 && (
           <div className="cat-det__fotos-section">
-            <p className="cat-det__section-label">
-              Fotos
-              {uploadandoFotos && <span className="cat-det__uploading"> Enviando...</span>}
-            </p>
+            <p className="cat-det__section-label">Fotos</p>
             <div className="cat-det__fotos-grid">
               {imagens.map(img => (
                 <div key={img.id} className="cat-det__foto">
@@ -642,11 +625,6 @@ export default function CatalogoDetalhe() {
                   )}
                 </div>
               ))}
-              {uploadandoFotos && (
-                <div className="cat-det__foto cat-det__foto--loading">
-                  <span>Enviando...</span>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -661,18 +639,6 @@ export default function CatalogoDetalhe() {
         {posts.length === 0 && imagens.length === 0 ? (
           <div className="cat-det__empty">
             <p>Este catálogo ainda não tem nada.</p>
-            {podeEditar && (
-              <div className="cat-det__empty-actions">
-                {isDono && (
-                  <button className="cat-det__empty-btn" onClick={() => fotosRef.current?.click()}>
-                    <PlusIcon size={14} /> Adicionar fotos
-                  </button>
-                )}
-                <button className="cat-det__empty-btn cat-det__empty-btn--outline" onClick={abrirPicker}>
-                  <PlusIcon size={14} /> Buscar publicações
-                </button>
-              </div>
-            )}
           </div>
         ) : posts.length > 0 ? (
           <div className="cat-det__grid">

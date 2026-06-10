@@ -386,9 +386,6 @@ export default function Perfil() {
         ) : posts.length === 0 ? (
           <div className="perfil__empty">
             <p>{t.profile.noPosts}</p>
-            <button className="perfil__empty-btn" onClick={() => setShowModal(true)}>
-              <PlusIcon size={14} /> {t.profile.createFirst}
-            </button>
           </div>
         ) : (
           <div className={`perfil__galeria perfil__galeria--${config.layout} perfil__galeria--${config.cardStyle}`}>

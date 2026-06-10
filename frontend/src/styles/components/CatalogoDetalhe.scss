@@ -36,28 +36,59 @@
     background: linear-gradient(135deg, #2A3B1C, #4A6030);
   }
 
-  &__capa-btn {
+  &__capa-cam-wrap {
     position: absolute;
     bottom: 14px;
     right: 18px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
     gap: 6px;
+  }
+
+  &__capa-cam-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     background: rgba(0, 0, 0, 0.55);
     color: #fff;
     border: none;
-    border-radius: 99px;
-    padding: 8px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.18s, background 0.18s;
     backdrop-filter: blur(4px);
-
+    transition: background 0.2s;
     &:hover { background: rgba(0, 0, 0, 0.75); }
     &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__capa-menu {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    overflow: hidden;
+    min-width: 140px;
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #2C2C2C;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.12s;
+      &:hover { background: #f5f3ef; }
+    }
+
+    &--del {
+      color: #c0392b !important;
+      &:hover { background: #fdf0ef !important; }
+    }
   }
 
   // ── CONTAINER ──────────────────────────────────────────────────
@@ -743,15 +774,17 @@
   &__card-del {
     background: none;
     border: none;
-    padding: 3px 6px;
+    padding: 2px 4px;
     cursor: pointer;
-    color: #8A9E7A;
+    color: #C8D8BC;
     border-radius: 4px;
     display: flex;
     align-items: center;
-    transition: color 0.15s, background 0.15s;
-    &:hover:not(:disabled) { color: #c0392b; background: rgba(192, 57, 43, 0.08); }
-    &:disabled { opacity: 0.4; cursor: not-allowed; }
+    margin-left: auto;
+    opacity: 0.5;
+    transition: color 0.15s, opacity 0.15s;
+    &:hover:not(:disabled) { color: #c0392b; opacity: 1; }
+    &:disabled { opacity: 0.2; cursor: not-allowed; }
   }
 
   // ── PICKER MODAL ───────────────────────────────────────────────
