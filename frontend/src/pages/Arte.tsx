@@ -23,6 +23,7 @@ export default function Arte() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [categoria, setCategoria] = useState<string | null>(null);
+  const [busca, setBusca] = useState("");
 
   const tagsRef = useRef<HTMLDivElement>(null);
   const autoScrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -91,11 +92,17 @@ export default function Arte() {
   function onTagStripTouchEnd() { scrollPaused.current = false; }
 
   const filtrados = useMemo(() => {
-    const lista = categoria
-      ? posts.filter(p => p.tags?.includes(categoria))
-      : posts;
+    let lista = categoria ? posts.filter(p => p.tags?.includes(categoria)) : posts;
+    if (busca.trim()) {
+      const q = busca.trim().toLowerCase();
+      lista = lista.filter(p =>
+        p.titulo.toLowerCase().includes(q) ||
+        p.descricao?.toLowerCase().includes(q) ||
+        p.tags?.some(t => t.toLowerCase().includes(q))
+      );
+    }
     return [...lista].sort((a, b) => b.curtidas.length - a.curtidas.length);
-  }, [posts, categoria]);
+  }, [posts, categoria, busca]);
 
   return (
     <div className="arte">
@@ -105,6 +112,16 @@ export default function Arte() {
       </div>
 
       <div className="arte__body">
+        <div className="arte__search-wrap">
+          <input
+            className="arte__search"
+            type="search"
+            placeholder="Buscar artes..."
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+          />
+        </div>
+
         {/* Filtros */}
         <div className="arte__filters">
           <button

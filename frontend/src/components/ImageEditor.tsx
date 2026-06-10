@@ -15,7 +15,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
   const [imgNat, setImgNat] = useState({ w: 0, h: 0 });
   const [cSize, setCSize] = useState({ w: 0, h: 0 });
   const [cropSize, setCropSize] = useState({ w: 0, h: 0 });
-  const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [confirming, setConfirming] = useState(false);
 
@@ -25,7 +24,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
   const dragging = useRef(false);
   const lastPos = useRef({ x: 0, y: 0 });
   const lastTouch = useRef<{ x: number; y: number } | null>(null);
-  const lastPinchDist = useRef<number | null>(null);
   const needsInitRef = useRef(false);
 
   useEffect(() => {
@@ -33,7 +31,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     setImgSrc(url);
     setImgNat({ w: 0, h: 0 });
     setCSize({ w: 0, h: 0 });
-    setScale(1);
     setOffset({ x: 0, y: 0 });
     needsInitRef.current = true;
     return () => URL.revokeObjectURL(url);
@@ -50,7 +47,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     return () => ro.disconnect();
   }, []);
 
-  // Calcula o frame de corte centralizado dentro do container
   useEffect(() => {
     if (cSize.w === 0 || cSize.h === 0) return;
     const maxW = cSize.w * 0.85;
@@ -66,13 +62,11 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     setCropSize({ w: cropW, h: cropH });
   }, [cSize.w, cSize.h, aspect]);
 
-  // Inicializa escala base (imagem cobre exatamente o frame de corte)
   useEffect(() => {
     if (!needsInitRef.current) return;
     if (imgNat.w === 0 || cropSize.w === 0 || cropSize.h === 0) return;
     needsInitRef.current = false;
     baseScaleRef.current = Math.max(cropSize.w / imgNat.w, cropSize.h / imgNat.h);
-    setScale(1);
     setOffset({ x: 0, y: 0 });
   }, [imgNat.w, imgNat.h, cropSize.w, cropSize.h]);
 
@@ -80,40 +74,24 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     const el = containerRef.current;
     if (!el) return;
     const onTouch = (e: TouchEvent) => e.preventDefault();
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaMode === 2 ? e.deltaY * 300 : e.deltaY;
-      setScale(s => clampScale(s * Math.pow(0.999, dy)));
-    };
     el.addEventListener("touchmove", onTouch, { passive: false });
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      el.removeEventListener("touchmove", onTouch);
-      el.removeEventListener("wheel", onWheel);
-    };
+    return () => el.removeEventListener("touchmove", onTouch);
   }, []);
 
-  function clampScale(s: number) {
-    const bs = baseScaleRef.current;
-    const maxS = bs > 0 ? Math.max(1, 1 / bs) : 4;
-    return Math.min(Math.max(s, 1), maxS);
-  }
+  useEffect(() => {
+    if (imgNat.w === 0 || cropSize.w === 0) return;
+    setOffset(o => clampOffset(o));
+  }, [cropSize.w, cropSize.h]);
 
-  // Garante que a imagem sempre cobre o frame de corte ao arrastar/zoom
-  function clampOffset(o: { x: number; y: number }, sc: number) {
+  function clampOffset(o: { x: number; y: number }) {
     const bs = baseScaleRef.current;
     if (!bs || cropSize.w === 0) return o;
-    const rendW = imgNat.w * bs * sc;
-    const rendH = imgNat.h * bs * sc;
+    const rendW = imgNat.w * bs;
+    const rendH = imgNat.h * bs;
     const mx = Math.max(0, (rendW - cropSize.w) / 2);
     const my = Math.max(0, (rendH - cropSize.h) / 2);
     return { x: Math.min(mx, Math.max(-mx, o.x)), y: Math.min(my, Math.max(-my, o.y)) };
   }
-
-  useEffect(() => {
-    if (imgNat.w === 0 || cropSize.w === 0) return;
-    setOffset(o => clampOffset(o, scale));
-  }, [scale, cropSize.w, cropSize.h]);
 
   function onImgLoad() {
     const img = imgRef.current;
@@ -123,12 +101,10 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
 
   const bs = baseScaleRef.current;
   const ready = imgNat.w > 0 && cropSize.w > 0 && bs > 0;
-  const rendW = ready ? imgNat.w * bs * scale : 0;
-  const rendH = ready ? imgNat.h * bs * scale : 0;
-  // Posição absoluta da imagem no container
+  const rendW = ready ? imgNat.w * bs : 0;
+  const rendH = ready ? imgNat.h * bs : 0;
   const imgLeft = ready ? (cSize.w - rendW) / 2 + offset.x : 0;
   const imgTop  = ready ? (cSize.h - rendH) / 2 + offset.y : 0;
-  // Posição do frame de corte (centralizado)
   const cropLeft = ready ? (cSize.w - cropSize.w) / 2 : 0;
   const cropTop  = ready ? (cSize.h - cropSize.h) / 2 : 0;
 
@@ -141,20 +117,13 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    setOffset(o => clampOffset({ x: o.x + dx, y: o.y + dy }, scale));
+    setOffset(o => clampOffset({ x: o.x + dx, y: o.y + dy }));
   }
   function onMouseUp() { dragging.current = false; }
 
-  function pinchDist(t: React.TouchList) {
-    return Math.hypot(t[1].clientX - t[0].clientX, t[1].clientY - t[0].clientY);
-  }
   function onTouchStart(e: React.TouchEvent) {
     if (e.touches.length === 1) {
       lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      lastPinchDist.current = null;
-    } else if (e.touches.length === 2) {
-      lastPinchDist.current = pinchDist(e.touches);
-      lastTouch.current = null;
     }
   }
   function onTouchMove(e: React.TouchEvent) {
@@ -162,17 +131,10 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
       const dx = e.touches[0].clientX - lastTouch.current.x;
       const dy = e.touches[0].clientY - lastTouch.current.y;
       lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      setOffset(o => clampOffset({ x: o.x + dx, y: o.y + dy }, scale));
-    } else if (e.touches.length === 2 && lastPinchDist.current !== null) {
-      const dist = pinchDist(e.touches);
-      setScale(s => clampScale(s * dist / lastPinchDist.current!));
-      lastPinchDist.current = dist;
+      setOffset(o => clampOffset({ x: o.x + dx, y: o.y + dy }));
     }
   }
-  function onTouchEnd() {
-    lastTouch.current = null;
-    lastPinchDist.current = null;
-  }
+  function onTouchEnd() { lastTouch.current = null; }
 
   function confirmar() {
     if (confirming || !imgRef.current || !ready) return;
@@ -180,7 +142,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     const outW = aspect >= 3 ? 1200 : 1080;
     const outH = Math.round(outW / aspect);
 
-    // Converte posição do frame de corte para coordenadas da imagem natural
     const toNat = imgNat.w / rendW;
     const srcX = (cropLeft - imgLeft) * toNat;
     const srcY = (cropTop  - imgTop)  * toNat;
@@ -200,11 +161,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
       }
     }, "image/jpeg", 0.93);
   }
-
-  const maxScaleVal = (ready && bs > 0) ? Math.max(1, 1 / bs) : 4;
-  const canZoom = maxScaleVal > 1.001;
-  const sliderRange = canZoom ? maxScaleVal - 1 : 1;
-  const sliderVal = ready && canZoom ? Math.round((scale - 1) / sliderRange * 100) : 0;
 
   return (
     <div className="img-ed-overlay" onClick={e => { if (e.target === e.currentTarget) onCancel(); }}>
@@ -260,20 +216,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
               )}
             </div>
           )}
-        </div>
-
-        <div className="img-ed__zoom">
-          <button type="button" disabled={!canZoom} onClick={() => setScale(s => clampScale(s - 0.15))}>−</button>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={sliderVal}
-            disabled={!canZoom}
-            onChange={e => { if (canZoom) setScale(1 + (Number(e.target.value) / 100) * sliderRange); }}
-          />
-          <button type="button" disabled={!canZoom} onClick={() => setScale(s => clampScale(s + 0.15))}>+</button>
         </div>
 
         <div className="img-ed__actions">

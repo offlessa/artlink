@@ -199,28 +199,26 @@ export default function Perfil() {
 
   async function salvarPerfil() {
     if (!usuario) return;
+    setEditMode(false);
     setSalvandoPerfil(true);
     try {
       await api.put(`/usuario/${usuario.id}`, editData);
       updateUsuario(editData);
-      setEditMode(false);
-    } finally {
-      setSalvandoPerfil(false);
-    }
+    } catch { /* silencioso */ }
+    finally { setSalvandoPerfil(false); }
   }
 
   async function salvarConfig(newCfg: ProfileConfig) {
     if (!usuario) return;
+    setConfig(newCfg);
+    setShowCustomize(false);
     setSalvandoConfig(true);
     const json = JSON.stringify(newCfg);
     try {
       await api.put(`/usuario/${usuario.id}`, { perfilConfig: json });
       updateUsuario({ perfilConfig: json });
-      setConfig(newCfg);
-      setShowCustomize(false);
-    } finally {
-      setSalvandoConfig(false);
-    }
+    } catch { /* silencioso */ }
+    finally { setSalvandoConfig(false); }
   }
 
   async function excluirPost(e: React.MouseEvent, id: number) {

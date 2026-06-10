@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
@@ -37,6 +37,7 @@ export default function Artistas() {
   const [carregando, setCarregando] = useState(true);
   const [seguindo, setSeguindo] = useState<Set<number>>(new Set());
   const [loadingSeguir, setLoadingSeguir] = useState<number | null>(null);
+  const [busca, setBusca] = useState("");
 
   useEffect(() => {
     carregar();
@@ -95,6 +96,16 @@ export default function Artistas() {
     finally { setLoadingSeguir(null); }
   }
 
+  const filtrados = useMemo(() => {
+    if (!busca.trim()) return artistas;
+    const q = busca.trim().toLowerCase();
+    return artistas.filter(a =>
+      a.nome.toLowerCase().includes(q) ||
+      a.username.toLowerCase().includes(q) ||
+      a.bio?.toLowerCase().includes(q)
+    );
+  }, [artistas, busca]);
+
   const inicial = (nome: string) => nome.charAt(0).toUpperCase();
 
   return (
@@ -105,19 +116,29 @@ export default function Artistas() {
       </div>
 
       <div className="artistas__body">
+        <div className="artistas__search-wrap">
+          <input
+            className="artistas__search"
+            type="search"
+            placeholder="Buscar artistas..."
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+          />
+        </div>
+
         {carregando ? (
           <div className="artistas__grid">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="artistas__skeleton" />
             ))}
           </div>
-        ) : artistas.length === 0 ? (
+        ) : filtrados.length === 0 ? (
           <div className="artistas__vazio">
-            <p>Nenhum artista encontrado.</p>
+            <p>{busca.trim() ? "Nenhum artista encontrado para esta busca." : "Nenhum artista encontrado."}</p>
           </div>
         ) : (
           <div className="artistas__grid">
-            {artistas.map(artista => (
+            {filtrados.map(artista => (
               <div key={artista.id} className="artistas__card">
                 {/* Banner de fundo */}
                 <div
