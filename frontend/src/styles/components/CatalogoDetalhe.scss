@@ -300,18 +300,17 @@
   &__excluir-btn {
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
     background: none;
-    color: #C0392B;
-    border: 1.5px solid #C0392B;
-    border-radius: 99px;
-    padding: 8px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 600;
+    color: #B8C4AE;
+    border: 1.5px solid #B8C4AE;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    &:hover { background: #C0392B; color: #fff; }
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    &:hover { background: #fdf0ef; color: #C0392B; border-color: #C0392B; }
   }
 
   &__sair-btn {

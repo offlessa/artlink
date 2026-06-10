@@ -467,26 +467,6 @@ export default function CatalogoDetalhe() {
               </button>
             )}
 
-            {/* Excluir catálogo (dono) */}
-            {isDono && (
-              <button
-                className="cat-det__excluir-btn"
-                onClick={async () => {
-                  if (!confirm("Excluir este catálogo permanentemente? Esta ação não pode ser desfeita.")) return;
-                  try {
-                    await api.delete(`/catalogo/${catalogo.id}`);
-                    navigate("/perfil");
-                  } catch {
-                    mostrarToast("Erro ao excluir catálogo.");
-                  }
-                }}
-                title="Excluir catálogo"
-              >
-                <TrashIcon size={14} />
-                Excluir
-              </button>
-            )}
-
             {/* Sair do catálogo (colaborador aceito) */}
             {isColaborador && (
               <button
@@ -521,6 +501,25 @@ export default function CatalogoDetalhe() {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Excluir catálogo — ícone lixeira, último à direita (dono) */}
+            {isDono && (
+              <button
+                className="cat-det__excluir-btn"
+                onClick={async () => {
+                  if (!confirm("Excluir este catálogo permanentemente? Esta ação não pode ser desfeita.")) return;
+                  try {
+                    await api.delete(`/catalogo/${catalogo.id}`);
+                    navigate("/perfil");
+                  } catch {
+                    mostrarToast("Erro ao excluir catálogo.");
+                  }
+                }}
+                title="Excluir catálogo"
+              >
+                <TrashIcon size={14} />
+              </button>
             )}
           </div>
         </div>
