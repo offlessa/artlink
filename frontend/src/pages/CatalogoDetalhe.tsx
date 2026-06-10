@@ -11,6 +11,7 @@ import {
   BookmarkIcon, ShareIcon,
 } from "../components/Icons";
 import Toast from "../components/Toast";
+import ImageEditor from "../components/ImageEditor";
 import { copiarLink } from "../utils/compartilhar";
 import "../styles/components/CatalogoDetalhe.scss";
 
@@ -69,6 +70,7 @@ export default function CatalogoDetalhe() {
   const [showPicker, setShowPicker] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
   const [showColabPanel, setShowColabPanel] = useState(false);
+  const [capaEditorFile, setCapaEditorFile] = useState<File | null>(null);
 
   useEffect(() => {
     function fechar(e: MouseEvent) {
@@ -236,10 +238,16 @@ export default function CatalogoDetalhe() {
     } finally { setAdicionando(null); }
   }
 
-  async function uploadCapa(e: React.ChangeEvent<HTMLInputElement>) {
+  function uploadCapa(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !catalogo) return;
     e.target.value = "";
+    setCapaEditorFile(file);
+  }
+
+  async function handleCapaEditorConfirm(blob: Blob) {
+    if (!catalogo) return;
+    const file = new File([blob], "capa.jpg", { type: "image/jpeg" });
     setSalvandoCapa(true);
     try {
       const url = await uploadImagem(file);
@@ -250,6 +258,7 @@ export default function CatalogoDetalhe() {
     } finally {
       setSalvandoCapa(false);
     }
+    setCapaEditorFile(null);
   }
 
   async function uploadFotos(e: React.ChangeEvent<HTMLInputElement>) {
@@ -338,6 +347,15 @@ export default function CatalogoDetalhe() {
   };
 
   return (
+    <>
+    {capaEditorFile && (
+      <ImageEditor
+        file={capaEditorFile}
+        aspect={16 / 9}
+        onConfirm={handleCapaEditorConfirm}
+        onCancel={() => setCapaEditorFile(null)}
+      />
+    )}
     <div className="cat-det">
 
       {/* ── CAPA ──────────────────────────────────────────────── */}
@@ -756,5 +774,6 @@ export default function CatalogoDetalhe() {
 
       <Footer />
     </div>
+    </>
   );
 }

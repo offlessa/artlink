@@ -14,6 +14,7 @@ import {
   GridIcon, ListIcon, ShareIcon, VerificadoIcon,
 } from "../components/Icons";
 import Toast from "../components/Toast";
+import ImageEditor from "../components/ImageEditor";
 import { copiarLink } from "../utils/compartilhar";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/Perfil.scss";
@@ -79,6 +80,8 @@ export default function Perfil() {
   const bannerRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
 
+  const [editorState, setEditorState] = useState<{ file: File; mode: "avatar" | "capa" } | null>(null);
+
   const cardStyles: { key: ProfileConfig["cardStyle"]; label: string }[] = [
     { key: "rounded", label: t.profile.cardOpts.rounded },
     { key: "sharp",   label: t.profile.cardOpts.sharp },
@@ -140,20 +143,32 @@ export default function Perfil() {
     return { backgroundColor: config.bgValue || "#FAF8F3" };
   }, [config]);
 
-  async function uploadBanner(e: React.ChangeEvent<HTMLInputElement>) {
+  function uploadBanner(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !usuario) return;
-    const url = await uploadImagem(file);
-    await api.put(`/usuario/${usuario.id}`, { fotoCapa: url });
-    updateUsuario({ fotoCapa: url });
+    e.target.value = "";
+    setEditorState({ file, mode: "capa" });
   }
 
-  async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+  function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !usuario) return;
+    e.target.value = "";
+    setEditorState({ file, mode: "avatar" });
+  }
+
+  async function handleEditorConfirm(blob: Blob) {
+    if (!usuario || !editorState) return;
+    const file = new File([blob], "image.jpg", { type: "image/jpeg" });
     const url = await uploadImagem(file);
-    await api.put(`/usuario/${usuario.id}`, { fotoPerfil: url });
-    updateUsuario({ fotoPerfil: url });
+    if (editorState.mode === "capa") {
+      await api.put(`/usuario/${usuario.id}`, { fotoCapa: url });
+      updateUsuario({ fotoCapa: url });
+    } else {
+      await api.put(`/usuario/${usuario.id}`, { fotoPerfil: url });
+      updateUsuario({ fotoPerfil: url });
+    }
+    setEditorState(null);
   }
 
   async function salvarPerfil() {
@@ -202,6 +217,16 @@ export default function Perfil() {
   const inicial = usuario?.nome?.charAt(0).toUpperCase() ?? "?";
 
   return (
+    <>
+    {editorState && (
+      <ImageEditor
+        file={editorState.file}
+        aspect={editorState.mode === "capa" ? 3 : 1}
+        circular={editorState.mode === "avatar"}
+        onConfirm={handleEditorConfirm}
+        onCancel={() => setEditorState(null)}
+      />
+    )}
     <div
       className={`perfil ${config.bgType === "texture" ? `perfil--texture-${config.bgValue}` : ""}`}
       style={bgStyle}
@@ -574,5 +599,6 @@ export default function Perfil() {
 
       <Footer />
     </div>
+    </>
   );
 }

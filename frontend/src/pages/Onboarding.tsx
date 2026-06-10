@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
+import ImageEditor from "../components/ImageEditor";
 import "../styles/components/Onboarding.scss";
 
 const SLIDES = [
@@ -42,6 +43,7 @@ export default function Onboarding() {
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [editorFile, setEditorFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   function avancarSlide() {
@@ -53,10 +55,17 @@ export default function Onboarding() {
     }
   }
 
-  async function handleFoto(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = "";
+    setEditorFile(file);
+  }
+
+  async function handleEditorConfirm(blob: Blob) {
+    const file = new File([blob], "foto.jpg", { type: "image/jpeg" });
     setFotoPreview(URL.createObjectURL(file));
+    setEditorFile(null);
     setUploading(true);
     try {
       const url = await uploadImagem(file);
@@ -122,6 +131,16 @@ export default function Onboarding() {
   }
 
   return (
+    <>
+    {editorFile && (
+      <ImageEditor
+        file={editorFile}
+        aspect={1}
+        circular
+        onConfirm={handleEditorConfirm}
+        onCancel={() => setEditorFile(null)}
+      />
+    )}
     <div className="onb">
       <div className="onb__card onb__card--perfil">
         <div className="onb__perfil-header">
@@ -187,5 +206,6 @@ export default function Onboarding() {
         </div>
       </div>
     </div>
+    </>
   );
 }

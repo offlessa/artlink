@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { XIcon, ImageIcon, ChevronRightIcon, PlusIcon } from "./Icons";
+import ImageEditor from "./ImageEditor";
 import "../styles/components/CreatePostModal.scss";
 
 interface Colaborador { id: number; nome: string; username: string; fotoPerfil?: string }
@@ -30,27 +31,39 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   const trocarRef = useRef<HTMLInputElement>(null);
   const adicionarRef = useRef<HTMLInputElement>(null);
 
+  interface EditItem { file: File; mode: "new" | number }
+  const [editQueue, setEditQueue] = useState<EditItem[]>([]);
+
   function adicionarArquivos(files: File[]) {
     const validos = files.filter(f => f.type.startsWith("image/"));
     if (!validos.length) return;
-    const novosPreviews = validos.map(f => URL.createObjectURL(f));
-    setArquivos(prev => {
-      const novo = [...prev, ...validos];
-      setPreviews(p => {
-        const novosP = [...p, ...novosPreviews];
-        setActiveIdx(novosP.length - 1);
-        return novosP;
-      });
-      return novo;
-    });
-    setStep("form");
+    setEditQueue(prev => [...prev, ...validos.map(f => ({ file: f, mode: "new" as const }))]);
   }
 
   function trocarFoto(file: File) {
     if (!file.type.startsWith("image/")) return;
-    const nova = URL.createObjectURL(file);
-    setArquivos(prev => { const a = [...prev]; a[activeIdx] = file; return a; });
-    setPreviews(prev => { const p = [...prev]; p[activeIdx] = nova; return p; });
+    setEditQueue([{ file, mode: activeIdx }]);
+  }
+
+  function handleEditorConfirm(blob: Blob) {
+    const item = editQueue[0];
+    if (!item) return;
+    const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+    const preview = URL.createObjectURL(file);
+    if (item.mode === "new") {
+      setArquivos(prev => [...prev, file]);
+      setPreviews(prev => {
+        const novos = [...prev, preview];
+        setActiveIdx(novos.length - 1);
+        return novos;
+      });
+      setStep("form");
+    } else {
+      const idx = item.mode as number;
+      setArquivos(prev => { const a = [...prev]; a[idx] = file; return a; });
+      setPreviews(prev => { const p = [...prev]; p[idx] = preview; return p; });
+    }
+    setEditQueue(prev => prev.slice(1));
   }
 
   function removerFoto(idx: number) {
@@ -146,6 +159,15 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   const inicial = usuario?.nome?.charAt(0).toUpperCase() ?? "?";
 
   return (
+    <>
+    {editQueue.length > 0 && (
+      <ImageEditor
+        file={editQueue[0].file}
+        aspect={1}
+        onConfirm={handleEditorConfirm}
+        onCancel={() => setEditQueue([])}
+      />
+    )}
     <div className="cpm-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="cpm">
         <div className="cpm__header">
@@ -321,5 +343,6 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
         )}
       </div>
     </div>
+    </>
   );
 }

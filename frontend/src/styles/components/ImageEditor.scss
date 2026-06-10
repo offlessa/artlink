@@ -1,0 +1,144 @@
+@use '../variables' as *;
+
+.img-ed-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.img-ed {
+  background: $surface;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid $borda;
+
+    span {
+      font-family: $font-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: $texto;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    &:hover { background: $brand-subtle; color: $texto; }
+  }
+
+  &__hint {
+    font-size: 0.75rem;
+    color: $texto-suave;
+    text-align: center;
+    padding: 10px 18px 0;
+    margin: 0;
+  }
+
+  &__stage {
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    background: #1a1a1a;
+    margin: 12px 18px;
+    border-radius: 8px;
+    touch-action: none;
+    user-select: none;
+
+    &:active { cursor: grabbing; }
+
+    &--circular {
+      border-radius: 50%;
+      align-self: center;
+      width: calc(100% - 36px);
+      max-width: 340px;
+    }
+  }
+
+  &__zoom {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px 8px;
+
+    button {
+      background: none;
+      border: 1px solid $borda;
+      border-radius: 6px;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.15rem;
+      line-height: 1;
+      color: $texto;
+      transition: background 0.15s;
+      flex-shrink: 0;
+      padding: 0;
+      &:hover { background: $brand-subtle; }
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: $brand;
+      cursor: pointer;
+      height: 4px;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    padding: 0 18px 18px;
+  }
+
+  &__btn {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: none;
+    font-family: $font-sans;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, opacity 0.18s;
+
+    &--cancel {
+      background: $creme;
+      color: $texto-medio;
+      border: 1.5px solid $borda;
+      &:hover { filter: brightness(0.96); }
+    }
+
+    &--confirm {
+      background: $brand;
+      color: #FAF8F3;
+      &:hover { background: $brand-hover; }
+      &:disabled { opacity: 0.6; cursor: default; }
+    }
+  }
+}
