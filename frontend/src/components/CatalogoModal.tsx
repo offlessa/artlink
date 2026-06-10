@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { XIcon, CameraIcon } from "./Icons";
+import ImageEditor from "./ImageEditor";
 import "../styles/components/CatalogoModal.scss";
 
 interface Props { onClose: () => void }
@@ -19,13 +20,20 @@ export default function CatalogoModal({ onClose }: Props) {
   const [capaPreview, setCapaPreview] = useState<string | null>(null);
   const [uploadandoCapa, setUploadandoCapa] = useState(false);
   const [criando, setCriando] = useState(false);
+  const [capaEditorFile, setCapaEditorFile] = useState<File | null>(null);
 
-  async function handleCapa(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleCapa(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
+    setCapaEditorFile(file);
+  }
+
+  async function handleCapaEditorConfirm(blob: Blob) {
+    const file = new File([blob], "capa.jpg", { type: "image/jpeg" });
     setCapaPreview(URL.createObjectURL(file));
     setUploadandoCapa(true);
+    setCapaEditorFile(null);
     try {
       const url = await uploadImagem(file);
       setCapaUrl(url);
@@ -53,62 +61,70 @@ export default function CatalogoModal({ onClose }: Props) {
   }
 
   return (
-    <div className="catm-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="catm">
-        <div className="catm__header">
-          <span>Novo catálogo</span>
-          <button onClick={onClose}><XIcon size={18} /></button>
-        </div>
-        <div className="catm__body">
-          {/* Capa */}
-          <div className="catm__capa" onClick={() => fileRef.current?.click()}>
-            {capaPreview
-              ? <img src={capaPreview} alt="capa" />
-              : (
-                <div className="catm__capa-placeholder">
-                  <CameraIcon size={22} />
-                  <span>Adicionar capa</span>
-                </div>
-              )
-            }
-            {uploadandoCapa && <div className="catm__capa-loading">Enviando...</div>}
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleCapa} />
+    <React.Fragment>
+      {capaEditorFile && (
+        <ImageEditor
+          file={capaEditorFile}
+          aspect={16 / 9}
+          onConfirm={handleCapaEditorConfirm}
+          onCancel={() => setCapaEditorFile(null)}
+        />
+      )}
+      <div className="catm-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+        <div className="catm">
+          <div className="catm__header">
+            <span>Novo catálogo</span>
+            <button onClick={onClose}><XIcon size={18} /></button>
           </div>
-          {capaPreview && (
+          <div className="catm__body">
+            <div className="catm__capa" onClick={() => fileRef.current?.click()}>
+              {capaPreview
+                ? <img src={capaPreview} alt="capa" />
+                : (
+                  <div className="catm__capa-placeholder">
+                    <CameraIcon size={22} />
+                    <span>Adicionar capa</span>
+                  </div>
+                )
+              }
+              {uploadandoCapa && <div className="catm__capa-loading">Enviando...</div>}
+              <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleCapa} />
+            </div>
+            {capaPreview && (
+              <button
+                className="catm__capa-remover"
+                type="button"
+                onClick={() => { setCapaPreview(null); setCapaUrl(null); }}
+              >
+                Remover capa
+              </button>
+            )}
+            <input
+              className="catm__input"
+              placeholder="Nome do catálogo *"
+              value={nome}
+              onChange={e => setNome(e.target.value)}
+              maxLength={100}
+              autoFocus
+              onKeyDown={e => { if (e.key === "Enter") criar(); }}
+            />
+            <textarea
+              className="catm__textarea"
+              placeholder="Descrição (opcional)"
+              value={descricao}
+              onChange={e => setDescricao(e.target.value)}
+              maxLength={500}
+            />
             <button
-              className="catm__capa-remover"
-              type="button"
-              onClick={() => { setCapaPreview(null); setCapaUrl(null); }}
+              className="catm__btn"
+              onClick={criar}
+              disabled={!nome.trim() || criando || uploadandoCapa}
             >
-              Remover capa
+              {criando ? "Criando..." : "Criar catálogo"}
             </button>
-          )}
-
-          <input
-            className="catm__input"
-            placeholder="Nome do catálogo *"
-            value={nome}
-            onChange={e => setNome(e.target.value)}
-            maxLength={100}
-            autoFocus
-            onKeyDown={e => { if (e.key === "Enter") criar(); }}
-          />
-          <textarea
-            className="catm__textarea"
-            placeholder="Descrição (opcional)"
-            value={descricao}
-            onChange={e => setDescricao(e.target.value)}
-            maxLength={500}
-          />
-          <button
-            className="catm__btn"
-            onClick={criar}
-            disabled={!nome.trim() || criando || uploadandoCapa}
-          >
-            {criando ? "Criando..." : "Criar catálogo"}
-          </button>
+          </div>
         </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 }

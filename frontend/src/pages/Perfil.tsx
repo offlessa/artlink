@@ -171,6 +171,18 @@ export default function Perfil() {
     setEditorState(null);
   }
 
+  async function removerBanner() {
+    if (!usuario) return;
+    await api.put(`/usuario/${usuario.id}`, { fotoCapa: "" });
+    updateUsuario({ fotoCapa: "" });
+  }
+
+  async function removerAvatar() {
+    if (!usuario) return;
+    await api.put(`/usuario/${usuario.id}`, { fotoPerfil: "" });
+    updateUsuario({ fotoPerfil: "" });
+  }
+
   async function salvarPerfil() {
     if (!usuario) return;
     setSalvandoPerfil(true);
@@ -236,9 +248,16 @@ export default function Perfil() {
         {usuario?.fotoCapa
           ? <img src={usuario.fotoCapa} alt="capa" />
           : <div className="perfil__banner-placeholder" />}
-        <button className="perfil__banner-btn" onClick={() => bannerRef.current?.click()}>
-          <CameraIcon size={15} /> {t.profile.changeCover}
-        </button>
+        <div className="perfil__banner-actions">
+          {usuario?.fotoCapa && (
+            <button className="perfil__banner-btn perfil__banner-btn--remove" onClick={removerBanner}>
+              <TrashIcon size={15} /> {t.profile.removeCover}
+            </button>
+          )}
+          <button className="perfil__banner-btn" onClick={() => bannerRef.current?.click()}>
+            <CameraIcon size={15} /> {t.profile.changeCover}
+          </button>
+        </div>
         <input ref={bannerRef} type="file" accept="image/*" hidden onChange={uploadBanner} />
       </div>
 
@@ -250,9 +269,14 @@ export default function Perfil() {
               ? <img src={usuario.fotoPerfil} alt={usuario.nome} />
               : <span>{inicial}</span>}
           </div>
-          <button className="perfil__avatar-btn" onClick={() => avatarRef.current?.click()}>
+          <button className="perfil__avatar-btn" title={t.profile.changeCover} onClick={() => avatarRef.current?.click()}>
             <CameraIcon size={12} />
           </button>
+          {usuario?.fotoPerfil && (
+            <button className="perfil__avatar-remove-btn" title={t.profile.removePhoto} onClick={removerAvatar}>
+              <TrashIcon size={10} />
+            </button>
+          )}
           <input ref={avatarRef} type="file" accept="image/*" hidden onChange={uploadAvatar} />
         </div>
 
