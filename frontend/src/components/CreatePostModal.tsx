@@ -12,8 +12,9 @@ interface Props { onClose: () => void; onSuccess: () => void; catalogoId?: numbe
 export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Props) {
   const { usuario } = useAuth();
   const [step, setStep] = useState<"upload" | "form">("upload");
-  const [preview, setPreview] = useState<string | null>(null);
-  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [arquivos, setArquivos] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [activeIdx, setActiveIdx] = useState(0);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
@@ -26,19 +27,57 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
   const [erro, setErro] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const trocarRef = useRef<HTMLInputElement>(null);
+  const adicionarRef = useRef<HTMLInputElement>(null);
 
-  function lerArquivo(file: File) {
-    if (!file.type.startsWith("image/")) return;
-    setArquivo(file);
-    setPreview(URL.createObjectURL(file));
+  function adicionarArquivos(files: File[]) {
+    const validos = files.filter(f => f.type.startsWith("image/"));
+    if (!validos.length) return;
+    const novosPreviews = validos.map(f => URL.createObjectURL(f));
+    setArquivos(prev => {
+      const novo = [...prev, ...validos];
+      setPreviews(p => {
+        const novosP = [...p, ...novosPreviews];
+        setActiveIdx(novosP.length - 1);
+        return novosP;
+      });
+      return novo;
+    });
     setStep("form");
+  }
+
+  function trocarFoto(file: File) {
+    if (!file.type.startsWith("image/")) return;
+    const nova = URL.createObjectURL(file);
+    setArquivos(prev => { const a = [...prev]; a[activeIdx] = file; return a; });
+    setPreviews(prev => { const p = [...prev]; p[activeIdx] = nova; return p; });
+  }
+
+  function removerFoto(idx: number) {
+    const novosArqs = arquivos.filter((_, i) => i !== idx);
+    const novosPrevs = previews.filter((_, i) => i !== idx);
+    setArquivos(novosArqs);
+    setPreviews(novosPrevs);
+    if (novosArqs.length === 0) {
+      setStep("upload");
+      setActiveIdx(0);
+    } else {
+      setActiveIdx(Math.min(activeIdx, novosArqs.length - 1));
+    }
   }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) lerArquivo(file);
+    const files = Array.from(e.dataTransfer.files ?? []);
+    adicionarArquivos(files);
+  }
+
+  function voltarParaUpload() {
+    setArquivos([]);
+    setPreviews([]);
+    setActiveIdx(0);
+    setStep("upload");
   }
 
   async function buscarColab(query: string) {
@@ -66,10 +105,11 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
     setCriando(true);
     setErro(null);
     try {
-      let imagemUrl: string | null = null;
-      if (arquivo) {
+      const urls: string[] = [];
+      for (const arq of arquivos) {
         try {
-          imagemUrl = await uploadImagem(arquivo);
+          const url = await uploadImagem(arq);
+          urls.push(url);
         } catch (uploadErr: any) {
           const status = uploadErr?.response?.status;
           const msg = uploadErr?.response?.data?.message ?? uploadErr?.response?.data?.error ?? uploadErr?.message;
@@ -83,7 +123,8 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
         usuarioId: usuario.id,
         titulo: titulo.trim(),
         descricao: descricao.trim() || null,
-        imagem: imagemUrl,
+        imagem: urls[0] ?? null,
+        imagens: urls,
         tags,
       });
       const postId = res.data?.data?.id ?? res.data?.id;
@@ -108,7 +149,7 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
     <div className="cpm-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="cpm">
         <div className="cpm__header">
-          <button className="cpm__back" onClick={step === "form" ? () => setStep("upload") : onClose}>
+          <button className="cpm__back" onClick={step === "form" ? voltarParaUpload : onClose}>
             {step === "form" ? <ChevronRightIcon size={16} className="cpm__back-icon" /> : <XIcon size={18} />}
           </button>
           <span>{step === "upload" ? "Nova publicação" : "Detalhes"}</span>
@@ -124,16 +165,61 @@ export default function CreatePostModal({ onClose, onSuccess, catalogoId }: Prop
             onDragLeave={() => setDragging(false)}
           >
             <div className="cpm__drop-icon"><ImageIcon size={52} /></div>
-            <p className="cpm__drop-title">Arraste sua foto aqui</p>
-            <p className="cpm__drop-sub">PNG, JPG, WEBP</p>
+            <p className="cpm__drop-title">Arraste suas fotos aqui</p>
+            <p className="cpm__drop-sub">PNG, JPG, WEBP · múltiplas imagens suportadas</p>
             <button className="cpm__drop-btn" type="button">Selecionar do computador</button>
-            <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => { const f = e.target.files?.[0]; if (f) lerArquivo(f); }} />
+            <input ref={fileRef} type="file" accept="image/*" multiple hidden
+              onChange={e => adicionarArquivos(Array.from(e.target.files ?? []))} />
           </div>
         ) : (
           <div className="cpm__form">
-            <div className="cpm__preview">
-              <img src={preview!} alt="preview" />
+            <div className="cpm__preview-col">
+              <div className="cpm__preview">
+                <img src={previews[activeIdx]} alt="preview" />
+                <button
+                  className="cpm__trocar-btn"
+                  type="button"
+                  onClick={() => trocarRef.current?.click()}
+                  title="Trocar esta foto"
+                >
+                  Trocar foto
+                </button>
+                <input ref={trocarRef} type="file" accept="image/*" hidden
+                  onChange={e => { const f = e.target.files?.[0]; if (f) trocarFoto(f); e.target.value = ""; }} />
+              </div>
+
+              {/* Thumbnail strip */}
+              <div className="cpm__thumbs">
+                {previews.map((p, i) => (
+                  <div
+                    key={i}
+                    className={`cpm__thumb ${i === activeIdx ? "cpm__thumb--active" : ""}`}
+                    onClick={() => setActiveIdx(i)}
+                  >
+                    <img src={p} alt={`foto ${i + 1}`} />
+                    <button
+                      type="button"
+                      className="cpm__thumb-del"
+                      onClick={e => { e.stopPropagation(); removerFoto(i); }}
+                      title="Remover foto"
+                    >×</button>
+                  </div>
+                ))}
+                {previews.length < 10 && (
+                  <button
+                    type="button"
+                    className="cpm__add-thumb"
+                    onClick={() => adicionarRef.current?.click()}
+                    title="Adicionar mais fotos"
+                  >
+                    <PlusIcon size={18} />
+                  </button>
+                )}
+                <input ref={adicionarRef} type="file" accept="image/*" multiple hidden
+                  onChange={e => { adicionarArquivos(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
+              </div>
             </div>
+
             <div className="cpm__fields">
               <div className="cpm__user-row">
                 <div className="cpm__avatar">

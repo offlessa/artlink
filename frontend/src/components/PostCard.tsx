@@ -16,6 +16,7 @@ interface PostCardProps {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  imagens?: string[];
   tags?: string[];
   visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
@@ -25,9 +26,11 @@ interface PostCardProps {
   onEdit?: () => void;
 }
 
-export default function PostCard({ id, titulo, descricao, imagem, tags, visualizacoes, curtidas, autor, onCurtidaChange, onDelete, onEdit }: PostCardProps) {
+export default function PostCard({ id, titulo, descricao, imagem, imagens, tags, visualizacoes, curtidas, autor, onCurtidaChange, onDelete, onEdit }: PostCardProps) {
   const navigate = useNavigate();
   const { usuario } = useAuth();
+  const allImages = (imagens?.length ?? 0) > 0 ? imagens! : (imagem ? [imagem] : []);
+  const [slideIdx, setSlideIdx] = useState(0);
 
   const jaCurtiu = curtidas.some((c) => c.usuarioId === usuario?.id);
   const totalCurtidas = curtidas.length;
@@ -171,10 +174,32 @@ export default function PostCard({ id, titulo, descricao, imagem, tags, visualiz
         </div>
 
         <div className="post-card__image-wrapper">
-          {imagem
-            ? <img src={imagem} alt={titulo} loading="lazy" />
-            : <div className="post-card__no-image"><ImageOffIcon size={36} /></div>
-          }
+          {allImages.length === 0 ? (
+            <div className="post-card__no-image"><ImageOffIcon size={36} /></div>
+          ) : allImages.length === 1 ? (
+            <img src={allImages[0]} alt={titulo} loading="lazy" />
+          ) : (
+            <div className="post-card__carousel" onClick={e => e.stopPropagation()}>
+              <img src={allImages[slideIdx]} alt={titulo} loading="lazy" />
+              <button
+                className="post-card__arrow post-card__arrow--prev"
+                onClick={e => { e.stopPropagation(); setSlideIdx(i => (i - 1 + allImages.length) % allImages.length); }}
+              >‹</button>
+              <button
+                className="post-card__arrow post-card__arrow--next"
+                onClick={e => { e.stopPropagation(); setSlideIdx(i => (i + 1) % allImages.length); }}
+              >›</button>
+              <div className="post-card__dots" onClick={e => e.stopPropagation()}>
+                {allImages.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`post-card__dot ${i === slideIdx ? "post-card__dot--ativo" : ""}`}
+                    onClick={e => { e.stopPropagation(); setSlideIdx(i); }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {tags && tags.length > 0 && (

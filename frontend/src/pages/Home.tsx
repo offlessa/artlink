@@ -17,6 +17,7 @@ interface Post {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  imagens?: string[];
   tags?: string[];
   visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
@@ -335,6 +336,7 @@ export default function Home() {
                   titulo={post.titulo}
                   descricao={post.descricao}
                   imagem={post.imagem}
+                  imagens={post.imagens}
                   tags={post.tags}
                   visualizacoes={post.visualizacoes}
                   curtidas={post.curtidas}

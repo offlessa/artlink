@@ -11,6 +11,7 @@ interface Post {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  imagens?: string[];
   curtidas: { id: number; usuarioId: number }[];
   comentarios: { id: number }[];
   autor: { id: number; nome: string; username: string; fotoPerfil?: string };
@@ -98,6 +99,7 @@ export default function Arte() {
                 titulo={post.titulo}
                 descricao={post.descricao}
                 imagem={post.imagem}
+                imagens={post.imagens}
                 curtidas={post.curtidas}
                 autor={post.autor}
                 onCurtidaChange={carregarPosts}

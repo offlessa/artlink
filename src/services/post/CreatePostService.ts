@@ -13,6 +13,7 @@ export class CreatePostService {
     titulo,
     descricao,
     imagem,
+    imagens,
     tags,
   }: PostRequest): Promise<ServiceResponse> {
     if (!usuarioId) {
@@ -58,6 +59,7 @@ export class CreatePostService {
           titulo: titulo.trim(),
           descricao: descricao?.trim() || null,
           imagem: imagem?.trim() || null,
+          imagens: imagens ?? [],
           tags: tags ?? [],
         },
         select: {

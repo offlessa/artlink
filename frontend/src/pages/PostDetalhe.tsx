@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
@@ -28,6 +28,7 @@ interface Post {
   titulo: string;
   descricao?: string;
   imagem?: string;
+  imagens?: string[];
   tags?: string[];
   visualizacoes?: number;
   curtidas: { id: number; usuarioId: number }[];
@@ -43,6 +44,8 @@ export default function PostDetalhe() {
   const t = useI18n();
 
   const [post, setPost] = useState<Post | null>(null);
+  const [slideIdx, setSlideIdx] = useState(0);
+  const touchStartX = useRef(0);
   const [comentarios, setComentarios] = useState<Comentario[]>([]);
   const [novoComentario, setNovoComentario] = useState("");
   const [carregando, setCarregando] = useState(true);
@@ -264,15 +267,52 @@ export default function PostDetalhe() {
             <button className="post-detalhe__voltar" onClick={() => navigate(-1)}>{t.postDetail.back}</button>
             Arte / <span>{post.titulo}</span>
           </p>
-          <div className="post-detalhe__imagem-wrapper">
-            {post.imagem
-              ? <img src={post.imagem} alt={post.titulo} />
-              : <div className="post-detalhe__sem-imagem">
-                  <ImageOffIcon size={40} />
-                  <span>{t.postDetail.noImage}</span>
-                </div>
-            }
-          </div>
+          {(() => {
+            const allImages = (post.imagens?.length ?? 0) > 0 ? post.imagens! : (post.imagem ? [post.imagem] : []);
+            return (
+              <div className="post-detalhe__imagem-wrapper">
+                {allImages.length === 0 ? (
+                  <div className="post-detalhe__sem-imagem">
+                    <ImageOffIcon size={40} />
+                    <span>{t.postDetail.noImage}</span>
+                  </div>
+                ) : allImages.length === 1 ? (
+                  <img src={allImages[0]} alt={post.titulo} />
+                ) : (
+                  <div
+                    className="post-detalhe__carousel"
+                    onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+                    onTouchEnd={e => {
+                      const diff = touchStartX.current - e.changedTouches[0].clientX;
+                      if (Math.abs(diff) > 40) {
+                        setSlideIdx(i => diff > 0 ? (i + 1) % allImages.length : (i - 1 + allImages.length) % allImages.length);
+                      }
+                    }}
+                  >
+                    <img src={allImages[slideIdx]} alt={post.titulo} />
+                    <button
+                      className="post-detalhe__carousel-arrow post-detalhe__carousel-arrow--prev"
+                      onClick={() => setSlideIdx(i => (i - 1 + allImages.length) % allImages.length)}
+                    >‹</button>
+                    <button
+                      className="post-detalhe__carousel-arrow post-detalhe__carousel-arrow--next"
+                      onClick={() => setSlideIdx(i => (i + 1) % allImages.length)}
+                    >›</button>
+                    <div className="post-detalhe__carousel-dots">
+                      {allImages.map((_, i) => (
+                        <button
+                          key={i}
+                          className={`post-detalhe__carousel-dot ${i === slideIdx ? "post-detalhe__carousel-dot--ativo" : ""}`}
+                          onClick={() => setSlideIdx(i)}
+                        />
+                      ))}
+                    </div>
+                    <span className="post-detalhe__carousel-counter">{slideIdx + 1}/{allImages.length}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           <div className="post-detalhe__meta">
             <div
               className="post-detalhe__autor-row"

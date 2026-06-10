@@ -55,6 +55,7 @@ model Post {
   titulo        String   @db.VarChar(150)
   descricao     String?  @db.Text
   imagem        String?  @db.Text
+  imagens       String[] @default([])
   tags          String[] @default([])
   visualizacoes Int      @default(0)
   dataPostagem  DateTime @default(now()) @map("data_postagem")
