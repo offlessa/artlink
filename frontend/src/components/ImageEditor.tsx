@@ -25,18 +25,45 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
   const lastPos = useRef({ x: 0, y: 0 });
   const lastTouch = useRef<{ x: number; y: number } | null>(null);
   const lastPinchDist = useRef<number | null>(null);
+  const needsInitRef = useRef(false);
 
+  // Novo arquivo: reseta tudo e marca que precisa inicializar
   useEffect(() => {
     const url = URL.createObjectURL(file);
     setImgSrc(url);
-    setScale(1);
-    setOffset({ x: 0, y: 0 });
     setImgNat({ w: 0, h: 0 });
     setStageSize({ w: 0, h: 0 });
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+    needsInitRef.current = true;
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  // Non-passive listeners so preventDefault works in all browsers
+  // ResizeObserver: mede o stage depois que o layout CSS (aspect-ratio) estiver finalizado
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const rect = entries[0].contentRect;
+      if (rect.width > 0 && rect.height > 0) {
+        setStageSize({ w: rect.width, h: rect.height });
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Inicializa baseScale quando ambas as dimensões estiverem prontas (uma vez por arquivo)
+  useEffect(() => {
+    if (!needsInitRef.current) return;
+    if (imgNat.w === 0 || stageSize.w === 0 || stageSize.h === 0) return;
+    needsInitRef.current = false;
+    baseScaleRef.current = Math.max(stageSize.w / imgNat.w, stageSize.h / imgNat.h);
+    setScale(1);
+    setOffset({ x: 0, y: 0 });
+  }, [imgNat.w, imgNat.h, stageSize.w, stageSize.h]);
+
+  // Non-passive listeners para que preventDefault funcione em todos os browsers
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
@@ -59,23 +86,10 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
   function onImgLoad() {
     const img = imgRef.current;
     if (!img) return;
-    const natW = img.naturalWidth;
-    const natH = img.naturalHeight;
-    setImgNat({ w: natW, h: natH });
-    // rAF garante que o stage já foi dimensionado pelo browser antes de medir
-    requestAnimationFrame(() => {
-      const el = stageRef.current;
-      if (!el) return;
-      const { width: sw, height: sh } = el.getBoundingClientRect();
-      if (!sw || !sh) return;
-      baseScaleRef.current = Math.max(sw / natW, sh / natH);
-      setStageSize({ w: sw, h: sh });
-      setScale(1);
-      setOffset({ x: 0, y: 0 });
-    });
+    setImgNat({ w: img.naturalWidth, h: img.naturalHeight });
   }
 
-  const ready = imgNat.w > 0 && stageSize.w > 0;
+  const ready = imgNat.w > 0 && stageSize.w > 0 && stageSize.h > 0;
   const bs = baseScaleRef.current;
   const rendW = ready ? imgNat.w * bs * scale : 0;
   const rendH = ready ? imgNat.h * bs * scale : 0;
@@ -151,7 +165,7 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     canvas.height = outH;
     const ctx = canvas.getContext("2d")!;
 
-    // Fator único para evitar qualquer distorção
+    // Fator único para evitar distorção
     const sc = outW / stageSize.w;
     ctx.drawImage(imgRef.current, imgX * sc, imgY * sc, rendW * sc, rendH * sc);
 
@@ -161,7 +175,6 @@ export default function ImageEditor({ file, aspect = 1, circular = false, onConf
     }, "image/jpeg", 0.93);
   }
 
-  // Slider de 0–100 mapeado para zoom 1x–3x (linear mas sentido natural)
   const sliderVal = ready ? Math.round((scale - 1) / 2 * 100) : 0;
 
   return (
