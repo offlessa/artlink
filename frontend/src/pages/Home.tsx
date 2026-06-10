@@ -134,8 +134,60 @@ export default function Home() {
   const todasTags = useMemo(() => {
     const set = new Set<string>();
     posts.forEach(p => p.tags?.forEach(t => set.add(t)));
-    return Array.from(set).slice(0, 20);
+    return Array.from(set).slice(0, 10);
   }, [posts]);
+
+  const tagsRef = useRef<HTMLDivElement>(null);
+  const autoScrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const scrollPaused = useRef(false);
+  const isDraggingTag = useRef(false);
+  const tagDragStartX = useRef(0);
+  const tagDragScrollLeft = useRef(0);
+  const hasDraggedTag = useRef(false);
+
+  function stopTagScroll() {
+    if (autoScrollTimer.current) { clearInterval(autoScrollTimer.current); autoScrollTimer.current = null; }
+  }
+
+  function startTagScroll() {
+    stopTagScroll();
+    autoScrollTimer.current = setInterval(() => {
+      const el = tagsRef.current;
+      if (!el || scrollPaused.current) return;
+      el.scrollLeft += 1;
+      if (el.scrollLeft >= el.scrollWidth / 2) el.scrollLeft = 0;
+    }, 18);
+  }
+
+  useEffect(() => {
+    if (todasTags.length > 0) startTagScroll();
+    return stopTagScroll;
+  }, [todasTags.length]);
+
+  function onTagStripMouseEnter() { scrollPaused.current = true; }
+  function onTagStripMouseLeave() {
+    scrollPaused.current = false;
+    isDraggingTag.current = false;
+  }
+  function onTagStripMouseDown(e: React.MouseEvent) {
+    const el = tagsRef.current;
+    if (!el) return;
+    isDraggingTag.current = true;
+    hasDraggedTag.current = false;
+    tagDragStartX.current = e.pageX - el.getBoundingClientRect().left;
+    tagDragScrollLeft.current = el.scrollLeft;
+  }
+  function onTagStripMouseMove(e: React.MouseEvent) {
+    if (!isDraggingTag.current || !tagsRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - tagsRef.current.getBoundingClientRect().left;
+    const walk = x - tagDragStartX.current;
+    if (Math.abs(walk) > 4) hasDraggedTag.current = true;
+    tagsRef.current.scrollLeft = tagDragScrollLeft.current - walk;
+  }
+  function onTagStripMouseUp() { isDraggingTag.current = false; }
+  function onTagStripTouchStart() { scrollPaused.current = true; }
+  function onTagStripTouchEnd() { scrollPaused.current = false; }
 
   const filtrados = useMemo(() => {
     let lista = categoria
@@ -256,20 +308,35 @@ export default function Home() {
         {/* Filtros */}
         <div className="home__filters">
           <button
-            className={`home__pill ${!categoria ? "home__pill--ativo" : ""}`}
+            className={`home__pill home__pill--fixed ${!categoria ? "home__pill--ativo" : ""}`}
             onClick={() => setCategoria(null)}
           >
             {t.home.all}
           </button>
-          {todasTags.map(tag => (
-            <button
-              key={tag}
-              className={`home__pill ${categoria === tag ? "home__pill--ativo" : ""}`}
-              onClick={() => setCategoria(categoria === tag ? null : tag)}
+          {todasTags.length > 0 && (
+            <div
+              className="home__tags-strip"
+              ref={tagsRef}
+              onMouseEnter={onTagStripMouseEnter}
+              onMouseLeave={onTagStripMouseLeave}
+              onMouseDown={onTagStripMouseDown}
+              onMouseMove={onTagStripMouseMove}
+              onMouseUp={onTagStripMouseUp}
+              onTouchStart={onTagStripTouchStart}
+              onTouchEnd={onTagStripTouchEnd}
             >
-              #{tag}
-            </button>
-          ))}
+              {[...todasTags, ...todasTags].map((tag, i) => (
+                <button
+                  key={i}
+                  className={`home__pill ${categoria === tag ? "home__pill--ativo" : ""}`}
+                  onClick={() => { if (!hasDraggedTag.current) setCategoria(c => c === tag ? null : tag); }}
+                  onDragStart={e => e.preventDefault()}
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Grid */}

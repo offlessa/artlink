@@ -234,15 +234,29 @@
   &__filters {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 14px 2rem;
+    gap: 0;
+    padding: 10px 2rem;
     background: $surface;
     border-bottom: 1px solid $borda;
+    overflow: hidden;
+
+    @media (max-width: 640px) { padding: 8px 1rem; }
+  }
+
+  &__tags-strip {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     overflow-x: auto;
     scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
+    cursor: grab;
+    user-select: none;
+    padding: 4px 0;
+    padding-left: 8px;
 
-    @media (max-width: 640px) { padding: 10px 1rem; }
+    &::-webkit-scrollbar { display: none; }
+    &:active { cursor: grabbing; }
   }
 
   &__pill {
@@ -266,6 +280,22 @@
       border-color: $brand;
       color: #FAF8F3;
       &:hover { background: $brand-hover; border-color: $brand-hover; color: #FAF8F3; }
+    }
+
+    &--fixed {
+      flex-shrink: 0;
+      margin-right: 4px;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        right: -8px;
+        top: 15%;
+        height: 70%;
+        width: 1px;
+        background: $borda;
+      }
     }
   }
 
