@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { api, uploadImagem } from "../api/api";
+import { api } from "../api/api";
+import { uploadImagem } from "../api/upload";
 import { HeartIcon, ImageOffIcon, BookmarkIcon, ShareIcon, VerificadoIcon, PlayIcon } from "./Icons";
 import Toast from "./Toast";
 import EditPostModal from "./EditPostModal";
