@@ -4,12 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
 import "../styles/components/Login.scss";
 
-const FOTOS = [
-  "/ChatGPT Image 22 de mai. de 2026, 14_06_46.png",
-  "/12d65a66-950a-4912-885c-381d3b8aad1e.png",
-  "/ChatGPT Image 22 de mai. de 2026, 14_08_28.png",
-];
-
 const RAIO = 200;
 
 export default function Login() {
@@ -113,13 +107,6 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="auth-panel__fotos">
-            {FOTOS.map((src, i) => (
-              <div key={i} className={`auth-panel__foto auth-panel__foto--${i}`}>
-                <img src={src} alt="artesanato" />
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
