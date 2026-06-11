@@ -89,8 +89,8 @@ export default function PerfilPublico() {
   }, [username, eu?.id]);
 
   async function toggleSeguir() {
-    if (!eu || !perfil || loadingFollow) return;
-    if (!eu.id) { navigate("/login"); return; }
+    if (!eu) { navigate("/cadastro"); return; }
+    if (!perfil || loadingFollow) return;
     setLoadingFollow(true);
     try {
       if (seguindo) {
@@ -165,7 +165,7 @@ export default function PerfilPublico() {
                 </button>
                 <button
                   className="pp__btn-msg"
-                  onClick={() => navigate("/mensagens")}
+                  onClick={() => eu ? navigate("/mensagens") : navigate("/cadastro")}
                   title={t.publicProfile.message}
                 >
                   <MessageIcon size={14} />

@@ -107,7 +107,7 @@ export default function PostDetalhe() {
   }
 
   async function toggleCurtida() {
-    if (!post || !usuario) return;
+    if (!post || !usuario) { navigate("/cadastro"); return; }
     try {
       if (jaCurtiu) {
         const curtida = post.curtidas.find((c) => c.usuarioId === usuario.id);
@@ -120,7 +120,7 @@ export default function PostDetalhe() {
   }
 
   async function toggleSalvar() {
-    if (!post || !usuario) { navigate("/login"); return; }
+    if (!post || !usuario) { navigate("/cadastro"); return; }
     try {
       if (salvo) {
         await api.delete(`/post-salvo/${usuario.id}/${post.id}`);
@@ -445,7 +445,7 @@ export default function PostDetalhe() {
             </form>
           ) : (
             <p className="post-detalhe__sem-comentarios" style={{ marginTop: 8 }}>
-              <a href="/login" style={{ color: "#2A3B1C", fontWeight: 600 }}>{t.postDetail.signInToComment}</a> {t.postDetail.toComment}
+              <a href="/cadastro" style={{ color: "#2A3B1C", fontWeight: 600 }}>{t.postDetail.signInToComment}</a> {t.postDetail.toComment}
             </p>
           )}
         </div>
