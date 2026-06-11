@@ -363,6 +363,7 @@ export default function PostDetalhe() {
               )}
             </div>
           </div>
+          <h1 className="post-detalhe__titulo post-detalhe__titulo--mobile">{post.titulo}</h1>
           {post.tags && post.tags.length > 0 && (
             <div className="post-detalhe__tags">
               {post.tags.map(t => <span key={t} className="post-detalhe__tag">#{t}</span>)}
@@ -398,7 +399,7 @@ export default function PostDetalhe() {
         </div>
 
         <div className="post-detalhe__comentarios-col">
-          <h1 className="post-detalhe__titulo">{post.titulo}</h1>
+          <h1 className="post-detalhe__titulo post-detalhe__titulo--desktop">{post.titulo}</h1>
           <p className="post-detalhe__secao-titulo">
             {t.postDetail.comments(visiveis.length)}
           </p>
