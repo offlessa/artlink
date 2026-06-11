@@ -97,6 +97,11 @@ import { CatalogoSalvoController } from "./controllers/catalogoSalvo/CatalogoSal
 const router = Router();
 
 // ===================================================
+// ======================== PING =====================
+// ===================================================
+router.get("/ping", (_req, res) => { res.json({ ok: true }); });
+
+// ===================================================
 // ====================== UPLOAD =====================
 // ===================================================
 router.post("/upload", authMiddleware, upload.single("file"), new UploadController().handle);

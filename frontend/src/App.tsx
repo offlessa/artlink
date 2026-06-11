@@ -23,6 +23,7 @@ import Arte from "./pages/Arte";
 import VerificarEmail from "./pages/VerificarEmail";
 import HashtagPage from "./pages/HashtagPage";
 import Onboarding from "./pages/Onboarding";
+import ColdStartBanner from "./components/ColdStartBanner";
 
 function PublicLayout({ children }: { children: ReactNode }) {
   return (
@@ -50,6 +51,7 @@ export default function App() {
     <AuthProvider>
       <Router>
         <AppTheme />
+        <ColdStartBanner />
         <Routes>
           <Route path="/" element={<RootPage />} />
           <Route
