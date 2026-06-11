@@ -13,22 +13,7 @@
 
   // ── SIDEBAR ─────────────────────────────────────────────────────────────────
   &__sidebar {
-    width: 240px;
-    min-width: 240px;
-    position: sticky;
-    top: var(--navbar-h);
-    height: calc(100vh - var(--navbar-h));
-    background: $surface;
-    border-right: 1px solid $borda;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 0 16px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-
-    @media (max-width: 900px) { display: none; }
+    display: none;
   }
 
   &__sidebar-busca {
@@ -307,14 +292,14 @@
 
   &__body {
     flex: 1;
-    padding: 24px;
+    padding: 20px 24px;
 
-    @media (max-width: 640px) { padding: 14px; }
+    @media (max-width: 640px) { padding: 12px; }
   }
 
   // ── GRID (Pinterest masonry) ─────────────────────────────────────────────────
   &__grid {
-    columns: 4;
+    columns: 6;
     column-gap: 10px;
 
     > * {
@@ -323,19 +308,19 @@
     }
 
     html[data-densidade="confortavel"] & {
-      columns: 2;
-      max-width: 680px;
+      columns: 3;
+      max-width: 900px;
       margin: 0 auto;
     }
     html[data-densidade="compacto"] & {
-      columns: 5;
+      columns: 7;
       column-gap: 8px;
     }
 
-    @media (max-width: 1200px) { columns: 4; }
-    @media (max-width: 900px)  { columns: 3; }
-    @media (max-width: 640px)  { columns: 2; column-gap: 8px; }
-    @media (max-width: 400px)  { columns: 2; column-gap: 6px; }
+    @media (max-width: 1400px) { columns: 5; }
+    @media (max-width: 1100px) { columns: 4; }
+    @media (max-width: 768px)  { columns: 3; }
+    @media (max-width: 500px)  { columns: 2; column-gap: 8px; }
   }
 
   // ── CARDS NO FEED (estilo Pinterest) ────────────────────────────────────────
