@@ -26,12 +26,13 @@
   }
 
   &__titulo {
-    font-family: $font-serif;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-family: $font-display;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-style: italic;
     color: $texto;
-    letter-spacing: 0.2px;
-    line-height: 1.3;
+    letter-spacing: 0.1px;
+    line-height: 1.25;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
