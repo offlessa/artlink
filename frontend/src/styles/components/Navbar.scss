@@ -3,7 +3,7 @@
   top: 0;
   z-index: 200;
   height: 60px;
-  background: #2A3B1C;
+  background: #1E2E10;
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
@@ -260,7 +260,7 @@
     align-items: center;
     justify-content: center;
     padding: 0 4px;
-    border: 2px solid #2A3B1C;
+    border: 2px solid #1E2E10;
   }
 
   &__notif-wrap {
@@ -342,7 +342,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: #2A3B1C;
+    color: #1E2E10;
     font-size: 0.85rem;
     img { width: 100%; height: 100%; object-fit: cover; }
   }
@@ -373,7 +373,7 @@
     padding: 5px 14px;
     border-radius: 99px;
     border: none;
-    background: #2A3B1C;
+    background: #1E2E10;
     color: #FAF8F3;
     font-size: 0.78rem;
     font-weight: 600;
@@ -381,7 +381,7 @@
     transition: background 0.15s;
     font-family: 'DM Sans', sans-serif;
 
-    &:hover { background: #3d5429; }
+    &:hover { background: #2A3B1C; }
     &:disabled { opacity: 0.6; cursor: not-allowed; }
   }
 
@@ -564,7 +564,7 @@
     transition: color 0.15s;
 
     &:last-child { border-bottom: none; }
-    &:hover { color: #2A3B1C; }
+    &:hover { color: #1E2E10; }
   }
 }
 
@@ -575,7 +575,7 @@
   gap: 8px;
   width: 100%;
   padding: 12px;
-  background: #2A3B1C;
+  background: #1E2E10;
   color: #FAF8F3;
   border: none;
   border-radius: 10px;
@@ -641,7 +641,7 @@
   border-top: 1px solid #EDE8DF;
   transition: color 0.15s;
 
-  &:hover { color: #2A3B1C; }
+  &:hover { color: #1E2E10; }
 
   &--sair {
     color: #8B2020;
@@ -661,7 +661,7 @@
   display: block;
   width: 100%;
   padding: 13px;
-  background: #2A3B1C;
+  background: #1E2E10;
   color: #FAF8F3;
   border-radius: 8px;
   font-family: 'DM Sans', sans-serif;
@@ -679,8 +679,8 @@
   width: 100%;
   padding: 12px;
   background: transparent;
-  color: #2A3B1C;
-  border: 1.5px solid #2A3B1C;
+  color: #1E2E10;
+  border: 1.5px solid #1E2E10;
   border-radius: 8px;
   font-family: 'DM Sans', sans-serif;
   font-size: 0.95rem;
@@ -689,7 +689,7 @@
   text-decoration: none;
   transition: background 0.15s, color 0.15s;
 
-  &:hover { background: #2A3B1C; color: #FAF8F3; }
+  &:hover { background: #1E2E10; color: #FAF8F3; }
 }
 
 @keyframes dropIn {
