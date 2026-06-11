@@ -6,6 +6,7 @@ import { useConfiguracoes } from "../hooks/useConfiguracoes";
 import { useI18n } from "../hooks/useI18n";
 import PostCard from "../components/PostCard";
 import CreatePostModal from "../components/CreatePostModal";
+import Footer from "../components/Footer";
 import {
   HomeIcon, CompassIcon, FolderIcon, MessageIcon, BellIcon,
   PlusIcon, UserIcon, SettingsIcon, SearchIcon,
@@ -419,6 +420,8 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      <Footer />
 
       {showModal && (
         <CreatePostModal
