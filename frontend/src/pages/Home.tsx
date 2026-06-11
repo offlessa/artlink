@@ -228,6 +228,7 @@ export default function Home() {
 
   return (
     <div className="home">
+      <div className="home__layout">
 
       {/* ── SIDEBAR ESQUERDA ──────────────────────────────── */}
       <aside className="home__sidebar">
@@ -420,6 +421,7 @@ export default function Home() {
           )}
         </div>
       </main>
+      </div>
 
       <Footer />
 

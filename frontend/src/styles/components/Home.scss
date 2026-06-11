@@ -2,8 +2,14 @@
 
 .home {
   display: flex;
+  flex-direction: column;
   min-height: calc(100vh - var(--navbar-h));
   background: $creme;
+
+  &__layout {
+    display: flex;
+    flex: 1;
+  }
 
   // ── SIDEBAR ─────────────────────────────────────────────────────────────────
   &__sidebar {
