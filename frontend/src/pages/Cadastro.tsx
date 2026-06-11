@@ -94,7 +94,11 @@ export default function Cadastro() {
 
         <div className="auth-panel__content">
           <div ref={textoRef} className="auth-panel__texto">
-            <Link to="/" className="auth-panel__logo">Artlink</Link>
+            <div className="auth-panel__brand">
+              <img src="/artlink-icon.png" className="auth-panel__brand-icon" alt="" />
+              <Link to="/" className="auth-panel__logo">Artlink</Link>
+              <span className="auth-panel__brand-sub">online gallery</span>
+            </div>
             <div className="auth-panel__deco" />
             <p className="auth-panel__tagline">
               {t.signup.tagline1}<br />{t.signup.tagline2}
@@ -104,7 +108,11 @@ export default function Cadastro() {
               style={{ WebkitMaskImage: spotlightMask, maskImage: spotlightMask }}
               aria-hidden="true"
             >
-              <span className="auth-panel__logo">Artlink</span>
+              <div className="auth-panel__brand">
+                <img src="/artlink-icon.png" className="auth-panel__brand-icon" alt="" />
+                <span className="auth-panel__logo">Artlink</span>
+                <span className="auth-panel__brand-sub">online gallery</span>
+              </div>
               <div className="auth-panel__deco" />
               <p className="auth-panel__tagline">
                 {t.signup.tagline1}<br />{t.signup.tagline2}
@@ -125,7 +133,15 @@ export default function Cadastro() {
       <div className="auth-form-side">
         <div className="auth-box">
           <div className="auth-box__header">
-            <Link to="/" className="auth-box__logo-mobile">Artlink</Link>
+            <div className="auth-box__logo-mobile">
+              <div className="auth-box__mobile-icon-wrap">
+                <img src="/artlink-icon.png" alt="" />
+              </div>
+              <div>
+                <Link to="/" className="auth-box__mobile-nome">Artlink</Link>
+                <div className="auth-box__mobile-sub">online gallery</div>
+              </div>
+            </div>
             <h1 className="auth-box__title">{t.signup.title}</h1>
             <p className="auth-box__subtitle">{t.signup.subtitle}</p>
           </div>

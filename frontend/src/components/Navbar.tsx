@@ -202,9 +202,16 @@ export default function Navbar() {
     <>
       <nav className="navbar">
         <Link to="/" className="navbar__logo">
-          <span className="navbar__logo-nome">ARTLINK</span>
-          <span className="navbar__logo-sub">online gallery</span>
+          <img src="/artlink-icon.png" className="navbar__logo-icon" alt="" />
+          <div className="navbar__logo-text">
+            <span className="navbar__logo-nome">ARTLINK</span>
+            <span className="navbar__logo-sub">online gallery</span>
+          </div>
         </Link>
+
+        <div className="navbar__icon-center" aria-hidden="true">
+          <img src="/artlink-icon.png" alt="" />
+        </div>
 
         <div className="navbar__links">
           <Link to="/arte">{t.nav.art}</Link>

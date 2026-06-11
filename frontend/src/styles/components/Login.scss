@@ -122,6 +122,32 @@
     }
   }
 
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    animation: fadeSlideIn 0.7s ease both;
+  }
+
+  &__brand-icon {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    opacity: 0.9;
+    margin-bottom: 6px;
+  }
+
+  &__brand-sub {
+    font-family: $font-sans;
+    font-size: 0.68rem;
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(250, 248, 243, 0.55);
+    letter-spacing: 3px;
+    text-transform: lowercase;
+  }
+
   &__logo {
     display: block;
     font-family: $font-serif;
@@ -132,7 +158,6 @@
     text-transform: uppercase;
     line-height: 1;
     text-decoration: none;
-    animation: fadeSlideIn 0.7s ease both;
 
     &:hover { opacity: 0.85; }
   }
@@ -219,15 +244,47 @@
 
   &__logo-mobile {
     display: none;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    @media (max-width: 768px) { display: flex; }
+  }
+
+  &__mobile-icon-wrap {
+    background: $brand;
+    border-radius: 10px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+    }
+  }
+
+  &__mobile-nome {
+    display: block;
     font-family: $font-serif;
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: $brand;
     letter-spacing: 4px;
     text-transform: uppercase;
-    margin-bottom: 0.5rem;
     text-decoration: none;
-    @media (max-width: 768px) { display: block; }
+    line-height: 1;
+  }
+
+  &__mobile-sub {
+    font-size: 0.58rem;
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(42, 59, 28, 0.5);
+    letter-spacing: 2px;
+    margin-top: 3px;
   }
 
   &__title {

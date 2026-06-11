@@ -23,6 +23,20 @@
     gap: 10px;
   }
 
+  &__logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__logo-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+
   &__logo {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 1.6rem;
@@ -30,6 +44,17 @@
     color: #FAF8F3;
     letter-spacing: 4px;
     text-transform: uppercase;
+    line-height: 1;
+  }
+
+  &__logo-sub {
+    font-size: 0.6rem;
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(250, 248, 243, 0.45);
+    letter-spacing: 2.5px;
+    text-transform: lowercase;
+    margin-top: 3px;
   }
 
   &__deco {

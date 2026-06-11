@@ -6,7 +6,13 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__main">
         <div className="footer__brand">
-          <div className="footer__logo">Artlink</div>
+          <div className="footer__logo-wrap">
+            <img src="/artlink-icon.png" className="footer__logo-icon" alt="" />
+            <div>
+              <div className="footer__logo">Artlink</div>
+              <div className="footer__logo-sub">online gallery</div>
+            </div>
+          </div>
           <div className="footer__deco" />
           <p className="footer__tagline">
             Conectando a arte através do sentimento e da criação artesanal.
