@@ -155,9 +155,12 @@ export default function Home() {
     stopTagScroll();
     autoScrollTimer.current = setInterval(() => {
       const el = tagsRef.current;
-      if (!el || scrollPaused.current) return;
+      if (!el) return;
       el.scrollLeft += 1;
-      if (el.scrollLeft >= el.scrollWidth / 2) el.scrollLeft = 0;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (el.scrollLeft >= el.scrollWidth / 2 || el.scrollLeft >= maxScroll - 1) {
+        el.scrollLeft = 0;
+      }
     }, 18);
   }
 
@@ -166,9 +169,8 @@ export default function Home() {
     return stopTagScroll;
   }, [todasTags.length]);
 
-  function onTagStripMouseEnter() { scrollPaused.current = true; }
+  function onTagStripMouseEnter() { }
   function onTagStripMouseLeave() {
-    scrollPaused.current = false;
     isDraggingTag.current = false;
   }
   function onTagStripMouseDown(e: React.MouseEvent) {

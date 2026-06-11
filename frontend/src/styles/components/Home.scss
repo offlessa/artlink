@@ -260,8 +260,8 @@
     user-select: none;
     padding: 4px 0;
     padding-left: 8px;
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
-    mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 48px, black calc(100% - 48px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 48px, black calc(100% - 48px), transparent 100%);
 
     &::-webkit-scrollbar { display: none; }
     &:active { cursor: grabbing; }
