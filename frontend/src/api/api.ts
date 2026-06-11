@@ -18,6 +18,16 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Retry em erros de rede (sem resposta do servidor)
+    const config = error.config;
+    if (!error.response && config) {
+      config._retryCount = (config._retryCount ?? 0) + 1;
+      if (config._retryCount <= 2) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        return api(config);
+      }
+    }
+
     return Promise.reject(error);
   }
 );
