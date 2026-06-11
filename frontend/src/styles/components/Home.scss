@@ -299,28 +299,28 @@
 
   // ── GRID (Pinterest masonry) ─────────────────────────────────────────────────
   &__grid {
-    columns: 6;
-    column-gap: 10px;
+    columns: 8;
+    column-gap: 8px;
 
     > * {
       break-inside: avoid;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     html[data-densidade="confortavel"] & {
-      columns: 3;
+      columns: 4;
       max-width: 900px;
       margin: 0 auto;
     }
     html[data-densidade="compacto"] & {
-      columns: 7;
-      column-gap: 8px;
+      columns: 10;
+      column-gap: 6px;
     }
 
-    @media (max-width: 1400px) { columns: 5; }
-    @media (max-width: 1100px) { columns: 4; }
-    @media (max-width: 768px)  { columns: 3; }
-    @media (max-width: 500px)  { columns: 2; column-gap: 8px; }
+    @media (max-width: 1400px) { columns: 7; }
+    @media (max-width: 1100px) { columns: 6; }
+    @media (max-width: 768px)  { columns: 4; }
+    @media (max-width: 500px)  { columns: 3; column-gap: 6px; }
   }
 
   // ── CARDS NO FEED (estilo Pinterest) ────────────────────────────────────────
@@ -342,9 +342,10 @@
 
     &__image-wrapper {
       padding-bottom: 0;
-      height: 160px;
+      height: 220px;
 
-      @media (max-width: 640px) { height: 130px; }
+      @media (max-width: 768px) { height: 180px; }
+      @media (max-width: 500px) { height: 140px; }
     }
 
     &__footer {
