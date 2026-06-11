@@ -18,6 +18,7 @@ import Toast from "../components/Toast";
 import ImageEditor from "../components/ImageEditor";
 import ShareModal from "../components/ShareModal";
 import SeguidoresModal from "../components/SeguidoresModal";
+import FotoLightbox from "../components/FotoLightbox";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/Perfil.scss";
 
@@ -63,6 +64,7 @@ export default function Perfil() {
   const [catalogosSalvos, setCatalogosSalvos] = useState<CatalogoSalvo[]>([]);
   const [contadores, setContadores] = useState({ seguidores: 0, seguindo: 0 });
   const [modalSeg, setModalSeg] = useState<"seguidores" | "seguindo" | null>(null);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [tab, setTab] = useState<"posts" | "catalogos" | "salvos">("posts");
   const [toast, setToast] = useState("");
@@ -291,7 +293,7 @@ export default function Perfil() {
         <div className="perfil__avatar-wrap">
           <div className="perfil__avatar">
             {usuario?.fotoPerfil
-              ? <img src={usuario.fotoPerfil} alt={usuario.nome} />
+              ? <img src={usuario.fotoPerfil} alt={usuario.nome} onClick={() => setLightboxSrc(usuario.fotoPerfil!)} style={{ cursor: "zoom-in" }} />
               : <span>{inicial}</span>}
           </div>
           <div className="perfil__avatar-cam-wrap" ref={menuAvatarRef}>
@@ -691,6 +693,7 @@ export default function Perfil() {
         />
       )}
 
+      {lightboxSrc && <FotoLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
       <Footer />
     </div>
     </>

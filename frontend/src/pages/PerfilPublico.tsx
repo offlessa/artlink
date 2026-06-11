@@ -6,6 +6,7 @@ import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon, VerificadoIcon } from "../components/Icons";
 import SeguidoresModal from "../components/SeguidoresModal";
+import FotoLightbox from "../components/FotoLightbox";
 import Toast from "../components/Toast";
 import ShareModal from "../components/ShareModal";
 import { isVerificado } from "../utils/verificado";
@@ -44,6 +45,7 @@ export default function PerfilPublico() {
   const [shareAberto, setShareAberto] = useState(false);
   const [toast, setToast] = useState("");
   const [modalSeg, setModalSeg] = useState<"seguidores" | "seguindo" | null>(null);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (!username) return;
@@ -129,7 +131,7 @@ export default function PerfilPublico() {
       {/* PROFILE CARD */}
       <div className="pp__card">
         <div className="pp__avatar">
-          {perfil.fotoPerfil ? <img src={perfil.fotoPerfil} alt={perfil.nome} /> : <span>{inicial}</span>}
+          {perfil.fotoPerfil ? <img src={perfil.fotoPerfil} alt={perfil.nome} onClick={() => setLightboxSrc(perfil.fotoPerfil!)} style={{ cursor: "zoom-in" }} /> : <span>{inicial}</span>}
         </div>
         <div className="pp__meta">
           <h1 className="pp__nome">
@@ -259,6 +261,7 @@ export default function PerfilPublico() {
           onClose={() => setModalSeg(null)}
         />
       )}
+      {lightboxSrc && <FotoLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
   );
 }

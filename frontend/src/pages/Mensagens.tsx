@@ -5,6 +5,7 @@ import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
 import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon, ArrowLeftIcon, HeartIcon } from "../components/Icons";
+import FotoLightbox from "../components/FotoLightbox";
 import "../styles/components/Mensagens.scss";
 
 interface Usuario {
@@ -66,6 +67,7 @@ export default function Mensagens() {
   const [menuMensagem, setMenuMensagem] = useState<number | null>(null);
   const [apagando, setApagando] = useState<number | null>(null);
   const [respondendo, setRespondendo] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fotoInputRef = useRef<HTMLInputElement>(null);
@@ -583,7 +585,7 @@ export default function Mensagens() {
                               src={m.imagem}
                               alt="imagem"
                               className="msgs__balao-img"
-                              onClick={() => window.open(m.imagem, "_blank")}
+                              onClick={() => setLightboxSrc(m.imagem!)}
                             />
                           )}
                           {m.conteudo && <p>{m.conteudo}</p>}
@@ -674,6 +676,7 @@ export default function Mensagens() {
           </>
         )}
       </main>
+      {lightboxSrc && <FotoLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
     </div>
   );
 }

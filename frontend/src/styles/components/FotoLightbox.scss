@@ -1,0 +1,44 @@
+@use '../variables' as *;
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  animation: lb-in 0.15s ease;
+
+  &__img {
+    max-width: min(92vw, 900px);
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: $radius;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+    cursor: default;
+  }
+
+  &__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: background 0.15s;
+    &:hover { background: rgba(0, 0, 0, 0.75); }
+  }
+}
+
+@keyframes lb-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
