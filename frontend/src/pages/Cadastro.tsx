@@ -61,9 +61,9 @@ export default function Cadastro() {
         setErro(true);
         setMensagem(data.message || t.signup.error);
       }
-    } catch {
+    } catch (err: any) {
       setErro(true);
-      setMensagem(t.signup.serverError);
+      setMensagem(err?.response?.data?.message || t.signup.serverError);
     } finally {
       setCarregando(false);
     }
