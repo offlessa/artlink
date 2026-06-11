@@ -341,7 +341,8 @@ export default function Mensagens() {
   }
 
   function podeEditar(m: Mensagem) {
-    return m.remetenteId === usuario?.id && !m.apagadaParaTodos && !!m.conteudo;
+    if (m.remetenteId !== usuario?.id || m.apagadaParaTodos || !m.conteudo) return false;
+    return Date.now() - new Date(m.dataEnvio).getTime() <= 7 * 60 * 1000;
   }
 
   // ── SELEÇÃO MÚLTIPLA ──────────────────────────────
@@ -441,7 +442,7 @@ export default function Mensagens() {
 
   const temMinhasSelecionadas = Array.from(selecionadas).some(id => {
     const m = mensagens.find(msg => msg.id === id);
-    return m && m.remetenteId === usuario?.id && !m.apagadaParaTodos;
+    return m && podePararTodos(m);
   });
 
   return (
