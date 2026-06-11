@@ -211,7 +211,7 @@ export default function Navbar() {
 
         {usuario && (
           <>
-            <button className="navbar__criar navbar__criar--desktop" onClick={() => setShowModal(true)} title={t.nav.newPost}>
+            <button className="navbar__criar" onClick={() => setShowModal(true)} title={t.nav.newPost}>
               <PlusIcon size={16} />
             </button>
 
@@ -299,7 +299,11 @@ export default function Navbar() {
         )}
 
         {usuario ? (
-          <div className="navbar__user" onClick={() => { setMenuAberto(!menuAberto); setShowNotif(false); }}>
+          <div className="navbar__user" onClick={() => {
+            if (window.innerWidth <= 768) { navigate("/perfil"); return; }
+            setMenuAberto(!menuAberto);
+            setShowNotif(false);
+          }}>
             <div className="navbar__avatar">
               {usuario.fotoPerfil
                 ? <img src={usuario.fotoPerfil} alt={usuario.nome} />
@@ -349,10 +353,6 @@ export default function Navbar() {
 
             {usuario ? (
               <>
-                <button className="navbar__mobile-criar" onClick={() => { setShowModal(true); setMenuMobileAberto(false); }}>
-                  <PlusIcon size={16} /> {t.nav.newPost}
-                </button>
-                <div className="navbar__mobile-divider" />
                 <Link to="/perfil" className="navbar__mobile-user-link">
                   <div className="navbar__avatar">
                     {usuario.fotoPerfil

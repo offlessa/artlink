@@ -10,6 +10,8 @@
   gap: 1.2rem;
   box-shadow: 0 2px 16px rgba(0,0,0,0.28);
 
+  @media (max-width: 768px) { gap: 0.55rem; }
+
   @media (min-width: 769px) {
     height: 68px;
     padding: 0 2rem;
@@ -176,10 +178,6 @@
       background: rgba(255, 255, 255, 0.22);
       border-color: rgba(255, 255, 255, 0.55);
       transform: rotate(90deg);
-    }
-
-    &--desktop {
-      @media (max-width: 768px) { display: none; }
     }
   }
 
