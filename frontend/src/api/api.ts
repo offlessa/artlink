@@ -2,10 +2,11 @@ import axios from 'axios';
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000',
+  timeout: 60000,
 });
 
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 5000;
+const MAX_RETRIES = 4;
+const RETRY_DELAY = 12000;
 
 api.interceptors.response.use(
   (response) => response,
@@ -22,7 +23,9 @@ api.interceptors.response.use(
 
     // Servidor dormindo (Render free tier cold start) — tenta novamente
     const config = error.config;
-    if (!error.response && config) {
+    const isNetworkError = !error.response;
+    const isColdStart = [502, 503, 504].includes(error.response?.status);
+    if ((isNetworkError || isColdStart) && config) {
       config._retryCount = (config._retryCount ?? 0) + 1;
       if (config._retryCount <= MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
