@@ -45,7 +45,7 @@
   &__reveal {
     position: absolute;
     inset: 0;
-    background: url('/12d65a66-950a-4912-885c-381d3b8aad1e.png') center / cover no-repeat;
+    background: #FAF8F3;
     z-index: 0;
     pointer-events: none;
   }
@@ -220,7 +220,10 @@
     img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     &--0 { top: 20px; left: 15px; transform: rotate(-7deg); z-index: 1; filter: brightness(0.75); }
-    &--1 { top: 20px; left: 15px; transform: rotate(0deg);  z-index: 3; filter: brightness(0.88); }
+    &--1 {
+      top: 20px; left: 15px; transform: rotate(0deg); z-index: 3; filter: brightness(0.88);
+      img { object-fit: contain; }
+    }
     &--2 { top: 20px; left: 15px; transform: rotate(7deg);  z-index: 2; }
   }
 }

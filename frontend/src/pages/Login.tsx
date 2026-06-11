@@ -6,7 +6,7 @@ import "../styles/components/Login.scss";
 
 const FOTOS = [
   "/ChatGPT Image 22 de mai. de 2026, 14_06_46.png",
-  "/12d65a66-950a-4912-885c-381d3b8aad1e.png",
+  "/artlink-icon.png",
   "/ChatGPT Image 22 de mai. de 2026, 14_08_28.png",
 ];
 
