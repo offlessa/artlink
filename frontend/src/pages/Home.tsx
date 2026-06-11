@@ -261,13 +261,6 @@ export default function Home() {
           ))}
         </nav>
 
-        {/* Botão nova publicação */}
-        {usuario && (
-          <button className="home__sidebar-novo" onClick={() => setShowModal(true)}>
-            <PlusIcon size={16} />
-            {t.home.newPost}
-          </button>
-        )}
 
         {/* Avatar do usuário */}
         {usuario && (
