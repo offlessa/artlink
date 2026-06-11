@@ -29,7 +29,10 @@ export default function Onboarding() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated) navigate("/login");
+    if (!isAuthenticated) {
+      const hasToken = localStorage.getItem("@artlink:token") || sessionStorage.getItem("@artlink:token");
+      if (!hasToken) navigate("/login");
+    }
   }, [isAuthenticated]);
 
   const [etapa, setEtapa] = useState<"tutorial" | "perfil">("tutorial");
