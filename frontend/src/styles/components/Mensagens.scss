@@ -514,11 +514,16 @@
       line-height: 1.45;
       word-break: break-word;
     }
+    &-footer {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 3px;
+      padding: 0 4px;
+    }
     &-data {
       font-size: 0.7rem;
       color: $texto-suave;
-      margin-top: 3px;
-      padding: 0 4px;
     }
     &-img {
       max-width: 240px;
@@ -541,6 +546,43 @@
       p { background: $surface; border: 1px solid $borda; color: $texto; border-bottom-left-radius: 4px; }
       .msgs__balao-img { border-bottom-left-radius: 4px; }
     }
+  }
+
+  &__ticks {
+    font-size: 0.68rem;
+    letter-spacing: -1px;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1;
+    margin-left: 1px;
+
+    &--lido { color: rgba(255, 255, 255, 0.95); }
+  }
+
+  &__heart-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+    flex-shrink: 0;
+
+    &--ativo {
+      color: #e05a5a;
+      opacity: 1 !important;
+    }
+  }
+
+  &__balao-wrap:hover &__heart-btn { opacity: 0.7; }
+
+  &__heart-recebido {
+    color: #e05a5a;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
 
   // ── PREVIEW DE IMAGEM ─────────────────────────────

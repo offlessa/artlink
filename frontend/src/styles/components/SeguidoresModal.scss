@@ -1,0 +1,133 @@
+@use '../variables' as *;
+
+.seg-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.seg-modal {
+  background: $surface;
+  border-radius: $radius-lg;
+  width: min(420px, 92vw);
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  animation: seg-modal-in 0.18s ease;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid $borda;
+
+    h3 {
+      font-family: $font-serif;
+      font-size: 1.1rem;
+      margin: 0;
+      color: $texto;
+    }
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 50%;
+    transition: background 0.15s, color 0.15s;
+    &:hover { background: $borda-suave; color: $texto; }
+  }
+
+  &__lista {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+    &:hover { background: $brand-subtle; }
+  }
+
+  &__avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: $brand-subtle;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: $brand;
+    font-size: 1rem;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__nome {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: $texto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__username {
+    font-size: 0.78rem;
+    color: $texto-suave;
+  }
+
+  &__vazio {
+    text-align: center;
+    padding: 32px 20px;
+    color: $texto-suave;
+    font-size: 0.9rem;
+  }
+
+  &__skeleton {
+    height: 62px;
+    margin: 4px 12px;
+    border-radius: $radius;
+    background: linear-gradient(90deg, $borda 25%, $borda-suave 50%, $borda 75%);
+    background-size: 200% 100%;
+    animation: seg-shimmer 1.4s infinite;
+  }
+}
+
+@keyframes seg-modal-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes seg-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

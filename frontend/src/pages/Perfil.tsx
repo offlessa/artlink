@@ -17,6 +17,7 @@ import { isVideo, videoThumbnail } from "../utils/midia";
 import Toast from "../components/Toast";
 import ImageEditor from "../components/ImageEditor";
 import ShareModal from "../components/ShareModal";
+import SeguidoresModal from "../components/SeguidoresModal";
 import { isVerificado } from "../utils/verificado";
 import "../styles/components/Perfil.scss";
 
@@ -61,6 +62,7 @@ export default function Perfil() {
   const [postsSalvos, setPostsSalvos] = useState<PostSalvo[]>([]);
   const [catalogosSalvos, setCatalogosSalvos] = useState<CatalogoSalvo[]>([]);
   const [contadores, setContadores] = useState({ seguidores: 0, seguindo: 0 });
+  const [modalSeg, setModalSeg] = useState<"seguidores" | "seguindo" | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [tab, setTab] = useState<"posts" | "catalogos" | "salvos">("posts");
   const [toast, setToast] = useState("");
@@ -338,8 +340,12 @@ export default function Perfil() {
             <div className="perfil__stats">
               <span><strong>{posts.length}</strong> {t.profile.posts.toLowerCase()}</span>
               <span><strong>{catalogos.length}</strong> {t.profile.catalogs.toLowerCase()}</span>
-              <span><strong>{contadores.seguidores}</strong> {t.profile.followers}</span>
-              <span><strong>{contadores.seguindo}</strong> {t.profile.following}</span>
+              <button className="perfil__stat-btn" onClick={() => setModalSeg("seguidores")}>
+                <strong>{contadores.seguidores}</strong> {t.profile.followers}
+              </button>
+              <button className="perfil__stat-btn" onClick={() => setModalSeg("seguindo")}>
+                <strong>{contadores.seguindo}</strong> {t.profile.following}
+              </button>
             </div>
           </div>
         )}
@@ -677,6 +683,13 @@ export default function Perfil() {
         />
       )}
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
+      {modalSeg && usuario && (
+        <SeguidoresModal
+          usuarioId={usuario.id}
+          tipo={modalSeg}
+          onClose={() => setModalSeg(null)}
+        />
+      )}
 
       <Footer />
     </div>

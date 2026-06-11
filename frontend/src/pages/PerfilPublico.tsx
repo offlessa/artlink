@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
 import Footer from "../components/Footer";
 import { HeartIcon, CommentIcon, ImageOffIcon, UsersIcon, MessageIcon, ShareIcon, VerificadoIcon } from "../components/Icons";
+import SeguidoresModal from "../components/SeguidoresModal";
 import Toast from "../components/Toast";
 import ShareModal from "../components/ShareModal";
 import { isVerificado } from "../utils/verificado";
@@ -42,6 +43,7 @@ export default function PerfilPublico() {
   const [loadingFollow, setLoadingFollow] = useState(false);
   const [shareAberto, setShareAberto] = useState(false);
   const [toast, setToast] = useState("");
+  const [modalSeg, setModalSeg] = useState<"seguidores" | "seguindo" | null>(null);
 
   useEffect(() => {
     if (!username) return;
@@ -139,8 +141,12 @@ export default function PerfilPublico() {
           {perfil.cidade && <p className="pp__cidade">📍 {perfil.cidade}</p>}
           <div className="pp__stats">
             <span><strong>{posts.length}</strong> {t.publicProfile.posts}</span>
-            <span><strong>{contadores.seguidores}</strong> {t.publicProfile.followers}</span>
-            <span><strong>{contadores.seguindo}</strong> {t.publicProfile.following2}</span>
+            <button className="pp__stat-btn" onClick={() => setModalSeg("seguidores")}>
+              <strong>{contadores.seguidores}</strong> {t.publicProfile.followers}
+            </button>
+            <button className="pp__stat-btn" onClick={() => setModalSeg("seguindo")}>
+              <strong>{contadores.seguindo}</strong> {t.publicProfile.following2}
+            </button>
             <span><strong>{catalogos.length}</strong> {t.publicProfile.catalogs}</span>
           </div>
 
@@ -246,6 +252,13 @@ export default function PerfilPublico() {
         />
       )}
       {toast && <Toast mensagem={toast} visivel={!!toast} onFadeOut={() => setToast("")} />}
+      {modalSeg && perfil && (
+        <SeguidoresModal
+          usuarioId={perfil.id}
+          tipo={modalSeg}
+          onClose={() => setModalSeg(null)}
+        />
+      )}
     </div>
   );
 }

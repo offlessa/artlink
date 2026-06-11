@@ -4,7 +4,7 @@ import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
-import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon, ArrowLeftIcon } from "../components/Icons";
+import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon, ArrowLeftIcon, HeartIcon } from "../components/Icons";
 import "../styles/components/Mensagens.scss";
 
 interface Usuario {
@@ -23,6 +23,7 @@ interface Mensagem {
   dataEnvio: string;
   status: "nao_lido" | "lido";
   apagadaParaTodos: boolean;
+  curtida: boolean;
   remetente: Usuario;
   destinatario: Usuario;
 }
@@ -277,6 +278,15 @@ export default function Mensagens() {
       if (conversaSelecionada?.id === outroId) setConversaSelecionada(null);
       await carregarTudo();
     } catch { /* silencioso */ }
+  }
+
+  async function curtirMensagem(id: number, curtida: boolean) {
+    setMensagens(prev => prev.map(m => m.id === id ? { ...m, curtida } : m));
+    try {
+      await api.put(`/mensagem/${id}`, { curtida });
+    } catch {
+      setMensagens(prev => prev.map(m => m.id === id ? { ...m, curtida: !curtida } : m));
+    }
   }
 
   async function apagarParaMim(mensagemId: number) {
@@ -579,7 +589,28 @@ export default function Mensagens() {
                           {m.conteudo && <p>{m.conteudo}</p>}
                         </>
                       )}
-                      <span className="msgs__balao-data">{formatarData(m.dataEnvio)}</span>
+                      <div className="msgs__balao-footer">
+                        {!sou && !m.apagadaParaTodos && (
+                          <button
+                            className={`msgs__heart-btn${m.curtida ? " msgs__heart-btn--ativo" : ""}`}
+                            onClick={() => curtirMensagem(m.id, !m.curtida)}
+                            title={m.curtida ? "Descurtir" : "Curtir"}
+                          >
+                            <HeartIcon size={11} filled={m.curtida} />
+                          </button>
+                        )}
+                        {sou && m.curtida && !m.apagadaParaTodos && (
+                          <span className="msgs__heart-recebido">
+                            <HeartIcon size={10} filled />
+                          </span>
+                        )}
+                        <span className="msgs__balao-data">{formatarData(m.dataEnvio)}</span>
+                        {sou && !m.apagadaParaTodos && (
+                          <span className={`msgs__ticks${m.status === "lido" ? " msgs__ticks--lido" : ""}`}>
+                            {m.status === "lido" ? "✓✓" : "✓"}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

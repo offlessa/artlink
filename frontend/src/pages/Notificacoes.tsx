@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
-import { BellIcon } from "../components/Icons";
+import { BellIcon, XIcon } from "../components/Icons";
 import Footer from "../components/Footer";
 import "../styles/components/Notificacoes.scss";
 
@@ -82,6 +82,17 @@ export default function Notificacoes() {
     }
   }
 
+  async function deletarUma(id: number) {
+    setNotificacoes(prev => prev.filter(n => n.id !== id));
+    try { await api.delete(`/notificacao/${id}`); } catch {}
+  }
+
+  async function limparTudo() {
+    if (!usuario) return;
+    setNotificacoes([]);
+    try { await api.delete(`/notificacao/todas/${usuario.id}`); } catch {}
+  }
+
   async function responderColaboracao(n: Notificacao, aceitar: boolean) {
     setRespondendo(n.id);
     try {
@@ -130,9 +141,16 @@ export default function Notificacoes() {
             <BellIcon size={22} />
             <h1>{t.notifications.title}</h1>
           </div>
-          {naoLidas > 0 && (
-            <span className="notif-page__badge-total">{t.notifications.newBadge(naoLidas)}</span>
-          )}
+          <div className="notif-page__header-right">
+            {naoLidas > 0 && (
+              <span className="notif-page__badge-total">{t.notifications.newBadge(naoLidas)}</span>
+            )}
+            {notificacoes.length > 0 && (
+              <button className="notif-page__limpar-btn" onClick={limparTudo}>
+                Limpar tudo
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Conteúdo */}
@@ -207,6 +225,15 @@ export default function Notificacoes() {
 
                 {/* Badge nova */}
                 {!n.lida && <span className="notif-page__nova-dot" />}
+
+                {/* Botão remover */}
+                <button
+                  className="notif-page__del-btn"
+                  onClick={e => { e.stopPropagation(); deletarUma(n.id); }}
+                  title="Remover notificação"
+                >
+                  <XIcon size={13} />
+                </button>
               </div>
             ))}
           </div>

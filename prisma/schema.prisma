@@ -183,6 +183,7 @@ model Mensagem {
   dataEnvio         DateTime       @default(now()) @map("data_envio")
   status            StatusMensagem @default(nao_lido)
   apagadaParaTodos  Boolean        @default(false) @map("apagada_para_todos")
+  curtida           Boolean        @default(false)
 
   remetente         Usuario              @relation("Remetente", fields: [remetenteId], references: [id], onDelete: Cascade)
   destinatario      Usuario              @relation("Destinatario", fields: [destinatarioId], references: [id], onDelete: Cascade)

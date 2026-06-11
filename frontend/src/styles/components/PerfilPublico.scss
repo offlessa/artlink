@@ -107,6 +107,18 @@
     strong { color: $texto; font-weight: 700; }
   }
 
+  &__stat-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.85rem;
+    color: $texto-medio;
+    cursor: pointer;
+    transition: color 0.15s;
+    &:hover { color: $brand-mid; }
+    strong { color: $texto; font-weight: 700; }
+  }
+
   &__acoes {
     display: flex;
     gap: 10px;

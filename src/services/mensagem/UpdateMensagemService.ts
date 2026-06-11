@@ -3,7 +3,7 @@ import prismaClient from "../../prisma";
 export class UpdateMensagemService {
   async execute(
     id: number,
-    novosDados: { conteudo?: string; status?: "lido" | "nao_lido" }
+    novosDados: { conteudo?: string; status?: "lido" | "nao_lido"; curtida?: boolean }
   ) {
     // Verifica se a mensagem existe
     const mensagemExistente = await prismaClient.mensagem.findUnique({

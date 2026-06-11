@@ -88,6 +88,7 @@ import { GetSeguidorController } from "./controllers/seguidor/GetSeguidorControl
 // === NOTIFICAÇÃO ===
 import { GetNotificacaoController } from "./controllers/notificacao/GetNotificacaoController";
 import { UpdateNotificacaoController } from "./controllers/notificacao/UpdateNotificacaoController";
+import { DeleteNotificacaoController } from "./controllers/notificacao/DeleteNotificacaoController";
 
 // === SALVOS ===
 import { PostSalvoController } from "./controllers/postSalvo/PostSalvoController";
@@ -269,6 +270,9 @@ const getNotificacaoController = new GetNotificacaoController();
 router.get("/notificacao/:usuarioId", authMiddleware, getNotificacaoController.getByUsuario.bind(getNotificacaoController));
 router.get("/notificacao/nao-lidas/:usuarioId", authMiddleware, getNotificacaoController.contarNaoLidas.bind(getNotificacaoController));
 router.put("/notificacao/marcar-lidas/:usuarioId", authMiddleware, new UpdateNotificacaoController().marcarTodasLidas);
+const deleteNotifCtrl = new DeleteNotificacaoController();
+router.delete("/notificacao/todas/:usuarioId", authMiddleware, deleteNotifCtrl.deletarTodas.bind(deleteNotifCtrl));
+router.delete("/notificacao/:id", authMiddleware, deleteNotifCtrl.deletarUma.bind(deleteNotifCtrl));
 
 // ===================================================
 // =================== POST SALVOS ===================

@@ -5,7 +5,7 @@ export class UpdateMensagemController {
   async handle(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { conteudo, status } = req.body;
+      const { conteudo, status, curtida } = req.body;
 
       if (!id) {
         return res
@@ -13,18 +13,17 @@ export class UpdateMensagemController {
           .json({ message: "ID da mensagem não fornecido" });
       }
 
-      // Validação simples
-      if (!conteudo && !status) {
+      if (!conteudo && !status && curtida === undefined) {
         return res
           .status(400)
           .json({
             message:
-              "Informe pelo menos um campo para atualizar (conteudo ou status)",
+              "Informe pelo menos um campo para atualizar (conteudo, status ou curtida)",
           });
       }
 
       const service = new UpdateMensagemService();
-      const resultado = await service.execute(Number(id), { conteudo, status });
+      const resultado = await service.execute(Number(id), { conteudo, status, curtida });
 
       return res.json(resultado);
     } catch (error: any) {
