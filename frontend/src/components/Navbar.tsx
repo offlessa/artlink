@@ -201,7 +201,10 @@ export default function Navbar() {
   return (
     <>
       <nav className="navbar">
-        <Link to="/" className="navbar__logo">ARTLINK</Link>
+        <Link to="/" className="navbar__logo">
+          <span className="navbar__logo-nome">ARTLINK</span>
+          <span className="navbar__logo-sub">online gallery</span>
+        </Link>
 
         <div className="navbar__links">
           <Link to="/arte">{t.nav.art}</Link>
