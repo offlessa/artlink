@@ -4,7 +4,7 @@ import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
-import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon, ArrowLeftIcon, HeartIcon } from "../components/Icons";
+import { SendIcon, MessageIcon, ImageIcon, XIcon, ArchiveIcon, TrashIcon, ArrowLeftIcon, HeartIcon, CheckIcon, PencilIcon, CheckSquareIcon } from "../components/Icons";
 import FotoLightbox from "../components/FotoLightbox";
 import "../styles/components/Mensagens.scss";
 
@@ -25,6 +25,7 @@ interface Mensagem {
   status: "nao_lido" | "lido";
   apagadaParaTodos: boolean;
   curtida: boolean;
+  editado: boolean;
   remetente: Usuario;
   destinatario: Usuario;
 }
@@ -68,10 +69,14 @@ export default function Mensagens() {
   const [apagando, setApagando] = useState<number | null>(null);
   const [respondendo, setRespondendo] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [editando, setEditando] = useState<{ id: number } | null>(null);
+  const [modoSelecao, setModoSelecao] = useState(false);
+  const [selecionadas, setSelecionadas] = useState<Set<number>>(new Set());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fotoInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!usuario) { navigate("/login"); return; }
@@ -99,6 +104,20 @@ export default function Mensagens() {
     return () => document.removeEventListener("mousedown", fechar);
   }, []);
 
+  useEffect(() => {
+    function onEscape(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (editando) cancelarEdicao();
+      else if (modoSelecao) sairSelecao();
+    }
+    document.addEventListener("keydown", onEscape);
+    return () => document.removeEventListener("keydown", onEscape);
+  }, [editando, modoSelecao]);
+
+  useEffect(() => {
+    if (editando) inputRef.current?.focus();
+  }, [editando]);
+
   async function carregarTudo() {
     if (!usuario) return;
     const [recebidas, enviadas, cfgs] = await Promise.all([
@@ -122,7 +141,6 @@ export default function Mensagens() {
       const outro = m.remetenteId === usuario.id ? m.destinatario : m.remetente;
       const cfg = configMap.get(outroId);
 
-      // Ignorar mensagens antes da data de deleção
       if (cfg?.deletadaEm && new Date(m.dataEnvio) <= new Date(cfg.deletadaEm)) continue;
 
       const naoLida = m.destinatarioId === usuario.id && m.status === "nao_lido" ? 1 : 0;
@@ -230,7 +248,8 @@ export default function Mensagens() {
     setConversaSelecionada(u);
     setBuscaUsuario("");
     setResultadosBusca([]);
-    // Detectar a aba correta para este usuário
+    cancelarEdicao();
+    sairSelecao();
     const cfg = configs.find(c => c.outroUsuarioId === u.id);
     if (cfg?.solicitacao === "recebida") setAba("solicitacoes");
     else if (cfg?.arquivada) setAba("arquivadas");
@@ -291,6 +310,83 @@ export default function Mensagens() {
     }
   }
 
+  // ── EDITAR ────────────────────────────────────────
+  function iniciarEdicao(m: Mensagem) {
+    setMenuMensagem(null);
+    setTexto(m.conteudo);
+    setEditando({ id: m.id });
+  }
+
+  function cancelarEdicao() {
+    setEditando(null);
+    setTexto("");
+  }
+
+  async function salvarEdicao() {
+    if (!editando || !texto.trim()) return;
+    const id = editando.id;
+    const novoConteudo = texto.trim();
+    setEditando(null);
+    setTexto("");
+    setMensagens(prev => prev.map(m => m.id === id ? { ...m, conteudo: novoConteudo, editado: true } : m));
+    try {
+      await api.put(`/mensagem/${id}`, { conteudo: novoConteudo });
+    } catch {}
+  }
+
+  function handleFormSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editando) salvarEdicao();
+    else enviarMensagem(e);
+  }
+
+  function podeEditar(m: Mensagem) {
+    return m.remetenteId === usuario?.id && !m.apagadaParaTodos && !!m.conteudo;
+  }
+
+  // ── SELEÇÃO MÚLTIPLA ──────────────────────────────
+  function toggleSelecao(id: number) {
+    setSelecionadas(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function sairSelecao() {
+    setModoSelecao(false);
+    setSelecionadas(new Set());
+  }
+
+  async function apagarSelecionadasParaMim() {
+    const ids = Array.from(selecionadas);
+    sairSelecao();
+    setMensagens(prev => prev.filter(m => !ids.includes(m.id)));
+    await Promise.all(ids.map(id => api.delete(`/mensagem/${id}/para-mim`).catch(() => {})));
+  }
+
+  async function apagarSelecionadasParaTodos() {
+    const ids = Array.from(selecionadas);
+    const snap = [...mensagens];
+    sairSelecao();
+    setMensagens(prev => prev.reduce<Mensagem[]>((acc, m) => {
+      if (!ids.includes(m.id)) return [...acc, m];
+      if (m.remetenteId === usuario?.id && !m.apagadaParaTodos) {
+        return [...acc, { ...m, apagadaParaTodos: true, conteudo: "", imagem: undefined }];
+      }
+      return acc; // mensagens recebidas: remove da view (para-mim)
+    }, []));
+    await Promise.all(ids.map(async id => {
+      const m = snap.find(msg => msg.id === id);
+      if (!m) return;
+      if (m.remetenteId === usuario?.id && !m.apagadaParaTodos) {
+        await api.delete(`/mensagem/${id}/para-todos`).catch(() => {});
+      } else {
+        await api.delete(`/mensagem/${id}/para-mim`).catch(() => {});
+      }
+    }));
+  }
+
   async function apagarParaMim(mensagemId: number) {
     setMenuMensagem(null);
     setApagando(mensagemId);
@@ -343,6 +439,11 @@ export default function Mensagens() {
   const conversaEhEnviada = configDaConversa?.solicitacao === "enviada";
   const conversaArquivada = configDaConversa?.arquivada ?? false;
 
+  const temMinhasSelecionadas = Array.from(selecionadas).some(id => {
+    const m = mensagens.find(msg => msg.id === id);
+    return m && m.remetenteId === usuario?.id && !m.apagadaParaTodos;
+  });
+
   return (
     <div className={`msgs${conversaSelecionada ? " msgs--conversa-ativa" : ""}`}>
       {/* SIDEBAR */}
@@ -351,7 +452,6 @@ export default function Mensagens() {
           <h2>{t.messages.title}</h2>
         </div>
 
-        {/* Abas */}
         <div className="msgs__abas">
           <button
             className={`msgs__aba ${aba === "mensagens" ? "msgs__aba--ativa" : ""}`}
@@ -446,7 +546,6 @@ export default function Mensagens() {
                   </div>
                 </div>
               </button>
-              {/* Menu de contexto */}
               <div className="msgs__menu-wrap" ref={menuConversa === c.usuario.id ? menuRef : null}>
                 <button
                   className="msgs__menu-btn"
@@ -486,6 +585,7 @@ export default function Mensagens() {
           </div>
         ) : (
           <>
+            {/* Header */}
             <div className="msgs__chat-header">
               <button
                 className="msgs__back-btn"
@@ -510,6 +610,18 @@ export default function Mensagens() {
                 <button className="msgs__desarquivar-btn" onClick={() => desarquivarConversa(conversaSelecionada.id)}>
                   {t.messages.unarchive}
                 </button>
+              )}
+              {/* Botão selecionar / cancelar seleção */}
+              {mensagens.length > 0 && !conversaEhSolicitacao && (
+                modoSelecao ? (
+                  <button className="msgs__selecionar-btn msgs__selecionar-btn--ativo" onClick={sairSelecao}>
+                    Cancelar
+                  </button>
+                ) : (
+                  <button className="msgs__selecionar-btn" onClick={() => setModoSelecao(true)} title="Selecionar mensagens">
+                    <CheckSquareIcon size={16} />
+                  </button>
+                )
               )}
             </div>
 
@@ -536,6 +648,7 @@ export default function Mensagens() {
               </div>
             )}
 
+            {/* Lista de mensagens */}
             <div className="msgs__mensagens">
               {mensagens.length === 0 && (
                 <div className="msgs__chat-vazio msgs__chat-vazio--inline">
@@ -544,14 +657,26 @@ export default function Mensagens() {
               )}
               {mensagens.map(m => {
                 const sou = m.remetenteId === usuario?.id;
+                const selecionada = selecionadas.has(m.id);
                 return (
                   <div
                     key={m.id}
-                    className={`msgs__balao-wrap ${sou ? "msgs__balao-wrap--eu" : "msgs__balao-wrap--outro"}`}
-                    onMouseLeave={() => { if (menuMensagem === m.id) setMenuMensagem(null); }}
+                    className={`msgs__balao-wrap ${sou ? "msgs__balao-wrap--eu" : "msgs__balao-wrap--outro"} ${modoSelecao ? "msgs__balao-wrap--modo-sel" : ""} ${modoSelecao && selecionada ? "msgs__balao-wrap--selecionada" : ""} ${apagando === m.id ? "msgs__balao--apagando" : ""}`}
+                    onClick={modoSelecao ? () => toggleSelecao(m.id) : undefined}
+                    onMouseLeave={() => { if (!modoSelecao && menuMensagem === m.id) setMenuMensagem(null); }}
                   >
-                    {/* Botão de menu da mensagem */}
-                    {!m.apagadaParaTodos && (
+                    {/* Checkbox de seleção */}
+                    {modoSelecao && (
+                      <div
+                        className={`msgs__checkbox${selecionada ? " msgs__checkbox--marcado" : ""}`}
+                        onClick={e => { e.stopPropagation(); toggleSelecao(m.id); }}
+                      >
+                        {selecionada && <CheckIcon size={11} />}
+                      </div>
+                    )}
+
+                    {/* Menu de ações da mensagem */}
+                    {!modoSelecao && !m.apagadaParaTodos && (
                       <div className="msgs__balao-menu-wrap">
                         <button
                           className="msgs__balao-menu-btn"
@@ -562,6 +687,11 @@ export default function Mensagens() {
                         </button>
                         {menuMensagem === m.id && (
                           <div className={`msgs__balao-dropdown ${sou ? "msgs__balao-dropdown--eu" : "msgs__balao-dropdown--outro"}`}>
+                            {podeEditar(m) && (
+                              <button onClick={() => iniciarEdicao(m)}>
+                                <PencilIcon size={13} /> Editar
+                              </button>
+                            )}
                             <button onClick={() => apagarParaMim(m.id)}>
                               {t.messages.deleteForMe}
                             </button>
@@ -575,7 +705,7 @@ export default function Mensagens() {
                       </div>
                     )}
 
-                    <div className={`msgs__balao ${sou ? "msgs__balao--eu" : "msgs__balao--outro"} ${apagando === m.id ? "msgs__balao--apagando" : ""}`}>
+                    <div className={`msgs__balao ${sou ? "msgs__balao--eu" : "msgs__balao--outro"} ${editando?.id === m.id ? "msgs__balao--editando" : ""}`}>
                       {m.apagadaParaTodos ? (
                         <p className="msgs__balao-apagada">{t.messages.deletedMessage}</p>
                       ) : (
@@ -585,26 +715,29 @@ export default function Mensagens() {
                               src={m.imagem}
                               alt="imagem"
                               className="msgs__balao-img"
-                              onClick={() => setLightboxSrc(m.imagem!)}
+                              onClick={modoSelecao ? undefined : () => setLightboxSrc(m.imagem!)}
                             />
                           )}
                           {m.conteudo && <p>{m.conteudo}</p>}
                         </>
                       )}
                       <div className="msgs__balao-footer">
-                        {!sou && !m.apagadaParaTodos && (
+                        {!modoSelecao && !sou && !m.apagadaParaTodos && (
                           <button
                             className={`msgs__heart-btn${m.curtida ? " msgs__heart-btn--ativo" : ""}`}
-                            onClick={() => curtirMensagem(m.id, !m.curtida)}
+                            onClick={e => { e.stopPropagation(); curtirMensagem(m.id, !m.curtida); }}
                             title={m.curtida ? "Descurtir" : "Curtir"}
                           >
                             <HeartIcon size={11} filled={m.curtida} />
                           </button>
                         )}
-                        {sou && m.curtida && !m.apagadaParaTodos && (
+                        {!modoSelecao && sou && m.curtida && !m.apagadaParaTodos && (
                           <span className="msgs__heart-recebido">
                             <HeartIcon size={10} filled />
                           </span>
+                        )}
+                        {m.editado && !m.apagadaParaTodos && (
+                          <span className="msgs__editado">editado</span>
                         )}
                         <span className="msgs__balao-data">{formatarData(m.dataEnvio)}</span>
                         {sou && !m.apagadaParaTodos && (
@@ -620,6 +753,17 @@ export default function Mensagens() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Banner de edição */}
+            {editando && (
+              <div className="msgs__edit-banner">
+                <PencilIcon size={14} />
+                <span>Editando mensagem</span>
+                <button onClick={cancelarEdicao} title="Cancelar edição">
+                  <XIcon size={15} />
+                </button>
+              </div>
+            )}
+
             {/* Preview de imagem */}
             {imagemPreview && (
               <div className="msgs__img-preview">
@@ -630,49 +774,73 @@ export default function Mensagens() {
               </div>
             )}
 
-            {/* Formulário desabilitado se solicitação recebida */}
-            <form
-              className={`msgs__form ${conversaEhSolicitacao ? "msgs__form--bloqueado" : ""}`}
-              onSubmit={conversaEhSolicitacao ? e => e.preventDefault() : enviarMensagem}
-            >
-              {!conversaEhSolicitacao && (
-                <>
-                  <button
-                    type="button"
-                    className="msgs__foto-btn"
-                    onClick={() => fotoInputRef.current?.click()}
-                    title="Enviar foto"
-                    disabled={enviando}
-                  >
-                    <ImageIcon size={18} />
-                  </button>
-                  <input
-                    ref={fotoInputRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={selecionarImagem}
-                  />
-                </>
-              )}
-              <input
-                type="text"
-                placeholder={conversaEhSolicitacao ? t.messages.requestPlaceholder : t.messages.messagePlaceholder}
-                value={texto}
-                onChange={e => setTexto(e.target.value)}
-                className="msgs__input"
-                disabled={enviando || conversaEhSolicitacao}
-              />
-              {!conversaEhSolicitacao && (
+            {/* Formulário ou barra de seleção */}
+            {modoSelecao ? (
+              <div className="msgs__acao-bar">
+                <span className="msgs__acao-bar__count">
+                  {selecionadas.size} {selecionadas.size === 1 ? "selecionada" : "selecionadas"}
+                </span>
                 <button
-                  type="submit"
-                  className="msgs__enviar"
-                  disabled={(!texto.trim() && !imagemFile) || enviando}
+                  className="msgs__acao-bar__mim"
+                  onClick={apagarSelecionadasParaMim}
+                  disabled={selecionadas.size === 0}
                 >
-                  <SendIcon size={18} />
+                  Apagar para mim
                 </button>
-              )}
-            </form>
+                <button
+                  className="msgs__acao-bar__todos"
+                  onClick={apagarSelecionadasParaTodos}
+                  disabled={selecionadas.size === 0}
+                  title={temMinhasSelecionadas ? undefined : "Nenhuma mensagem sua selecionada"}
+                >
+                  Apagar para todos
+                </button>
+              </div>
+            ) : (
+              <form
+                className={`msgs__form ${conversaEhSolicitacao ? "msgs__form--bloqueado" : ""} ${editando ? "msgs__form--editando" : ""}`}
+                onSubmit={conversaEhSolicitacao ? e => e.preventDefault() : handleFormSubmit}
+              >
+                {!conversaEhSolicitacao && !editando && (
+                  <>
+                    <button
+                      type="button"
+                      className="msgs__foto-btn"
+                      onClick={() => fotoInputRef.current?.click()}
+                      title="Enviar foto"
+                      disabled={enviando}
+                    >
+                      <ImageIcon size={18} />
+                    </button>
+                    <input
+                      ref={fotoInputRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={selecionarImagem}
+                    />
+                  </>
+                )}
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder={conversaEhSolicitacao ? t.messages.requestPlaceholder : editando ? "Editar mensagem..." : t.messages.messagePlaceholder}
+                  value={texto}
+                  onChange={e => setTexto(e.target.value)}
+                  className="msgs__input"
+                  disabled={enviando || conversaEhSolicitacao}
+                />
+                {!conversaEhSolicitacao && (
+                  <button
+                    type="submit"
+                    className={`msgs__enviar${editando ? " msgs__enviar--editar" : ""}`}
+                    disabled={(!texto.trim() && !imagemFile) || enviando}
+                  >
+                    {editando ? <CheckIcon size={18} /> : <SendIcon size={18} />}
+                  </button>
+                )}
+              </form>
+            )}
           </>
         )}
       </main>

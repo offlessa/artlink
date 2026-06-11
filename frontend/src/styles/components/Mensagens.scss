@@ -671,6 +671,172 @@
     &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 
+  // ── BOTÃO SELECIONAR ─────────────────────────────
+  &__selecionar-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $texto-suave;
+    padding: 7px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+    &:hover { background: $borda-suave; color: $brand; }
+
+    &--ativo {
+      border-radius: 99px;
+      padding: 6px 14px;
+      font-family: $font-sans;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: $brand;
+      &:hover { background: $brand-subtle; }
+    }
+  }
+
+  // ── CHECKBOX DE SELEÇÃO ───────────────────────────
+  &__balao-wrap {
+    &--modo-sel {
+      cursor: pointer;
+      padding-left: 38px;
+      border-radius: $radius;
+      transition: background 0.1s;
+      &:hover { background: rgba(0,0,0,0.03); }
+    }
+
+    &--selecionada {
+      background: rgba(42, 59, 28,0.08) !important;
+    }
+  }
+
+  &__checkbox {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid $borda;
+    background: $surface;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+    color: transparent;
+
+    &--marcado {
+      background: $brand;
+      border-color: $brand;
+      color: #fff;
+    }
+  }
+
+  // ── BARRA DE AÇÕES (seleção múltipla) ─────────────
+  &__acao-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid $borda;
+    background: $surface;
+    flex-wrap: wrap;
+
+    &__count {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: $texto;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    &__mim {
+      background: none;
+      border: 1.5px solid $borda;
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-family: $font-sans;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: $texto-medio;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      &:hover:not(:disabled) { border-color: $brand; color: $brand; }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
+    }
+
+    &__todos {
+      background: none;
+      border: 1.5px solid #c0392b;
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-family: $font-sans;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #c0392b;
+      cursor: pointer;
+      transition: background 0.15s;
+      &:hover:not(:disabled) { background: rgba(192, 57, 43, 0.07); }
+      &:disabled { opacity: 0.4; cursor: not-allowed; }
+    }
+  }
+
+  // ── BANNER DE EDIÇÃO ──────────────────────────────
+  &__edit-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: $brand-subtle;
+    border-top: 1px solid rgba(42, 59, 28,0.15);
+    font-size: 0.82rem;
+    color: $brand;
+
+    span { flex: 1; font-weight: 500; }
+
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: $brand;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      border-radius: 50%;
+      transition: background 0.15s;
+      &:hover { background: rgba(42, 59, 28,0.15); }
+    }
+  }
+
+  &__balao--editando p {
+    outline: 2px solid rgba(42, 59, 28,0.3);
+    outline-offset: 1px;
+    border-radius: $radius !important;
+  }
+
+  &__form--editando {
+    border-top-color: $brand !important;
+  }
+
+  &__enviar--editar {
+    background: #27ae60 !important;
+  }
+
+  // ── LABEL "editado" ───────────────────────────────
+  &__editado {
+    font-size: 0.66rem;
+    color: rgba(255,255,255,0.55);
+    font-style: italic;
+
+    .msgs__balao--outro & {
+      color: $texto-suave;
+    }
+  }
+
   // ── AVATARES ──────────────────────────────────────
   &__avatar {
     width: 46px;
