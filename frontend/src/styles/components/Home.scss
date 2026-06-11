@@ -13,7 +13,22 @@
 
   // ── SIDEBAR ─────────────────────────────────────────────────────────────────
   &__sidebar {
-    display: none;
+    width: 240px;
+    min-width: 240px;
+    position: sticky;
+    top: var(--navbar-h);
+    height: calc(100vh - var(--navbar-h));
+    background: $surface;
+    border-right: 1px solid $borda;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+
+    @media (max-width: 900px) { display: none; }
   }
 
   &__sidebar-busca {
