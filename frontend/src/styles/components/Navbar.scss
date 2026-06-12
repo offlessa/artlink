@@ -11,6 +11,7 @@
   box-shadow: 0 2px 16px rgba(0,0,0,0.28);
 
   @media (max-width: 768px) { gap: 0.55rem; }
+  @media (max-width: 380px) { gap: 0.4rem; padding: 0 0.75rem; }
 
   @media (min-width: 769px) {
     height: 68px;
@@ -43,6 +44,8 @@
     align-items: flex-start;
     line-height: 1;
     gap: 2px;
+
+    @media (max-width: 380px) { display: none; }
   }
 
   &__logo-nome {

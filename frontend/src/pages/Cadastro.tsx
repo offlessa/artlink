@@ -55,6 +55,7 @@ export default function Cadastro() {
       const { data } = await api.post("/usuario", { nome, username, email, senha });
       if (data.success) {
         novoUsuario.current = true;
+        sessionStorage.setItem("@artlink:novo", "1");
         await login(email, senha, false);
         navigate("/onboarding");
       } else {

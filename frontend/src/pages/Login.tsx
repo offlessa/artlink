@@ -12,7 +12,9 @@ export default function Login() {
   const t = useI18n();
 
   useEffect(() => {
-    if (isAuthenticated) navigate("/home");
+    if (!isAuthenticated) return;
+    const isNovo = sessionStorage.getItem("@artlink:novo");
+    navigate(isNovo ? "/onboarding" : "/home");
   }, [isAuthenticated]);
 
   const [email, setEmail] = useState(() => localStorage.getItem("@artlink:lembrar-email") ?? "");

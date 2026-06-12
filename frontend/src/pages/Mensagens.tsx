@@ -595,15 +595,21 @@ export default function Mensagens() {
               >
                 <ArrowLeftIcon size={18} />
               </button>
-              <div className="msgs__avatar msgs__avatar--sm">
-                {conversaSelecionada.fotoPerfil
-                  ? <img src={conversaSelecionada.fotoPerfil} alt={conversaSelecionada.nome} />
-                  : <span>{inicial(conversaSelecionada.nome)}</span>}
-              </div>
-              <div className="msgs__chat-header-info">
-                <p className="msgs__nome">{conversaSelecionada.nome}</p>
-                <p className="msgs__username">@{conversaSelecionada.username}</p>
-              </div>
+              <button
+                className="msgs__chat-header-user"
+                onClick={() => navigate(`/u/${conversaSelecionada.username}`)}
+                title="Ver perfil"
+              >
+                <div className="msgs__avatar msgs__avatar--sm">
+                  {conversaSelecionada.fotoPerfil
+                    ? <img src={conversaSelecionada.fotoPerfil} alt={conversaSelecionada.nome} />
+                    : <span>{inicial(conversaSelecionada.nome)}</span>}
+                </div>
+                <div className="msgs__chat-header-info">
+                  <p className="msgs__nome">{conversaSelecionada.nome}</p>
+                  <p className="msgs__username">@{conversaSelecionada.username}</p>
+                </div>
+              </button>
               {conversaEhEnviada && (
                 <span className="msgs__pendente-tag">{t.messages.waitingReply}</span>
               )}

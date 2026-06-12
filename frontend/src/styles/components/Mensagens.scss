@@ -315,7 +315,24 @@
     background: $surface;
   }
 
-  &__chat-header-info { flex: 1; }
+  &__chat-header-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    padding: 4px 6px;
+    border-radius: 8px;
+    transition: background 0.15s;
+    min-width: 0;
+
+    &:hover { background: $brand-subtle; }
+  }
+
+  &__chat-header-info { flex: 1; min-width: 0; }
 
   &__pendente-tag {
     font-size: 0.72rem;

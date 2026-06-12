@@ -82,6 +82,7 @@ export default function Onboarding() {
 
   async function salvar() {
     if (!usuario) return navigate("/home");
+    sessionStorage.removeItem("@artlink:novo");
     setSalvando(true);
     try {
       const updates: Record<string, string> = {};
@@ -124,7 +125,7 @@ export default function Onboarding() {
             <button className="onb__btn" onClick={avancarSlide}>
               {ultimo ? "Completar perfil →" : "Próximo →"}
             </button>
-            <button className="onb__pular" onClick={() => navigate("/home")}>
+            <button className="onb__pular" onClick={() => { sessionStorage.removeItem("@artlink:novo"); navigate("/home"); }}>
               Pular
             </button>
           </div>
@@ -203,7 +204,7 @@ export default function Onboarding() {
           <button className="onb__btn" onClick={salvar} disabled={salvando || uploading}>
             {salvando ? "Salvando..." : "Entrar no Artlink →"}
           </button>
-          <button className="onb__pular" onClick={() => navigate("/home")}>
+          <button className="onb__pular" onClick={() => { sessionStorage.removeItem("@artlink:novo"); navigate("/home"); }}>
             Pular por agora
           </button>
         </div>
