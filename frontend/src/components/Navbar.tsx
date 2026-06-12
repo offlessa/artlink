@@ -122,6 +122,17 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ""; };
   }, [menuMobileAberto]);
 
+  async function deletarNotifUma(id: number) {
+    setNotificacoes(prev => prev.filter(n => n.id !== id));
+    try { await api.delete(`/notificacao/${id}`); } catch {}
+  }
+
+  async function limparTodasNotif() {
+    if (!usuario) return;
+    setNotificacoes([]);
+    try { await api.delete(`/notificacao/todas/${usuario.id}`); } catch {}
+  }
+
   async function carregarNotificacoes() {
     if (!usuario) return;
     try {
@@ -246,6 +257,14 @@ export default function Navbar() {
                 <div className="navbar__notif-dropdown">
                   <div className="navbar__notif-header">
                     <span>{t.nav.notifications}</span>
+                    {notificacoesFiltradas.length > 0 && (
+                      <button
+                        className="navbar__notif-limpar"
+                        onClick={e => { e.stopPropagation(); limparTodasNotif(); }}
+                      >
+                        Limpar tudo
+                      </button>
+                    )}
                   </div>
                   {notificacoesFiltradas.length === 0 ? (
                     <p className="navbar__notif-empty">{t.nav.noNotifications}</p>
@@ -292,6 +311,13 @@ export default function Navbar() {
                             </div>
                           )}
                         </div>
+                        <button
+                          className="navbar__notif-del"
+                          onClick={e => { e.stopPropagation(); deletarNotifUma(n.id); }}
+                          title="Remover"
+                        >
+                          <XIcon size={11} />
+                        </button>
                       </div>
                     ))
                   )}
