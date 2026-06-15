@@ -134,14 +134,14 @@ export default function Login() {
             <div className="auth-form__field auth-form__field--float">
               <input
                 className="auth-form__input"
-                type="email"
+                type="text"
                 placeholder=" "
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="email"
+                autoComplete="username"
               />
-              <label className="auth-form__label">{t.login.email}</label>
+              <label className="auth-form__label">{t.login.emailOrUsername}</label>
             </div>
 
             <div className="auth-form__field auth-form__field--float">
