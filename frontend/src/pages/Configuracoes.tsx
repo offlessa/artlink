@@ -209,13 +209,12 @@ export default function Configuracoes() {
               <span className="cfg__item-label">{tc.appearance.theme}</span>
               <span className="cfg__item-desc">{tc.appearance.themeDesc}</span>
             </div>
-            <Select<"claro" | "escuro" | "sistema">
+            <Select<"claro" | "escuro">
               value={a.tema}
               onChange={v => setA("tema", v)}
               options={[
-                { value: "claro",   label: tc.appearance.themeOptions.claro },
-                { value: "escuro",  label: tc.appearance.themeOptions.escuro },
-                { value: "sistema", label: tc.appearance.themeOptions.sistema },
+                { value: "claro",  label: tc.appearance.themeOptions.claro },
+                { value: "escuro", label: tc.appearance.themeOptions.escuro },
               ]}
             />
           </div>

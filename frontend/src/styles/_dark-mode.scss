@@ -5,18 +5,18 @@
 
 $D: "html[data-tema='escuro']";
 
-// Paleta escura
-$dk-bg:       #131A0D;
-$dk-surface:  #1B2414;
-$dk-surface2: #222D18;
-$dk-surface3: #2A3820;
-$dk-borda:    #2C3C1E;
-$dk-borda-s:  #243018;
-$dk-texto:    #DCE8CA;
-$dk-medio:    #90B070;
-$dk-suave:    #537840;
-$dk-brand:    #5C7A3A;
-$dk-accent:   #3A5228;
+// Paleta escura — neutro (backgrounds/texto) + verde como cor de destaque
+$dk-bg:       #121212;
+$dk-surface:  #1E1E1E;
+$dk-surface2: #252525;
+$dk-surface3: #2D2D2D;
+$dk-borda:    #303030;
+$dk-borda-s:  #262626;
+$dk-texto:    #EBEBEB;
+$dk-medio:    #9E9E9E;
+$dk-suave:    #606060;
+$dk-brand:    #5FA83A;
+$dk-accent:   #3D7022;
 
 // ── BODY / BASE ───────────────────────────────────────────────────────────────
 #{$D} body {
@@ -26,7 +26,7 @@ $dk-accent:   #3A5228;
 
 // ── NAVBAR ────────────────────────────────────────────────────────────────────
 #{$D} .navbar {
-  background: #0E1409;
+  background: #0A0A0A;
   border-bottom: 1px solid $dk-borda;
 
   &__dropdown {
@@ -57,7 +57,7 @@ $dk-accent:   #3A5228;
   &__notif-texto { color: $dk-texto; }
   &__notif-avatar { background: $dk-surface3; color: $dk-texto; }
   &__notif-recusar { border-color: $dk-borda; color: $dk-medio; background: transparent; }
-  &__badge { border-color: #0E1409; }
+  &__badge { border-color: #0A0A0A; }
 }
 
 // ── HOME / GRID ───────────────────────────────────────────────────────────────
@@ -315,7 +315,7 @@ $dk-accent:   #3A5228;
   &__colab-item-user { color: $dk-suave; }
   &__colab-btn { color: $dk-medio; border-color: $dk-borda; &:hover { border-color: $dk-brand; color: $dk-texto; } }
   &__sair-btn { color: $dk-suave; border-color: $dk-borda; }
-  &__capa-placeholder { background: linear-gradient(135deg, #0E1409, #1B2414); }
+  &__capa-placeholder { background: linear-gradient(135deg, #0A0A0A, #1E1E1E); }
 }
 
 // ── MENSAGENS ─────────────────────────────────────────────────────────────────
@@ -504,8 +504,8 @@ $dk-accent:   #3A5228;
   &__autor-nome { color: $dk-texto; }
   &__autor-user { color: $dk-suave; }
 
-  &__stack-1 { background: rgba(40,55,25,0.9); }
-  &__stack-2 { background: rgba(30,42,18,0.85); }
+  &__stack-1 { background: rgba(30,30,30,0.9); }
+  &__stack-2 { background: rgba(20,20,20,0.85); }
 
   &__skeleton {
     background: linear-gradient(90deg, $dk-surface2 25%, $dk-surface3 50%, $dk-surface2 75%);
@@ -607,10 +607,10 @@ $dk-accent:   #3A5228;
 #{$D} .perfil__banner-placeholder { filter: brightness(0.7); }
 
 // Cards de catálogo — camadas "album" no escuro
-#{$D} .perfil__cat-card::before { background: rgba(40,55,25,0.9) !important; }
-#{$D} .perfil__cat-card::after  { background: rgba(50,68,32,0.85) !important; }
-#{$D} .pp__cat-card::before { background: rgba(40,55,25,0.9) !important; }
-#{$D} .pp__cat-card::after  { background: rgba(50,68,32,0.85) !important; }
+#{$D} .perfil__cat-card::before { background: rgba(30,30,30,0.9) !important; }
+#{$D} .perfil__cat-card::after  { background: rgba(20,20,20,0.85) !important; }
+#{$D} .pp__cat-card::before { background: rgba(30,30,30,0.9) !important; }
+#{$D} .pp__cat-card::after  { background: rgba(20,20,20,0.85) !important; }
 
 // ProfileCard (componente separado, se usado)
 #{$D} .profile-card { background: $dk-surface; border-color: $dk-borda; color: $dk-texto; }
@@ -620,4 +620,4 @@ $dk-accent:   #3A5228;
 #{$D} ::-webkit-scrollbar-thumb { background: $dk-borda; }
 
 // ── SELEÇÃO DE TEXTO ──────────────────────────────────────────────────────────
-#{$D} ::selection { background: rgba(92,122,58,0.4); color: $dk-texto; }
+#{$D} ::selection { background: rgba(95,168,58,0.35); color: $dk-texto; }

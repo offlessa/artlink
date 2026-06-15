@@ -13,7 +13,7 @@ export interface Configuracoes {
     som: boolean;
   };
   aparencia: {
-    tema: "claro" | "escuro" | "sistema";
+    tema: "claro" | "escuro";
     tamanhoFonte: "pequeno" | "medio" | "grande";
     densidadeFeed: "confortavel" | "normal" | "compacto";
   };
@@ -57,12 +57,7 @@ export function useConfiguracoes() {
     const html = document.documentElement;
 
     const tema = config.aparencia.tema;
-    if (tema === "sistema") {
-      const prefDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      html.setAttribute("data-tema", prefDark ? "escuro" : "claro");
-    } else {
-      html.setAttribute("data-tema", tema === "escuro" ? "escuro" : "claro");
-    }
+    html.setAttribute("data-tema", tema === "escuro" ? "escuro" : "claro");
 
     html.setAttribute("data-fonte", config.aparencia.tamanhoFonte);
     html.setAttribute("data-densidade", config.aparencia.densidadeFeed);
