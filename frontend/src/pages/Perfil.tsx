@@ -4,6 +4,7 @@ import { api } from "../api/api";
 import { uploadImagem } from "../api/upload";
 import { useAuth } from "../context/AuthContext";
 import { useI18n } from "../hooks/useI18n";
+import { useConfiguracoes } from "../hooks/useConfiguracoes";
 import Footer from "../components/Footer";
 import CreatePostModal from "../components/CreatePostModal";
 import CatalogoModal from "../components/CatalogoModal";
@@ -57,6 +58,7 @@ export default function Perfil() {
   const { usuario, updateUsuario } = useAuth();
   const navigate = useNavigate();
   const t = useI18n();
+  const { aparencia } = useConfiguracoes();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [catalogos, setCatalogos] = useState<Catalogo[]>([]);
@@ -151,10 +153,11 @@ export default function Perfil() {
   }, [usuario?.id]);
 
   const bgStyle = useMemo(() => {
+    if (aparencia.tema === "escuro") return {};
     if (config.bgType === "gradient") return { background: config.bgValue };
     if (config.bgType === "texture") return { backgroundColor: config.bgValue };
     return { backgroundColor: config.bgValue || "#FAF8F3" };
-  }, [config]);
+  }, [config, aparencia.tema]);
 
   function uploadBanner(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

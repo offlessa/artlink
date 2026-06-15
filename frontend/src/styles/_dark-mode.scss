@@ -155,6 +155,22 @@ $dk-accent:   #3D7022;
 
 // ── PERFIL ────────────────────────────────────────────────────────────────────
 #{$D} .perfil {
+  background: $dk-bg;
+
+  &__foto-menu {
+    background: $dk-surface;
+    button { color: $dk-texto; &:hover { background: $dk-surface3; } }
+  }
+
+  &__post-menu-dropdown {
+    background: $dk-surface;
+    border-color: $dk-borda;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    button { color: $dk-texto; &:hover { background: $dk-surface3; } }
+  }
+
+  &__post-menu-excluir { color: #e88 !important; &:hover { background: rgba(220,60,60,0.12) !important; } }
+
   &__card {
     background: $dk-surface;
     border-color: $dk-borda;
@@ -566,15 +582,50 @@ $dk-accent:   #3D7022;
 #{$D} .sobre {
   background: $dk-bg;
 
-  &__section { background: $dk-bg; }
-  &__section--alt { background: $dk-surface2; }
-  &__card { background: $dk-surface; border-color: $dk-borda; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
-  &__card-titulo { color: $dk-texto; }
-  &__card-texto { color: $dk-medio; }
-  &__section-title { color: $dk-texto; }
-  &__section-texto { color: $dk-medio; }
-  &__membro-nome { color: $dk-texto; }
-  &__membro-role { color: $dk-suave; }
+  &__hero {
+    background: $dk-surface2;
+  }
+
+  &__titulo  { color: $dk-texto; }
+  &__subtitulo { color: $dk-medio; }
+
+  &__bloco {
+    &--claro {
+      background: $dk-surface;
+      h2 { color: $dk-texto; }
+      p  { color: $dk-medio; }
+    }
+    &--escuro {
+      background: $dk-surface2;
+      h2, p { color: $dk-texto; }
+    }
+    &--destaque {
+      background: linear-gradient(135deg, $dk-surface3, $dk-surface2);
+      h2, p { color: $dk-texto; }
+    }
+  }
+
+  &__conteudo h2 { color: $dk-texto; }
+
+  &__lista li {
+    background: $dk-surface2;
+    border-left-color: $dk-brand;
+    color: $dk-texto;
+    box-shadow: none;
+    strong { color: $dk-brand; }
+  }
+
+  &__valor {
+    h3 { color: $dk-texto; }
+    p  { color: $dk-medio; }
+    &-icone { color: $dk-brand; }
+  }
+
+  &__cta {
+    background: $dk-brand;
+    color: #fff;
+    &:hover { background: $dk-accent; }
+  }
 }
 
 // ── HOVERS COM brand-subtle (#EBF0E4 → fica estranho no escuro) ───────────────
