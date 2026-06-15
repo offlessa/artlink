@@ -45,6 +45,7 @@ model Usuario {
   notificacoesEnviadas   Notificacao[] @relation("NotifRemetente")
   postsSalvos            PostSalvo[]
   catalogosSalvos        CatalogoSalvo[]
+  visualizacoes          Visualizacao[]
 
   @@map("usuarios")
 }
@@ -61,13 +62,14 @@ model Post {
   visualizacoes Int      @default(0)
   dataPostagem  DateTime @default(now()) @map("data_postagem")
 
-  autor         Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  colaboracoes  PostColaboracao[]
-  catalogos     CatalogoPost[]
-  curtidas      Curtida[]
-  comentarios   Comentario[]
-  notificacoes  Notificacao[]
-  salvos        PostSalvo[]
+  autor              Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  colaboracoes       PostColaboracao[]
+  catalogos          CatalogoPost[]
+  curtidas           Curtida[]
+  comentarios        Comentario[]
+  notificacoes       Notificacao[]
+  salvos             PostSalvo[]
+  visualizacoesLog   Visualizacao[]
 
   @@map("posts")
 }
@@ -280,4 +282,16 @@ model CatalogoSalvo {
 
   @@unique([usuarioId, catalogoId])
   @@map("catalogos_salvos")
+}
+
+model Visualizacao {
+  usuarioId Int      @map("usuario_id")
+  postId    Int      @map("post_id")
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([usuarioId, postId])
+  @@map("visualizacoes")
 }

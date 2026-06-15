@@ -76,8 +76,22 @@ export default function PostDetalhe() {
 
   useEffect(() => {
     carregarPost();
-    if (id) api.patch(`/post/${id}/visualizar`).catch(() => {});
-  }, [id]);
+    if (!id) return;
+
+    if (usuario) {
+      // Logado: backend deduplica via tabela e ignora o próprio dono
+      api.patch(`/post/${id}/visualizar`).catch(() => {});
+    } else {
+      // Anônimo: localStorage evita contar recarregamentos (TTL de 24h)
+      const key = `@artlink:view_${id}`;
+      const last = Number(localStorage.getItem(key) ?? 0);
+      const TTL = 24 * 60 * 60 * 1000;
+      if (!last || Date.now() - last > TTL) {
+        api.patch(`/post/${id}/visualizar`).catch(() => {});
+        localStorage.setItem(key, String(Date.now()));
+      }
+    }
+  }, [id, usuario?.id]);
 
   useEffect(() => {
     if (!usuario || !id) return;
