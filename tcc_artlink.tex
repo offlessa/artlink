@@ -178,35 +178,37 @@ Conforme apontam estudos sobre economia criativa e sociedade em rede, a digitali
 
 \subsection{Plataformas de Referência para Artistas e Artesãos}
 
-Para compreender o cenário atual e identificar oportunidades de melhoria, foram analisadas duas plataformas de referência com propostas distintas de apoio ao artesanato: Etsy e ArtFinder.
+Para compreender o cenário atual e identificar oportunidades de melhoria, foram analisadas três plataformas de referência com propostas distintas de apoio ao artesanato: Instagram, Etsy e ArtFinder.
+
+O \textbf{Instagram} é a rede social generalista mais utilizada por artistas e artesãos para divulgar seu trabalho atualmente \cite{instagram2024}. A plataforma oferece \textit{feed} de publicações, sistema de seguidores, curtidas e comentários já consolidados, com grande alcance de público, além de um recurso básico de coautoria em publicações (\textit{Collabs}). Contudo, por não ter sido projetada para o universo criativo, carece de ferramentas de organização de portfólio, não oferece um fluxo formal de convite, aceite e recusa de colaboração como o implementado no Artlink, e sua audiência é genérica, dispersa entre todo tipo de conteúdo, sem o mesmo foco no universo artístico e artesanal.
 
 O \textbf{Etsy}, lançado em 2005, é um dos maiores \textit{marketplaces} para produtos artesanais e \textit{vintage} do mundo. A plataforma permite que artesãos criem lojas \textit{online} e vendam diretamente a consumidores finais, oferecendo grande visibilidade global. Contudo, o Etsy se concentra no aspecto comercial, com funcionalidades limitadas de interação social entre criadores \cite{etsy2024}. O modelo de taxas por listagem e por transação pode, ainda, representar um obstáculo para artesãos iniciantes.
 
 O \textbf{ArtFinder}, lançado em 2013, propõe uma abordagem mais curada, voltada à arte e ao artesanato exclusivo. Diferencia-se pela seleção rigorosa dos vendedores, valorizando a exclusividade das obras \cite{artfinder2024}. No entanto, essa barreira de entrada limita o acesso de artesãos em início de carreira, e a plataforma tampouco oferece funcionalidades sociais como seguidores ou \textit{feed} de publicações.
 
-O \textbf{Artlink} foi desenvolvido para preencher as lacunas identificadas nessas plataformas, combinando elementos de rede social com ferramentas de divulgação artística. A Tabela~\ref{tab:comparativo} apresenta um comparativo entre as três plataformas.
+O \textbf{Artlink} foi desenvolvido para preencher as lacunas identificadas nessas plataformas, combinando elementos de rede social com ferramentas de divulgação artística. A Tabela~\ref{tab:comparativo} apresenta um comparativo entre as quatro plataformas.
 
 \begin{table}[ht]
 \centering
 \caption{Comparativo entre plataformas para artistas}
 \label{tab:comparativo}
-\begin{tabular}{|l|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
-\textbf{Funcionalidades} & \textbf{Etsy} & \textbf{ArtFinder} & \textbf{Artlink} \\ \hline
-\textit{Feed} social e publicações  & Não  & Não   & Sim   \\ \hline
-Sistema de seguidores               & Não  & Não   & Sim   \\ \hline
-Mensagens diretas entre usuários    & Parcial & Não  & Sim  \\ \hline
-Colaboração entre artistas          & Não  & Não   & Sim   \\ \hline
-Catálogos e coleções de obras       & Parcial & Sim  & Sim  \\ \hline
-Curtidas e comentários              & Não  & Parcial & Sim  \\ \hline
-Notificações de interações          & Sim  & Parcial & Sim  \\ \hline
-Busca por \textit{hashtags}         & Parcial & Não  & Sim  \\ \hline
-Gestão de estoque e vendas          & Sim  & Sim   & Não   \\ \hline
+\textbf{Funcionalidades} & \textbf{Instagram} & \textbf{Etsy} & \textbf{ArtFinder} & \textbf{Artlink} \\ \hline
+\textit{Feed} social e publicações  & Sim & Não  & Não   & Sim   \\ \hline
+Sistema de seguidores               & Sim & Não  & Não   & Sim   \\ \hline
+Mensagens diretas entre usuários    & Sim & Parcial & Não  & Sim  \\ \hline
+Colaboração entre artistas          & Parcial & Não  & Não   & Sim   \\ \hline
+Catálogos e coleções de obras       & Não & Parcial & Sim  & Sim  \\ \hline
+Curtidas e comentários              & Sim & Não  & Parcial & Sim  \\ \hline
+Notificações de interações          & Sim & Sim  & Parcial & Sim  \\ \hline
+Busca por \textit{hashtags}         & Sim & Parcial & Não  & Sim  \\ \hline
+Gestão de estoque e vendas          & Não & Sim  & Sim   & Não   \\ \hline
 \end{tabular}
 \caption*{Fonte: Elaborado pelo autor (2025)}
 \end{table}
 
-O comparativo evidencia que o Artlink se diferencia pelo foco nas interações sociais e na colaboração entre criadores, em detrimento de funcionalidades de \textit{e-commerce} presentes nas demais plataformas analisadas. Essa escolha reflete o objetivo central do sistema: antes de comercializar, conectar.
+O comparativo evidencia que o Artlink se diferencia tanto das redes sociais generalistas, como o Instagram, que carecem de ferramentas de portfólio e de um fluxo estruturado de colaboração entre criadores, quanto das plataformas de comércio eletrônico, como Etsy e ArtFinder, que carecem de um componente social completo. Em contrapartida, funcionalidades de \textit{e-commerce}, presentes nas demais plataformas analisadas, não fazem parte do escopo do Artlink. Essa escolha reflete o objetivo central do sistema: antes de comercializar, conectar.
 
 \section{Desenvolvimento do Sistema}
 
@@ -219,7 +221,7 @@ O \textbf{Artlink} foi desenvolvido com base nos princípios da \textbf{Design S
 
     \item \textbf{Prototipagem:} As interfaces foram prototipadas no \textbf{Figma}, com foco na experiência do usuário (UX) e na acessibilidade. O \textit{design} priorizou um \textit{layout} responsivo e intuitivo, adequado tanto para computadores quanto para dispositivos móveis.
 
-    \item \textbf{Implementação:} O desenvolvimento foi realizado no \textit{Visual Studio Code} (VS Code), utilizando o ecossistema JavaScript/TypeScript em ambas as camadas da aplicação. A organização modular do código garantiu escalabilidade e facilidade de manutenção.
+    \item \textbf{Implementação:} O desenvolvimento foi realizado no \textit{Visual Studio Code} (VS Code), utilizando React no \textit{frontend} e Node.js com Express no \textit{backend}, dentro do ecossistema JavaScript/TypeScript em ambas as camadas da aplicação. A organização modular do código garantiu escalabilidade e facilidade de manutenção.
 
     \item \textbf{Validação:} O sistema foi submetido a testes de integração e de usabilidade. A plataforma foi implantada em produção no serviço de hospedagem Render.com, validando sua operação em ambiente real.
 \end{itemize}
@@ -343,29 +345,10 @@ O banco de dados foi modelado de forma relacional no PostgreSQL, utilizando o Pr
 A entidade \texttt{Notificacao} utiliza um \textit{enum} (\texttt{TipoNotificacao}) com os valores \texttt{curtida}, \texttt{comentario}, \texttt{seguindo}, \texttt{colaboracao}, \texttt{colaboracao\_catalogo} e \texttt{mensagem}, permitindo a categorização precisa de cada evento gerado pelo sistema.
 
 \begin{figure}[!ht]
-\caption{Diagrama simplificado do modelo relacional do banco de dados}
+\caption{Modelo relacional completo do banco de dados do Artlink}
 \centering
-\begin{tikzpicture}[
-  ent/.style = {rectangle, draw=black!70, thick, rounded corners=2pt,
-                font=\scriptsize\sffamily,
-                minimum width=2.6cm, minimum height=0.9cm, align=center},
-  rel/.style = {->, >=Stealth, semithick, black!55},
-  lbl/.style = {font=\tiny\sffamily, fill=white, inner sep=1pt},
-]
-  \node[ent] (usuario)    at (0,   0)   {\textbf{Usuario}\\nome, username, email};
-  \node[ent] (post)       at (4.5, 0)   {\textbf{Post}\\titulo, imagens, tags};
-  \node[ent] (catalogo)   at (0,   2.2) {\textbf{Catalogo}\\nome, descricao};
-  \node[ent] (curtida)    at (8,   1.2) {\textbf{Curtida}\\usuarioId, postId};
-  \node[ent] (comentario) at (8,  -1.2) {\textbf{Comentario}\\postId, conteudo};
-  \node[ent] (seguidor)   at (-3.5, 0)  {\textbf{Seguidor}\\seguidorId, seguidoId};
-
-  \draw[rel] (usuario) -- node[lbl,above]{1:N} (post);
-  \draw[rel] (usuario) -- node[lbl,right]{1:N} (catalogo);
-  \draw[rel] (post)    -- node[lbl,above,sloped]{1:N} (curtida);
-  \draw[rel] (post)    -- node[lbl,below,sloped]{1:N} (comentario);
-  \draw[rel] (usuario) -- node[lbl,above]{N:N} (seguidor);
-\end{tikzpicture}\\[6pt]
-{\small Fonte: Elaborado pelo autor (2025)}
+\includegraphics[width=\textwidth]{Imagens/diagrama_completo_banco_dados.png}\\[6pt]
+{\small Cinza = tabela de junção (chave composta); branco = entidade com chave estrangeira; cor = entidade principal. Fonte: Elaborado pelo autor (2025)}
 \label{fig:diagrama_banco}
 \end{figure}
 
@@ -500,7 +483,8 @@ Como trabalhos futuros, destacam-se as seguintes possibilidades de evolução:
     \item Desenvolvimento de aplicativo nativo para dispositivos móveis (iOS e Android);
     \item Integração de funcionalidades de \textit{e-commerce}, permitindo a comercialização de obras diretamente pela plataforma;
     \item Implementação de sistema de eventos e exposições virtuais para artistas;
-    \item Adição de recursos de inteligência artificial para recomendação de obras e artistas com base no comportamento do usuário.
+    \item Adição de recursos de inteligência artificial para recomendação de obras e artistas com base no comportamento do usuário;
+    \item Implementação de um sistema de denúncia e moderação de conteúdo, combinando revisão manual por administradores com análise automática de imagens via inteligência artificial (por exemplo, Amazon Rekognition ou WebPurify), a fim de impedir a publicação de conteúdo impróprio.
 \end{itemize}
 
 O Artlink representa uma contribuição concreta para a valorização do artesanato e da arte no ambiente digital brasileiro, oferecendo aos criadores um espaço próprio para se conectar, compartilhar e crescer.
